@@ -24,12 +24,7 @@ namespace TheDataResourceImporter
             MessageUtil.appendTbDetail += LogHelper.WriteLog;
 
             MessageUtil.updateProgressIndicator = updateProgressIndicator;
-
-
-
             cbFileType.SelectedIndex = 0;
-
-
             SetStyle(ControlStyles.UserPaint, true);
             SetStyle(ControlStyles.AllPaintingInWmPaint, true); // 禁止擦除背景.  
             SetStyle(ControlStyles.DoubleBuffer, true); // 双缓冲  
@@ -71,8 +66,6 @@ namespace TheDataResourceImporter
             ImportManger.resetCounter();
 
 
-
-
             //清空强制终止标识
             ImportManger.forcedStop = false;
 
@@ -104,6 +97,8 @@ namespace TheDataResourceImporter
             Func<string[],string, bool> func = TheDataResourceImporter.ImportManger.BeginImport;
 
             ImportManger.importStartTime = System.DateTime.Now;
+
+
             func.BeginInvoke(filePaths,fileType, 
                 delegate(IAsyncResult ia)
                 {

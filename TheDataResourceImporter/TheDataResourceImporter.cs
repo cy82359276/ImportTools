@@ -134,8 +134,12 @@ namespace TheDataResourceImporter
 
 
                 StringBuilder sb = new StringBuilder();
+
+
                 foreach (IArchiveEntry entry in archive.Entries)
                 {
+
+
 
                     //当前条目是目录
                     if(entry.IsDirectory)
@@ -176,6 +180,9 @@ namespace TheDataResourceImporter
 
                             entryFileParentFullPathNameSet.Add(parentFullPath);
                         }
+
+
+
                     }
                     sb.Append(entry.Key + Environment.NewLine);
                 }

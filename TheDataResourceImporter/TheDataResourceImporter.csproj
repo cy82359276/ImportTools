@@ -56,13 +56,21 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=4.4.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.5.0.0\lib\net40\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="SharpCompress, Version=0.12.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\sharpcompress-master\src\SharpCompress\bin\Debug\net40\SharpCompress.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -80,11 +88,179 @@
     <Compile Include="AboutBoxUS.Designer.cs">
       <DependentUpon>AboutBoxUS.cs</DependentUpon>
     </Compile>
+    <Compile Include="DataResourceEntities.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DataResourceEntities.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DataResourceEntities.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DataResourceEntities.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DataResourceEntities.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="errorList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="errorList.Designer.cs">
+      <DependentUpon>errorList.cs</DependentUpon>
+    </Compile>
     <Compile Include="ImportHistory.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ImportHistory.Designer.cs">
       <DependentUpon>ImportHistory.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IMPORT_ERROR.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="IMPORT_SESSION.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_AMERICAN_BRAND_GRAPHCLASSIFY.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_AMERICAN_BRAND_USCLASSIFY.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_AMERICA_APPLY_BRAND.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_AMERICA_TRANSFER_BRAND.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_AMERICA_TRIAL_BRAND.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_BIOLOGICAL_PROCESS.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_BOOK.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_BRAND.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_BRAND_CLASSIFICATION.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_BRAND_LICENSE.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_BRAND_TRANSFER.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_CIRCUITLAYOUT.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_COURTCASE_PROCESS.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_CUSTOMS_RECORD.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_LAWSTATE_INDEXINGLIB.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_MEDICINE_PATENT_HANDLE.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_MEDICINE_PATENT_TRANS.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_BIOLOGICALSEQ.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_FEEINFORMATION.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_FULLTEXT_PDF.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_GAZETTE.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_INVALID.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_JUDGMENT.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_LAWSPROCESS.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_LAWSTATE.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_LAWSTATE_CHANGE.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_NOTICES.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_REVIEW.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_STANDARDFULLTXT.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_STAND_TEXTIMAGE.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_TEXTCODE.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PATENT_TEXTIMAGE.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_PHARMACEUTICAL_PATENT.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_CHINA_WELLKNOWN_BRAND.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_COMMUNITY_INTELLECTUALRECORD.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_COMPANY_CODE_LIBRARY.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_DOCDB.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_FOREIGN_PATENT_FULLTEXT_PDF.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_FOREIGN_PATENT_SEQUENCE.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_GLOBAL_PATENT_CITATION.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_JOURNAL_PROJECT_ABSTRACT.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_MADRID_BRAND_ENTER_CHINA.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_MADRID_BRAND_PURCHASE.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_PATENT_FAMILY.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_PATENT_PAYMENT.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_WORLD_LEGAL_STATUS.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="S_ZONE_CODE_BASE.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="TheDataResourceImporter.cs" />
     <Compile Include="Main.cs">
@@ -103,6 +279,9 @@
     <EmbeddedResource Include="AboutBoxUS.resx">
       <DependentUpon>AboutBoxUS.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="errorList.resx">
+      <DependentUpon>errorList.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ImportHistory.resx">
       <DependentUpon>ImportHistory.cs</DependentUpon>
     </EmbeddedResource>
@@ -120,6 +299,14 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
+    <EntityDeploy Include="DataResourceEntities.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>DataResourceEntities.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <None Include="DataResourceEntities.edmx.diagram">
+      <DependentUpon>DataResourceEntities.edmx</DependentUpon>
+    </None>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -151,6 +338,21 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DataResourceEntities.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DataResourceEntities.Context.cs</LastGenOutput>
+      <DependentUpon>DataResourceEntities.edmx</DependentUpon>
+    </Content>
+    <Content Include="DataResourceEntities.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>DataResourceEntities.edmx</DependentUpon>
+      <LastGenOutput>DataResourceEntities.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

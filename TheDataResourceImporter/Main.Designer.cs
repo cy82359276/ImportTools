@@ -65,6 +65,7 @@
             this.menuHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.menuCheckHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAbout = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkBoxClearExistData = new System.Windows.Forms.CheckBox();
             this.mainMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -468,21 +469,32 @@
             // 
             this.menuCheckHelp.Enabled = false;
             this.menuCheckHelp.Name = "menuCheckHelp";
-            this.menuCheckHelp.Size = new System.Drawing.Size(152, 22);
+            this.menuCheckHelp.Size = new System.Drawing.Size(124, 22);
             this.menuCheckHelp.Text = "查看帮助";
             // 
             // menuAbout
             // 
             this.menuAbout.Name = "menuAbout";
-            this.menuAbout.Size = new System.Drawing.Size(152, 22);
+            this.menuAbout.Size = new System.Drawing.Size(124, 22);
             this.menuAbout.Text = "关于";
             this.menuAbout.Click += new System.EventHandler(this.menuAbout_Click);
+            // 
+            // checkBoxClearExistData
+            // 
+            this.checkBoxClearExistData.AutoSize = true;
+            this.checkBoxClearExistData.Location = new System.Drawing.Point(470, 34);
+            this.checkBoxClearExistData.Name = "checkBoxClearExistData";
+            this.checkBoxClearExistData.Size = new System.Drawing.Size(96, 16);
+            this.checkBoxClearExistData.TabIndex = 33;
+            this.checkBoxClearExistData.Text = "清空现有数据";
+            this.checkBoxClearExistData.UseVisualStyleBackColor = true;
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(625, 699);
+            this.Controls.Add(this.checkBoxClearExistData);
             this.Controls.Add(this.labelImportCountPerSec);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.labelAverageElapsedTime);
@@ -565,6 +577,7 @@
         private System.Windows.Forms.ToolStripMenuItem menuHelp;
         private System.Windows.Forms.ToolStripMenuItem menuCheckHelp;
         private System.Windows.Forms.ToolStripMenuItem menuAbout;
+        private System.Windows.Forms.CheckBox checkBoxClearExistData;
     }
 }
 

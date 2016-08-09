@@ -11,7 +11,6 @@ namespace TheDataResourceImporter.Utils
 {
     class CompressUtil
     {
-
         public  static string tempDir = ConfigurationManager.AppSettings["tempDir"];
         /***
          * 将当前的entry写到指定目录,保留文件信息,如果文件存在, 覆盖文件
