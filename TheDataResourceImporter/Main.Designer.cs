@@ -269,7 +269,6 @@
             this.label1.Size = new System.Drawing.Size(53, 12);
             this.label1.TabIndex = 11;
             this.label1.Text = "共发现了";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // labelTotal
             // 
@@ -455,6 +454,7 @@
             this.menuShowImportHistory.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.H)));
             this.menuShowImportHistory.Size = new System.Drawing.Size(68, 21);
             this.menuShowImportHistory.Text = "导入历史";
+            this.menuShowImportHistory.Click += new System.EventHandler(this.menuShowImportHistory_Click);
             // 
             // menuHelp
             // 

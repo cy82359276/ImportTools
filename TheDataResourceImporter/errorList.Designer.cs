@@ -28,17 +28,57 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.sessionID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ErrorId = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ZipOrDirPath = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.errorEntryNum = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ErrorType = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ErrorMsg = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IgnoreEror = new System.Windows.Forms.DataGridViewButtonColumn();
             this.Retry = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.IgnoreEror = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.ErrorMsg = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ErrorType = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.errorEntryNum = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ZipOrDirPath = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ErrorId = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.sessionID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
+            // 
+            // Retry
+            // 
+            this.Retry.HeaderText = "重试";
+            this.Retry.Name = "Retry";
+            // 
+            // IgnoreEror
+            // 
+            this.IgnoreEror.HeaderText = "忽略错误";
+            this.IgnoreEror.Name = "IgnoreEror";
+            // 
+            // ErrorMsg
+            // 
+            this.ErrorMsg.HeaderText = "错误内容";
+            this.ErrorMsg.Name = "ErrorMsg";
+            // 
+            // ErrorType
+            // 
+            this.ErrorType.HeaderText = "错误类型";
+            this.ErrorType.Name = "ErrorType";
+            // 
+            // errorEntryNum
+            // 
+            this.errorEntryNum.HeaderText = "错误表目编号";
+            this.errorEntryNum.Name = "errorEntryNum";
+            // 
+            // ZipOrDirPath
+            // 
+            this.ZipOrDirPath.HeaderText = "错误压缩包或目录路径";
+            this.ZipOrDirPath.Name = "ZipOrDirPath";
+            // 
+            // ErrorId
+            // 
+            this.ErrorId.HeaderText = "错误编号";
+            this.ErrorId.Name = "ErrorId";
+            // 
+            // sessionID
+            // 
+            this.sessionID.HeaderText = "导入操作ID";
+            this.sessionID.Name = "sessionID";
             // 
             // dataGridView1
             // 
@@ -58,46 +98,6 @@
             this.dataGridView1.Size = new System.Drawing.Size(848, 568);
             this.dataGridView1.TabIndex = 0;
             // 
-            // sessionID
-            // 
-            this.sessionID.HeaderText = "导入操作ID";
-            this.sessionID.Name = "sessionID";
-            // 
-            // ErrorId
-            // 
-            this.ErrorId.HeaderText = "错误编号";
-            this.ErrorId.Name = "ErrorId";
-            // 
-            // ZipOrDirPath
-            // 
-            this.ZipOrDirPath.HeaderText = "错误压缩包或目录路径";
-            this.ZipOrDirPath.Name = "ZipOrDirPath";
-            // 
-            // errorEntryNum
-            // 
-            this.errorEntryNum.HeaderText = "错误表目编号";
-            this.errorEntryNum.Name = "errorEntryNum";
-            // 
-            // ErrorType
-            // 
-            this.ErrorType.HeaderText = "错误类型";
-            this.ErrorType.Name = "ErrorType";
-            // 
-            // ErrorMsg
-            // 
-            this.ErrorMsg.HeaderText = "错误内容";
-            this.ErrorMsg.Name = "ErrorMsg";
-            // 
-            // IgnoreEror
-            // 
-            this.IgnoreEror.HeaderText = "忽略错误";
-            this.IgnoreEror.Name = "IgnoreEror";
-            // 
-            // Retry
-            // 
-            this.Retry.HeaderText = "重试";
-            this.Retry.Name = "Retry";
-            // 
             // errorList
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -113,14 +113,14 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn sessionID;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorId;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ZipOrDirPath;
-        private System.Windows.Forms.DataGridViewTextBoxColumn errorEntryNum;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorType;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorMsg;
-        private System.Windows.Forms.DataGridViewButtonColumn IgnoreEror;
         private System.Windows.Forms.DataGridViewButtonColumn Retry;
+        private System.Windows.Forms.DataGridViewButtonColumn IgnoreEror;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorMsg;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorType;
+        private System.Windows.Forms.DataGridViewTextBoxColumn errorEntryNum;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ZipOrDirPath;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorId;
+        private System.Windows.Forms.DataGridViewTextBoxColumn sessionID;
+        private System.Windows.Forms.DataGridView dataGridView1;
     }
 }

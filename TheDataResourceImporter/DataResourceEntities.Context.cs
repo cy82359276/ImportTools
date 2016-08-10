@@ -25,7 +25,6 @@ namespace TheDataResourceImporter
             throw new UnintentionalCodeFirstException();
         }
     
-        public DbSet<IMPORT_ERROR> IMPORT_ERROR { get; set; }
         public DbSet<IMPORT_SESSION> IMPORT_SESSION { get; set; }
         public DbSet<S_AMERICA_APPLY_BRAND> S_AMERICA_APPLY_BRAND { get; set; }
         public DbSet<S_AMERICA_TRANSFER_BRAND> S_AMERICA_TRANSFER_BRAND { get; set; }
@@ -74,5 +73,6 @@ namespace TheDataResourceImporter
         public DbSet<S_PATENT_PAYMENT> S_PATENT_PAYMENT { get; set; }
         public DbSet<S_WORLD_LEGAL_STATUS> S_WORLD_LEGAL_STATUS { get; set; }
         public DbSet<S_ZONE_CODE_BASE> S_ZONE_CODE_BASE { get; set; }
+        public DbSet<IMPORT_ERROR> IMPORT_ERROR { get; set; }
     }
 }

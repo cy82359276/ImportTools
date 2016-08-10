@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="Model.Store" Provider="Oracle.ManagedDataAccess.Client" ProviderManifestToken="11.2" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
+    <Schema Namespace="Model.Store" Provider="Oracle.ManagedDataAccess.Client" ProviderManifestToken="11.2" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
         <EntityType Name="IMPORT_ERROR">
           <Key>
             <PropertyRef Name="ID" />
@@ -17,6 +17,7 @@
           <Property Name="ZIP_PATH" Type="varchar2" MaxLength="1000" />
           <Property Name="IGNORED" Type="varchar2" MaxLength="10" />
           <Property Name="REIMPORTED" Type="varchar2" MaxLength="10" />
+          <Property Name="OCURREDTIME" Type="date" />
         </EntityType>
         <EntityType Name="IMPORT_SESSION">
           <Key>
@@ -1260,24 +1261,10 @@
           <EntitySet Name="S_WORLD_LEGAL_STATUS" EntityType="Self.S_WORLD_LEGAL_STATUS" Schema="DRMSTEST" store:Type="Tables" />
           <EntitySet Name="S_ZONE_CODE_BASE" EntityType="Self.S_ZONE_CODE_BASE" Schema="DRMSTEST" store:Type="Tables" />
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="Model" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
-        <EntityType Name="IMPORT_ERROR">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="ZIP_OR_DIR_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="ISZIP" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="POINTOR" Type="Decimal" Precision="38" Scale="0" />
-          <Property Name="ZIP_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="IGNORED" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="REIMPORTED" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-        </EntityType>
         <EntityType Name="IMPORT_SESSION">
           <Key>
             <PropertyRef Name="SESSION_ID" />
@@ -2470,7 +2457,6 @@
           <Property Name="ZONECODE" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityContainer Name="DataSourceEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="IMPORT_ERROR" EntityType="Self.IMPORT_ERROR" />
           <EntitySet Name="IMPORT_SESSION" EntityType="Self.IMPORT_SESSION" />
           <EntitySet Name="S_AMERICA_APPLY_BRAND" EntityType="Self.S_AMERICA_APPLY_BRAND" />
           <EntitySet Name="S_AMERICA_TRANSFER_BRAND" EntityType="Self.S_AMERICA_TRANSFER_BRAND" />
@@ -2519,27 +2505,28 @@
           <EntitySet Name="S_PATENT_PAYMENT" EntityType="Self.S_PATENT_PAYMENT" />
           <EntitySet Name="S_WORLD_LEGAL_STATUS" EntityType="Self.S_WORLD_LEGAL_STATUS" />
           <EntitySet Name="S_ZONE_CODE_BASE" EntityType="Self.S_ZONE_CODE_BASE" />
+          <EntitySet Name="IMPORT_ERROR" EntityType="Model.IMPORT_ERROR" />
         </EntityContainer>
+        <EntityType Name="IMPORT_ERROR">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="ZIP_OR_DIR_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="ISZIP" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="POINTOR" Type="Decimal" Precision="38" Scale="0" />
+          <Property Name="ZIP_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="IGNORED" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="REIMPORTED" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="OCURREDTIME" Type="DateTime" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="ModelStoreContainer" CdmEntityContainer="DataSourceEntities">
-          <EntitySetMapping Name="IMPORT_ERROR">
-            <EntityTypeMapping TypeName="Model.IMPORT_ERROR">
-              <MappingFragment StoreEntitySet="IMPORT_ERROR">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="SESSION_ID" ColumnName="SESSION_ID" />
-                <ScalarProperty Name="ZIP_OR_DIR_PATH" ColumnName="ZIP_OR_DIR_PATH" />
-                <ScalarProperty Name="ISZIP" ColumnName="ISZIP" />
-                <ScalarProperty Name="POINTOR" ColumnName="POINTOR" />
-                <ScalarProperty Name="ZIP_PATH" ColumnName="ZIP_PATH" />
-                <ScalarProperty Name="IGNORED" ColumnName="IGNORED" />
-                <ScalarProperty Name="REIMPORTED" ColumnName="REIMPORTED" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="IMPORT_SESSION">
             <EntityTypeMapping TypeName="Model.IMPORT_SESSION">
               <MappingFragment StoreEntitySet="IMPORT_SESSION">
@@ -3776,6 +3763,21 @@
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="ZONEADDRESS" ColumnName="ZONEADDRESS" />
                 <ScalarProperty Name="ZONECODE" ColumnName="ZONECODE" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="IMPORT_ERROR">
+            <EntityTypeMapping TypeName="Model.IMPORT_ERROR">
+              <MappingFragment StoreEntitySet="IMPORT_ERROR">
+                <ScalarProperty Name="OCURREDTIME" ColumnName="OCURREDTIME" />
+                <ScalarProperty Name="REIMPORTED" ColumnName="REIMPORTED" />
+                <ScalarProperty Name="IGNORED" ColumnName="IGNORED" />
+                <ScalarProperty Name="ZIP_PATH" ColumnName="ZIP_PATH" />
+                <ScalarProperty Name="POINTOR" ColumnName="POINTOR" />
+                <ScalarProperty Name="ISZIP" ColumnName="ISZIP" />
+                <ScalarProperty Name="ZIP_OR_DIR_PATH" ColumnName="ZIP_OR_DIR_PATH" />
+                <ScalarProperty Name="SESSION_ID" ColumnName="SESSION_ID" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -220,10 +220,6 @@ namespace TheDataResourceImporter
             }
         }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
 
         private void btnAbort_Click(object sender, EventArgs e)
         {
@@ -241,6 +237,11 @@ namespace TheDataResourceImporter
         {
             //MessageBox.Show("技术支持 内网分机8323");
             new AboutBoxUS().ShowDialog();
+        }
+
+        private void menuShowImportHistory_Click(object sender, EventArgs e)
+        {
+            new ImportHistory().Show();
         }
     }
 }

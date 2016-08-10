@@ -6,6 +6,11 @@ using SharpCompress.Archive;
 using System.Configuration;
 using SharpCompress.Common;
 using System.IO;
+using SharpCompress.Archive.Zip;
+using SharpCompress.Archive.SevenZip;
+using SharpCompress.Archive.GZip;
+using SharpCompress.Archive.Rar;
+using SharpCompress.Archive.Tar;
 
 namespace TheDataResourceImporter.Utils
 {
@@ -89,7 +94,91 @@ namespace TheDataResourceImporter.Utils
             }
             return deleted;
         }
+        public static bool isSupportedArchive(string filePath)
+        {
+            FileInfo fileInfo = new FileInfo(filePath);
 
+            try
+            {
+                using (var stream = fileInfo.OpenRead())
+                {
+                    if (ZipArchive.IsZipFile(stream, null))
+                    {
+                        stream.Dispose();
+                        return true;
+                    }
+                    stream.Seek(0, SeekOrigin.Begin);
+                    if (SevenZipArchive.IsSevenZipFile(stream))
+                    {
+                        stream.Dispose();
+                        return true;
+
+                    }
+                    stream.Seek(0, SeekOrigin.Begin);
+                    if (GZipArchive.IsGZipFile(stream))
+                    {
+                        stream.Dispose();
+                        return true;
+                    }
+                    stream.Seek(0, SeekOrigin.Begin);
+                    if (RarArchive.IsRarFile(stream, Options.None))
+                    {
+                        stream.Dispose();
+                        return true;
+                    }
+                    stream.Seek(0, SeekOrigin.Begin);
+                    if (TarArchive.IsTarFile(stream))
+                    {
+                        stream.Dispose();
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+        }
+
+
+        //压缩包内目录类型 移除多余的/, 统一使用\\做分隔符
+        public static string removeDirEntrySlash(string entryKey)
+        {
+            if (entryKey.EndsWith("/"))
+            {
+                entryKey = entryKey.Substring(0, entryKey.Length - 1);
+            }
+            if (entryKey.Contains("/"))
+            {
+                entryKey = entryKey.Replace('/', '\\');
+            }
+            return entryKey;
+        }
+
+        //获取目录类条目的深度
+        public static int getDirEntryDepth(string originalEntryKey)
+        {
+            string neatedPath = removeDirEntrySlash(originalEntryKey);
+            return neatedPath.Split('\\').Length;
+        }
+
+
+        //获取文件类条目的父目录
+        public static string getFileEntryParentPath(string fileEntryKey)
+        {
+            if (fileEntryKey.Contains("/"))
+            {
+                fileEntryKey = fileEntryKey.Replace('/', '\\');
+            }
+
+            string[] pathParts = fileEntryKey.Split('\\');
+
+            //拼接
+            string parentFullPath = string.Join("\\", pathParts, 0, pathParts.Length - 1);
+            return parentFullPath;
+        }
 
     }
 }

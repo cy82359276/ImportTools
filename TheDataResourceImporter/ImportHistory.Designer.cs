@@ -103,6 +103,7 @@
             this.Controls.Add(this.dataGridViewImportHistory);
             this.Name = "ImportHistory";
             this.Text = "导入历史";
+            this.Load += new System.EventHandler(this.ImportHistory_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewImportHistory)).EndInit();
             this.ResumeLayout(false);
 

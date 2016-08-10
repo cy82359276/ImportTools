@@ -15,5 +15,11 @@ namespace TheDataResourceImporter
         {
             InitializeComponent();
         }
+
+        //页面加载
+        private void ImportHistory_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

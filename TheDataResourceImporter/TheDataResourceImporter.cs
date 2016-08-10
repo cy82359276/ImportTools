@@ -45,7 +45,7 @@ namespace TheDataResourceImporter
             fileCount = 0;
             //清空进度信息
             MessageUtil.DoupdateProgressIndicator(0, 0, 0, 0, "");
-        }   
+        }
 
 
 
@@ -54,110 +54,124 @@ namespace TheDataResourceImporter
 
             //importStartTime = System.DateTime.Now;
             fileCount = AllFilePaths.Length;
-            foreach (string path in AllFilePaths)
+            using (DataSourceEntities dataSourceEntites = new DataSourceEntities())
             {
-                //强制终止
-                if (forcedStop)
+                foreach (string path in AllFilePaths)
                 {
-                    MessageUtil.DoAppendTBDetail("强制终止了插入");
-                    break;
-                }
-
-                currentFile = path.Substring(path.LastIndexOf('\\') + 1);
-
-                try
-                {
-                    if (File.Exists(path))
+                    //强制终止
+                    if (forcedStop)
                     {
-
-                        ImportByPath(path, fileType);
-
-                        System.GC.Collect();
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        break;
                     }
-                }
-                catch (Exception ex)
-                {
 
-                    if (ex.Message.Contains("对象名:“Main”"))
+                    currentFile = path.Substring(path.LastIndexOf('\\') + 1);
+
+                    try
                     {
+                        if (File.Exists(path))
+                        {
+                            ImportByPath(path, fileType, dataSourceEntites);
+                            System.GC.Collect();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                        if (ex.Message.Contains("对象名:“Main”"))
+                        {
+                            continue;
+                        }
+
+                        //LogHelper.WriteLog("", "error", currentFile + ":" + ex.Message);
+                        LogHelper.WriteErrorLog($"导入文件{currentFile}时发生错误,错误消息:{ex.Message}");
                         continue;
                     }
-
-                    LogHelper.WriteLog("", "error", currentFile + ":" + ex.Message);
-                    continue;
                 }
-
             }
 
             return true;
         }
 
 
-        public static bool ImportByPath(string filePath, string fileType)
+        public static bool  ImportByPath(string filePath, string fileType, DataSourceEntities entiesContext)
         {
             currentFile = filePath;
 
+            //导入操作信息
+            IMPORT_SESSION importSession = new IMPORT_SESSION() { SESSION_ID = System.Guid.NewGuid().ToString(), ROLLED_BACK = "N", DATA_RES_TYPE = fileType, START_TIME = System.DateTime.Now, ZIP_OR_DIR_PATH = filePath, HAS_ERROR = "N", FAILED_COUNT = 0, COMPLETED = "N", LAST_TIME = 0, ZIP_ENTRIES_COUNT = 0, ZIP_ENTRY_POINTOR = 0, IS_ZIP = "Y" };
 
+            //判断是否是
 
-            FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            StreamReader sr = new StreamReader(fs, Encoding.UTF8);
-            List<RecModel> list = new List<RecModel>();
-            string str = "";
-
-            RecModel rec = null;
-
-            FileInfo selectedFileInfo = new FileInfo(filePath);
-
-            SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
-
-            var archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
-
-            int entiresCount = archive.Entries.Count();
-
-            totalCount = entiresCount;
-
-            //清零
-            handledCount = 0;
-
-            MessageUtil.DoAppendTBDetail("您选择的资源类型为：" + fileType);
-
-            MessageUtil.DoAppendTBDetail("在压缩包中发现" + entiresCount + "个条目，目录详细如下：");
-
-
+            #region 分文件类型进行处理
+            #region 中国专利全文代码化数据
+            //压缩包内解析XML
+            //目前监测了XML文件缺失的情况
             if (fileType == "中国专利全文代码化数据")
             {
+                FileInfo selectedFileInfo = new FileInfo(filePath);
+               
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                int entiresCount = archive.Entries.Count();
+
+                totalCount = entiresCount;
+                //清零
+                handledCount = 0;
+
+                MessageUtil.DoAppendTBDetail("您选择的资源类型为：" + fileType);
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + entiresCount + "个条目，目录详细如下：");
+
+
+
+                
+
+
+
+                //检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries
+                                        where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                        select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                var xmlEntryParentDirEntries = (from entry in archive.Entries
+                                               where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML")
+                                               select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+
+                //发现存在XML不存在的情况
+                if(dirEntriesWithoutXML.Count() > 0)
+                {
+                    foreach(string entryKey in dirEntriesWithoutXML)
+                    {
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = 0, ZIP_OR_DIR_PATH=filePath, REIMPORTED="N", ZIP_PATH=entryKey, OCURREDTIME = System.DateTime.Now};
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+
+
 
 
                 //确认是否是存在缺失XML的情况
                 HashSet<string> dirNameSet = new HashSet<string>();
                 HashSet<string> entryFileParentFullPathNameSet = new HashSet<string>();
 
-
                 StringBuilder sb = new StringBuilder();
-
 
                 foreach (IArchiveEntry entry in archive.Entries)
                 {
-
-
-
                     //当前条目是目录
-                    if(entry.IsDirectory)
+                    if (entry.IsDirectory)
                     {
                         string entryDirPath = entry.Key;
-                        //剔除目录的斜杠
-                        if(entryDirPath.EndsWith("/"))
-                        {
-                            entryDirPath = entryDirPath.Substring(0, entryDirPath.Length - 1);
-                        }
-                        if(entryDirPath.Contains("/"))
-                        {
-                            entryDirPath = entryDirPath.Replace('/', '\\');
-                        }
 
-                        string[] pathParts = entryDirPath.Split('\\');
-
-                        if(pathParts.Length > 1)
+                        if (CompressUtil.getDirEntryDepth(entryDirPath) > 1)
                         {
                             dirNameSet.Add(entryDirPath);
                         }
@@ -166,7 +180,7 @@ namespace TheDataResourceImporter
                     {
                         string entryFilePath = entry.Key;
                         //判断是否是XML
-                        if(entryFilePath.ToUpper().EndsWith("XML"))
+                        if (entryFilePath.ToUpper().EndsWith("XML"))
                         {
                             if (entryFilePath.Contains("/"))
                             {
@@ -180,18 +194,12 @@ namespace TheDataResourceImporter
 
                             entryFileParentFullPathNameSet.Add(parentFullPath);
                         }
-
-
-
                     }
                     sb.Append(entry.Key + Environment.NewLine);
                 }
-
                 dirNameSet.ExceptWith(entryFileParentFullPathNameSet);
 
-
                 MessageUtil.DoAppendTBDetail(sb.ToString());
-
 
                 //存在目录内找不到XML的情况
                 if (dirNameSet.Count > 0)
@@ -207,13 +215,21 @@ namespace TheDataResourceImporter
 
 
 
+
+
+
+
+
+
+
+
                 MessageUtil.DoAppendTBDetail("当前压缩包：" + selectedFileInfo.Name);
                 MessageUtil.DoAppendTBDetail("开始寻找专利XML文件：");
-                foreach(IArchiveEntry entry in archive.Entries)
+                foreach (IArchiveEntry entry in archive.Entries)
                 {
                     handledCount++;
 
-                    if(forcedStop)
+                    if (forcedStop)
                     {
                         MessageUtil.DoAppendTBDetail("强制终止了插入");
                         break;
@@ -222,7 +238,7 @@ namespace TheDataResourceImporter
                     //MessageUtil.DoAppendTBDetail("当前条目：" + entry.Key + "，是" + (entry.IsDirectory ? "目录" : "文件"));
                     var keyTemp = entry.Key;
                     //当前文件为XML文件
-                    if(keyTemp.ToUpper().EndsWith(".XML"))
+                    if (keyTemp.ToUpper().EndsWith(".XML"))
                     {
                         handledXMLCount++;
                         //解压当前的XML文件
@@ -351,7 +367,7 @@ namespace TheDataResourceImporter
                         }
                         var abstractEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/abstract");
 
-                        
+
                         if (abstractEles.Count() > 0)
                         {
                             insertStr = insertStr + "ABSTRACT,";
@@ -363,7 +379,7 @@ namespace TheDataResourceImporter
 
                             valuesStr = valuesStr + "'" + valueTemp + "',";
                         }
-              
+
                         insertStr = insertStr + "PATH_XML,";
                         valuesStr = valuesStr + "'" + entry.Key + "',";
 
@@ -378,7 +394,7 @@ namespace TheDataResourceImporter
 
                         valuesStr = valuesStr + String.Format("'{0}',", id);
 
-                        if(',' == insertStr.Last())
+                        if (',' == insertStr.Last())
                         {
                             insertStr = insertStr.Substring(0, insertStr.Length - 1);
                         }
@@ -394,7 +410,7 @@ namespace TheDataResourceImporter
 
                         int insertedCount = OracleDB.ExecuteSql(sql);
 
-                        if(1 == insertedCount)
+                        if (1 == insertedCount)
                         {
                             MessageUtil.DoAppendTBDetail("记录：" + entry.Key + "插入成功!!!");
                         }
@@ -402,8 +418,18 @@ namespace TheDataResourceImporter
 
                     //更新进度信息
                     MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, handledXMLCount, 0, filePath);
+
+
+
+
+
                 }
+
+
             }
+            #endregion
+
+            #region
             else if (fileType == "中国专利全文图像数据")
             {
 
@@ -852,124 +878,15 @@ namespace TheDataResourceImporter
 
 
             }
+            #endregion
+            #endregion
 
 
 
-
-
-
-
-
-
-
-
-            /**
-             * 判断文档的类型
-             * */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            /**
-             * 解析XML入库
-             * */
-
-            //while ((str = sr.ReadLine()) != null)
-            //{
-            //}
-            //最后一个REC
-
-            //数据库Test
-            //DataTable dt = OracleDB.GetDT("select * from S_CHINA_Patent_TextCode t"); ;
-
-
-            //importRec(rec);
-
-
-            //MessageUtil.SetMessage(currentFile + "  已处理件数:" + dealCount + "  缺失件数:" + lostCount);
-
-            sr.Close();
-
-            fs.Close();
+            importSession.LAST_TIME = importSession.START_TIME != null ? DateTime.Now.Subtract(importSession.START_TIME.Value).Seconds : 0;
+            //是否发生错误
+            importSession.HAS_ERROR = importSession.FAILED_COUNT > 0 ? "Y" : "N";
             return true;
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        public static bool importRec(RecModel rec)
-        {
-            try
-            {
-                string tableName = "";
-                dealCount++;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLog("", "error", currentFile + ": " + rec.SWPUBDATE + "-" + rec.AN + "-" + rec.FLZT + "-" + rec.FLZTInfo + "--" + ex.Message);
-                return true;
-            }
-
-            return false;
-        }
-
-
-
-        public static bool RecordExist(RecModel rec, string tableName)
-        {
-            try
-            {
-                string sql = @"SELECT APPLYNO FROM {0}
-                                WHERE AUXIDX='{1}'";
-
-                string auxidx = rec.SWPUBDATE + rec.AN + rec.FLZT + rec.FLZTInfo;
-
-                sql = string.Format(sql, tableName, auxidx);
-
-                if (OracleDB.GetDT(sql).Rows.Count > 0)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLog("", "error", currentFile + ": " + rec.SWPUBDATE + "-" + rec.AN + "-" + rec.FLZT + "-" + rec.FLZTInfo + "--" + ex.Message);
-                return true;
-            }
-
         }
     }
 }

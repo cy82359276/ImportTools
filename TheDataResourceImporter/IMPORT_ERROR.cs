@@ -22,5 +22,6 @@ namespace TheDataResourceImporter
         public string ZIP_PATH { get; set; }
         public string IGNORED { get; set; }
         public string REIMPORTED { get; set; }
+        public Nullable<System.DateTime> OCURREDTIME { get; set; }
     }
 }
