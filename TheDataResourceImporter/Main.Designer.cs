@@ -40,16 +40,8 @@
             this.btnAbort = new System.Windows.Forms.Button();
             this.btn_Choose = new System.Windows.Forms.Button();
             this.tb_FilePath = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.labelTotal = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.labelHandled = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.labelRemained = new System.Windows.Forms.Label();
+            this.labelProgressMsg = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.labelHandledXMLCount = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
             this.labelStatus = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.labelcurrentArchive = new System.Windows.Forms.Label();
@@ -261,59 +253,14 @@
             this.tb_FilePath.Size = new System.Drawing.Size(327, 21);
             this.tb_FilePath.TabIndex = 9;
             // 
-            // label1
+            // labelProgressMsg
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(47, 615);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(53, 12);
-            this.label1.TabIndex = 11;
-            this.label1.Text = "共发现了";
-            // 
-            // labelTotal
-            // 
-            this.labelTotal.AutoSize = true;
-            this.labelTotal.Location = new System.Drawing.Point(96, 615);
-            this.labelTotal.Name = "labelTotal";
-            this.labelTotal.Size = new System.Drawing.Size(11, 12);
-            this.labelTotal.TabIndex = 12;
-            this.labelTotal.Text = "0";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(147, 615);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(89, 12);
-            this.label3.TabIndex = 13;
-            this.label3.Text = "个条目，已处理";
-            // 
-            // labelHandled
-            // 
-            this.labelHandled.AutoSize = true;
-            this.labelHandled.Location = new System.Drawing.Point(242, 615);
-            this.labelHandled.Name = "labelHandled";
-            this.labelHandled.Size = new System.Drawing.Size(11, 12);
-            this.labelHandled.TabIndex = 15;
-            this.labelHandled.Text = "0";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(293, 615);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(53, 12);
-            this.label6.TabIndex = 16;
-            this.label6.Text = "个，剩余";
-            // 
-            // labelRemained
-            // 
-            this.labelRemained.AutoSize = true;
-            this.labelRemained.Location = new System.Drawing.Point(352, 615);
-            this.labelRemained.Name = "labelRemained";
-            this.labelRemained.Size = new System.Drawing.Size(11, 12);
-            this.labelRemained.TabIndex = 17;
-            this.labelRemained.Text = "0";
+            this.labelProgressMsg.AutoSize = true;
+            this.labelProgressMsg.Location = new System.Drawing.Point(48, 615);
+            this.labelProgressMsg.Name = "labelProgressMsg";
+            this.labelProgressMsg.Size = new System.Drawing.Size(89, 12);
+            this.labelProgressMsg.TabIndex = 11;
+            this.labelProgressMsg.Text = "              ";
             // 
             // label8
             // 
@@ -322,33 +269,6 @@
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(0, 12);
             this.label8.TabIndex = 18;
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(401, 615);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(41, 12);
-            this.label9.TabIndex = 19;
-            this.label9.Text = "已处理";
-            // 
-            // labelHandledXMLCount
-            // 
-            this.labelHandledXMLCount.AutoSize = true;
-            this.labelHandledXMLCount.Location = new System.Drawing.Point(449, 615);
-            this.labelHandledXMLCount.Name = "labelHandledXMLCount";
-            this.labelHandledXMLCount.Size = new System.Drawing.Size(11, 12);
-            this.labelHandledXMLCount.TabIndex = 20;
-            this.labelHandledXMLCount.Text = "0";
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(487, 615);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(35, 12);
-            this.label11.TabIndex = 21;
-            this.label11.Text = "个XML";
             // 
             // labelStatus
             // 
@@ -505,16 +425,8 @@
             this.Controls.Add(this.labelcurrentArchive);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.labelStatus);
-            this.Controls.Add(this.label11);
-            this.Controls.Add(this.labelHandledXMLCount);
-            this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
-            this.Controls.Add(this.labelRemained);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.labelHandled);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.labelTotal);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.labelProgressMsg);
             this.Controls.Add(this.btn_Choose);
             this.Controls.Add(this.tb_FilePath);
             this.Controls.Add(this.btnAbort);
@@ -552,16 +464,8 @@
         private System.Windows.Forms.Button btnAbort;
         private System.Windows.Forms.Button btn_Choose;
         private System.Windows.Forms.TextBox tb_FilePath;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label labelTotal;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label labelHandled;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label labelRemained;
+        private System.Windows.Forms.Label labelProgressMsg;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label labelHandledXMLCount;
-        private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label labelStatus;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label labelcurrentArchive;

@@ -26,5 +26,9 @@ namespace TheDataResourceImporter
         public string DATA_RES_TYPE { get; set; }
         public Nullable<decimal> ZIP_ENTRY_POINTOR { get; set; }
         public string ROLLED_BACK { get; set; }
+        public Nullable<decimal> ITEMS_POINT { get; set; }
+        public Nullable<decimal> TOTAL_ITEM { get; set; }
+        public string ZIP_ENTRY_PATH { get; set; }
+        public string NOTE { get; set; }
     }
 }

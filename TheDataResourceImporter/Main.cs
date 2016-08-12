@@ -107,7 +107,7 @@ namespace TheDataResourceImporter
                     {
                         double totalSeconds = System.DateTime.Now.Subtract(ImportManger.importStartTime).TotalSeconds;
 
-                        MessageUtil.DoAppendTBDetail(String.Format("\r\n导入结束!共运行了{0:0.##}秒, 处理了个{1}件XML，平均用时：{2:0.#######}", totalSeconds, ImportManger.handledXMLCount, totalSeconds / ImportManger.handledXMLCount));
+                        MessageUtil.DoAppendTBDetail(String.Format("\r\n导入结束!共运行了{0:0.##}秒, 成功入库{1}件，平均用时：{2:0.#######}", totalSeconds, ImportManger.handledCount, totalSeconds / ImportManger.handledCount));
                     }
 
                     SetEnabled(btn_Choose, true);
@@ -142,12 +142,13 @@ namespace TheDataResourceImporter
             else
             {
                 labelcurrentArchive.Text = achievePath;
-                labelTotal.Text = totalCount.ToString();
-                labelHandled.Text = handledCount.ToString();
-                labelHandledXMLCount.Text = handledXMLCount.ToString();
-                labelRemained.Text = (totalCount - handledCount).ToString();
                 string status = handledCount + "/" + totalCount;
+
                 labelStatus.Text = status;
+
+                string progressMsg = $"发现待入库{totalCount}件条目，已入库{handledCount}件，剩余{totalCount - handledCount}件";
+
+                labelProgressMsg.Text = progressMsg;
 
                 int currentPercentage = 0;
                 if (totalCount > 0)
@@ -162,9 +163,9 @@ namespace TheDataResourceImporter
                 //更新耗时信息
                 double totalSecCount = System.DateTime.Now.Subtract(ImportManger.importStartTime).TotalSeconds;
 
-                double averageTime = totalSecCount / ImportManger.handledXMLCount ;
+                double averageTime = totalSecCount / ImportManger.handledCount;
 
-                double importCountPerSec = ImportManger.handledXMLCount / totalSecCount;
+                double importCountPerSec = ImportManger.handledCount / totalSecCount;
 
                 labelelapsedTotalTime.Text = totalSecCount.ToString("0.####") + "S";
 

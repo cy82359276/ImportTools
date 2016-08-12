@@ -97,7 +97,6 @@ namespace TheDataResourceImporter
         {
             currentFile = filePath;
 
-
             //导入操作信息
             IMPORT_SESSION importSession = MiscUtil.getNewImportSession(fileType, filePath);
             entiesContext.IMPORT_SESSION.Add(importSession);
@@ -109,8 +108,9 @@ namespace TheDataResourceImporter
             //目前监测了XML文件缺失的情况
             if (fileType == "中国专利全文代码化数据")
             {
-                FileInfo selectedFileInfo = new FileInfo(filePath);
+                importStartTime = System.DateTime.Now;
 
+                FileInfo selectedFileInfo = new FileInfo(filePath);
 
                 //清零
                 handledCount = 0;
@@ -121,6 +121,10 @@ namespace TheDataResourceImporter
                 SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
 
                 IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                importSession.IS_ZIP = "Y";
+                entiesContext.SaveChanges();
+
                 //总条目数
                 totalCount = archive.Entries.Count();
 
@@ -146,6 +150,7 @@ namespace TheDataResourceImporter
 
                     foreach (string entryKey in dirEntriesWithoutXML)
                     {
+                        importSession.HAS_ERROR = "Y";
                         IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE="文件夹中不存在XML"};
                         importSession.FAILED_COUNT++;
                         entiesContext.IMPORT_ERROR.Add(importError);
@@ -234,8 +239,11 @@ namespace TheDataResourceImporter
                     if (forcedStop)
                     {
                         MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
                         break;
                     }
+
 
                     var keyTemp = entry.Key;
 
@@ -253,11 +261,13 @@ namespace TheDataResourceImporter
                     }
 
                     S_CHINA_PATENT_TEXTCODE sCNPatentTextCode = new S_CHINA_PATENT_TEXTCODE() { ID= System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID};
+                    sCNPatentTextCode.ARCHIVE_INNER_PATH = entry.Key;
+                    sCNPatentTextCode.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
                     entiesContext.S_CHINA_PATENT_TEXTCODE.Add(sCNPatentTextCode);
-                    entiesContext.SaveChanges();
+                    //entiesContext.SaveChanges();
 
                     XDocument doc = XDocument.Load(entryFullPath);
-
 
                     #region 具体的入库操作,EF
                     //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -317,7 +327,13 @@ namespace TheDataResourceImporter
 
                     }
 
-                    var classification_ipcr = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/classifications-ipcr/main-classification");
+                    var classification_ipcr = MiscUtil.getXElementValueByTagNameaAndChildTabName(rootElement, "main-classification");
+
+                    if(String.IsNullOrEmpty(classification_ipcr))
+                    {
+                        classification_ipcr = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/classifications-ipcr/classification-ipcr/text");
+                    }
+
 
                     sCNPatentTextCode.CLASSIFICATION_IPCR = classification_ipcr;
 
@@ -335,7 +351,8 @@ namespace TheDataResourceImporter
 
                     entiesContext.SaveChanges();
 
-                    var currentValue = entiesContext.Entry(sCNPatentTextCode).CurrentValues.ToString();
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(sCNPatentTextCode);
 
                     MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
 
@@ -510,10 +527,7 @@ namespace TheDataResourceImporter
                         MessageUtil.DoAppendTBDetail("记录：" + entry.Key + "插入成功!!!");
                     }
                     **/
-
-
                     #endregion
-
 
                     #region 解析XML,插入数据库 已使用EF重构
                     /**
@@ -684,10 +698,8 @@ namespace TheDataResourceImporter
 
 
                     //更新进度信息
-                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, handledXMLCount, 0, filePath);
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
                 }
-
-
             }
             #endregion
 
@@ -1142,10 +1154,19 @@ namespace TheDataResourceImporter
             }
             #endregion
             #endregion
+            importSession.LAST_TIME =new Decimal(importSession.START_TIME != null ? DateTime.Now.Subtract(importSession.START_TIME.Value).TotalSeconds : 0);
 
-            importSession.LAST_TIME = importSession.START_TIME != null ? DateTime.Now.Subtract(importSession.START_TIME.Value).Seconds : 0;
             //是否发生错误
             importSession.HAS_ERROR = importSession.FAILED_COUNT > 0 ? "Y" : "N";
+
+            importSession.ZIP_ENTRY_POINTOR = handledCount;
+
+            importSession.COMPLETED = totalCount == handledCount ? "Y" : "N";
+
+            importSession.ITEMS_POINT = handledCount;
+
+            importSession.TOTAL_ITEM = totalCount;
+
             entiesContext.SaveChanges();
             return true;
         }

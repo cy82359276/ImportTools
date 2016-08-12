@@ -6,12 +6,14 @@ using SharpCompress;
 using System.IO;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace TheDataResourceImporter.Utils
 {
     class MiscUtil
     {
-        public static IMPORT_ERROR getImpErrorInstance(string sessionId, string isZip, string zipOrDirPath, string zipPath, string errorMessage = "", string errorDetail = "")
+        public static IMPORT_ERROR getImpErrorInstance(string sessionId, string isZip, string zipOrDirPath, string zipPath="", string errorMessage = "", string errorDetail = "")
         {
             var innerImpError = new IMPORT_ERROR() {ID=System.Guid.NewGuid().ToString(), IGNORED="N", OCURREDTIME=DateTime.Now, REIMPORTED="N", ISZIP = isZip, POINTOR = 0, SESSION_ID= sessionId , ZIP_OR_DIR_PATH = zipOrDirPath, ZIP_PATH = zipPath, ERROR_MESSAGE = errorMessage, ERROR_DETAIL = errorDetail};
             return innerImpError;
@@ -95,7 +97,15 @@ namespace TheDataResourceImporter.Utils
         }
 
 
-
+        public static string jsonSerilizeObject(Object source)
+        {
+            var jSetting = new JsonSerializerSettings();
+            jSetting.NullValueHandling = NullValueHandling.Include;
+            IsoDateTimeConverter dtConverter = new IsoDateTimeConverter { DateTimeFormat = "yyyy-MM-dd" };
+            jSetting.Converters.Add(dtConverter);
+            string json = JsonConvert.SerializeObject(source, jSetting);
+            return json;
+        }
 
 
 
