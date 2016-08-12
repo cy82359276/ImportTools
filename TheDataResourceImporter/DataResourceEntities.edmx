@@ -813,6 +813,10 @@
           <Property Name="PUB_DATE" Type="date" />
           <Property Name="PATH_TIF" Type="varchar2" MaxLength="300" />
           <Property Name="EXIST_TIF" Type="varchar2" MaxLength="1" />
+          <Property Name="IMPORT_SESSION_ID" Type="varchar2" MaxLength="100" />
+          <Property Name="IMPORT_TIME" Type="date" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
+          <Property Name="FILE_PATH" Type="varchar2" MaxLength="1000" />
         </EntityType>
         <EntityType Name="S_CHINA_PHARMACEUTICAL_PATENT">
           <Key>
@@ -2067,6 +2071,10 @@
           <Property Name="PUB_DATE" Type="DateTime" />
           <Property Name="PATH_TIF" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
           <Property Name="EXIST_TIF" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="S_CHINA_PHARMACEUTICAL_PATENT">
           <Key>
@@ -3364,6 +3372,10 @@
           <EntitySetMapping Name="S_CHINA_PATENT_TEXTIMAGE">
             <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_TEXTIMAGE">
               <MappingFragment StoreEntitySet="S_CHINA_PATENT_TEXTIMAGE">
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="APPL_TYPE" ColumnName="APPL_TYPE" />
                 <ScalarProperty Name="APP_NUMBER" ColumnName="APP_NUMBER" />

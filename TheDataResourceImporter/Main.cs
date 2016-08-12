@@ -21,7 +21,7 @@ namespace TheDataResourceImporter
             MessageUtil.setTbDetail = SetTextBoxDetail;
             MessageUtil.appendTbDetail = appendTextBoxDetail;
             //添加日志输出
-            MessageUtil.appendTbDetail += LogHelper.WriteLog;
+            //MessageUtil.appendTbDetail += LogHelper.WriteLog;
 
             MessageUtil.updateProgressIndicator = updateProgressIndicator;
             cbFileType.SelectedIndex = 0;
@@ -126,7 +126,7 @@ namespace TheDataResourceImporter
             }
             else
             {
-                lock (textBoxDetail)
+               //lock (textBoxDetail)
                 {
                     textBoxDetail.Text = msg;
                 }
@@ -145,7 +145,7 @@ namespace TheDataResourceImporter
             else
             {
 
-                lock (this)
+                //lock (importProgressBar)
                 {
                     labelcurrentArchive.Text = achievePath;
                     string status = handledCount + "/" + totalCount;
@@ -194,10 +194,11 @@ namespace TheDataResourceImporter
             else
             {
                 //textBoxDetail.Text = textBoxDetail.Text + msg;
-                lock (textBoxDetail)
+                //lock (textBoxDetail)
                 {
                     textBoxDetail.SelectionStart = textBoxDetail.Text.Length;
-                    textBoxDetail.AppendText(msg);
+                    //textBoxDetail.AppendText(msg);
+                    textBoxDetail.Text = msg;
                     textBoxDetail.ScrollToCaret();
                 }
             }

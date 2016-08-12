@@ -20,5 +20,9 @@ namespace TheDataResourceImporter
         public Nullable<System.DateTime> PUB_DATE { get; set; }
         public string PATH_TIF { get; set; }
         public string EXIST_TIF { get; set; }
+        public string IMPORT_SESSION_ID { get; set; }
+        public Nullable<System.DateTime> IMPORT_TIME { get; set; }
+        public string ARCHIVE_INNER_PATH { get; set; }
+        public string FILE_PATH { get; set; }
     }
 }

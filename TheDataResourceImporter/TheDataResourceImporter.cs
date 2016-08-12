@@ -11,6 +11,7 @@ using SharpCompress.Archive;
 using SharpCompress.Common;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using System.Threading.Tasks;
 
 namespace TheDataResourceImporter
 {
@@ -115,10 +116,11 @@ namespace TheDataResourceImporter
 
                 //清零
                 handledCount = 0;
-                MessageUtil.DoAppendTBDetail("当前压缩包：" + selectedFileInfo.Name);
 
                 MessageUtil.DoAppendTBDetail("您选择的资源类型为：" + fileType);
-                
+
+                MessageUtil.DoAppendTBDetail("当前压缩包：" + selectedFileInfo.Name);
+
                 SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
 
                 IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
@@ -128,6 +130,7 @@ namespace TheDataResourceImporter
 
                 //总条目数
                 totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
 
                 #region 检查目录内无XML的情况
                 var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
@@ -152,7 +155,7 @@ namespace TheDataResourceImporter
                     foreach (string entryKey in dirEntriesWithoutXML)
                     {
                         importSession.HAS_ERROR = "Y";
-                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE="文件夹中不存在XML"};
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
                         importSession.FAILED_COUNT++;
                         entiesContext.IMPORT_ERROR.Add(importError);
                         entiesContext.SaveChanges();
@@ -262,7 +265,7 @@ namespace TheDataResourceImporter
                         continue;
                     }
 
-                    S_CHINA_PATENT_TEXTCODE sCNPatentTextCode = new S_CHINA_PATENT_TEXTCODE() { ID= System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID};
+                    S_CHINA_PATENT_TEXTCODE sCNPatentTextCode = new S_CHINA_PATENT_TEXTCODE() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
                     sCNPatentTextCode.ARCHIVE_INNER_PATH = entry.Key;
                     sCNPatentTextCode.FILE_PATH = filePath;
                     //sCNPatentTextCode.SESSION_INDEX = handledCount;
@@ -332,7 +335,7 @@ namespace TheDataResourceImporter
 
                     var classification_ipcr = MiscUtil.getXElementValueByTagNameaAndChildTabName(rootElement, "main-classification");
 
-                    if(String.IsNullOrEmpty(classification_ipcr))
+                    if (String.IsNullOrEmpty(classification_ipcr))
                     {
                         classification_ipcr = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/classifications-ipcr/classification-ipcr/text");
                     }
@@ -708,6 +711,90 @@ namespace TheDataResourceImporter
             #region
             else if (fileType == "中国专利全文图像数据")
             {
+                importStartTime = System.DateTime.Now;
+
+                FileInfo selectedFileInfo = new FileInfo(filePath);
+
+                //清零
+                handledCount = 0;
+                MessageUtil.DoAppendTBDetail("您选择的资源类型为：" + fileType);
+
+                MessageUtil.DoAppendTBDetail("当前压缩包：" + selectedFileInfo.Name);
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                importSession.IS_ZIP = "Y";
+                entiesContext.SaveChanges();
+
+                //总条目数
+                totalCount = archive.Entries.Count();
+
+                //S_CHINA_PATENT_TEXTIMAGE sCNPatTxtImg = new S_CHINA_PATENT_TEXTIMAGE();
+
+                var APPL_TYPE = "";
+                try
+                {
+                    string appl_type = selectedFileInfo.Directory.Parent.Name;
+                    APPL_TYPE = appl_type;
+                }
+                catch (Exception)
+                {
+
+                }
+
+                var pub_dateEntry = (from entry in archive.Entries.AsParallel()
+                                     where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 1
+                                     select CompressUtil.removeDirEntrySlash(entry.Key)).FirstOrDefault();
+
+                var PUB_DATE = System.DateTime.Now;
+                if (null != pub_dateEntry)
+                {
+                    PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(pub_dateEntry);
+                }
+
+
+
+                //所有的待导入条目
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+                //总数
+                totalCount = dirNameSetEntires.Count();
+
+
+                //所有包含Tif的条目
+                var tifEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory&& entry.Key.ToUpper().EndsWith(".TIF")
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+                //不包含tif的目录
+                var dirEntiresWithoutTif = dirNameSetEntires.Except(tifEntryParentDirEntries);
+
+                //包含tif
+                Parallel.ForEach<string>(tifEntryParentDirEntries, key => {
+                    S_CHINA_PATENT_TEXTIMAGE sCNPatTxtImg = new S_CHINA_PATENT_TEXTIMAGE();
+                    
+
+
+
+
+                });
+
+                //不包含tif
+                Parallel.ForEach<string>(dirEntiresWithoutTif, key => {
+
+
+
+
+
+
+                });
+
+
+
+
 
             }
             else if (fileType == "中国专利标准化全文文本数据")
@@ -1156,7 +1243,7 @@ namespace TheDataResourceImporter
             }
             #endregion
             #endregion
-            importSession.LAST_TIME =new Decimal(importSession.START_TIME != null ? DateTime.Now.Subtract(importSession.START_TIME.Value).TotalSeconds : 0);
+            importSession.LAST_TIME = new Decimal(importSession.START_TIME != null ? DateTime.Now.Subtract(importSession.START_TIME.Value).TotalSeconds : 0);
 
             //是否发生错误
             importSession.HAS_ERROR = importSession.FAILED_COUNT > 0 ? "Y" : "N";

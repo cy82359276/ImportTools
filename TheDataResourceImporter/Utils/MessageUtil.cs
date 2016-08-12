@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TheDataResourceImporter.Utils
 {
@@ -42,16 +43,25 @@ namespace TheDataResourceImporter.Utils
             string timeStamp = now.ToLocalTime().ToString() + " " + now.Millisecond;
             //添加消息换行
             msg = Environment.NewLine + timeStamp + Environment.NewLine + msg;
+
+
+            //var task = new Task(()=> appendTbDetail?.Invoke(msg));
+            //task.Start();
             //异步更新
-            appendTbDetail?.BeginInvoke(msg, ia=> { }, null);
-            //appendTbDetail?.Invoke(msg);
+            //appendTbDetail?.BeginInvoke(msg, null, null);
+
+            LogHelper.WriteLog(msg);
+
+            appendTbDetail?.Invoke(msg);
         }
 
         public static void DoupdateProgressIndicator(int totalCount, int handledCount, int handledXMLCount, int handledDirCount, string achievePath)
         {
-            //updateProgressIndicator?.Invoke(totalCount, handledCount, handledXMLCount, handledDirCount, achievePath);
+            updateProgressIndicator?.Invoke(totalCount, handledCount, handledXMLCount, handledDirCount, achievePath);
             //异步更新
-            updateProgressIndicator?.BeginInvoke(totalCount, handledCount, handledXMLCount, handledDirCount, achievePath, ia => { }, null);
+            //var task = new Task(() => updateProgressIndicator?.Invoke(totalCount, handledCount, handledXMLCount, handledDirCount, achievePath));
+            //task.Start();
+            //updateProgressIndicator?.BeginInvoke(totalCount, handledCount, handledXMLCount, handledDirCount, achievePath, ia => { }, null);
         }
     }
 }

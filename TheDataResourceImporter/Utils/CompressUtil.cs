@@ -180,5 +180,11 @@ namespace TheDataResourceImporter.Utils
             return parentFullPath;
         }
 
+        //返回条目名称, 不包含父条目信息
+        public static string getEntryShortName(string entryKey)
+        {
+            entryKey = removeDirEntrySlash(entryKey);
+            return entryKey.Split('\\').LastOrDefault();
+        }
     }
 }
