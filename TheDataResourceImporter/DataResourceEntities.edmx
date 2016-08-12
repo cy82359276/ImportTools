@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<edmx:Edmx Version="2.0" xmlns:edmx="http://schemas.microsoft.com/ado/2008/10/edmx">
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
   <!-- EF Runtime content -->
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="Model.Store" Provider="Oracle.ManagedDataAccess.Client" ProviderManifestToken="11.2" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
+    <Schema Namespace="Model.Store" Provider="Oracle.ManagedDataAccess.Client" ProviderManifestToken="11.2" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="IMPORT_ERROR">
           <Key>
             <PropertyRef Name="ID" />
@@ -18,6 +18,8 @@
           <Property Name="IGNORED" Type="varchar2" MaxLength="10" />
           <Property Name="REIMPORTED" Type="varchar2" MaxLength="10" />
           <Property Name="OCURREDTIME" Type="date" />
+          <Property Name="ERROR_MESSAGE" Type="varchar2" MaxLength="2000" />
+          <Property Name="ERROR_DETAIL" Type="clob" />
         </EntityType>
         <EntityType Name="IMPORT_SESSION">
           <Key>
@@ -792,6 +794,7 @@
           <Property Name="GAZETTE_NUM" Type="nvarchar2" MaxLength="20" />
           <Property Name="GAZETTE_DATE" Type="date" />
           <Property Name="IMPORT_SESSION_ID" Type="nvarchar2" MaxLength="100" />
+          <Property Name="IMPORT_TIME" Type="date" />
         </EntityType>
         <EntityType Name="S_CHINA_PATENT_TEXTIMAGE">
           <Key>
@@ -1264,7 +1267,7 @@
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
-      <Schema Namespace="Model" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+      <Schema Namespace="Model" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2009/11/edm" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
         <EntityType Name="IMPORT_SESSION">
           <Key>
             <PropertyRef Name="SESSION_ID" />
@@ -2038,6 +2041,7 @@
           <Property Name="GAZETTE_NUM" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
           <Property Name="GAZETTE_DATE" Type="DateTime" />
           <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
         </EntityType>
         <EntityType Name="S_CHINA_PATENT_TEXTIMAGE">
           <Key>
@@ -2456,7 +2460,7 @@
           <Property Name="ZONEADDRESS" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="ZONECODE" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
         </EntityType>
-        <EntityContainer Name="DataSourceEntities" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="DataSourceEntities" annotation:LazyLoadingEnabled="true" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
           <EntitySet Name="IMPORT_SESSION" EntityType="Self.IMPORT_SESSION" />
           <EntitySet Name="S_AMERICA_APPLY_BRAND" EntityType="Self.S_AMERICA_APPLY_BRAND" />
           <EntitySet Name="S_AMERICA_TRANSFER_BRAND" EntityType="Self.S_AMERICA_TRANSFER_BRAND" />
@@ -2520,12 +2524,14 @@
           <Property Name="IGNORED" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
           <Property Name="REIMPORTED" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
           <Property Name="OCURREDTIME" Type="DateTime" />
+          <Property Name="ERROR_MESSAGE" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="ERROR_DETAIL" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
-      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="ModelStoreContainer" CdmEntityContainer="DataSourceEntities">
           <EntitySetMapping Name="IMPORT_SESSION">
             <EntityTypeMapping TypeName="Model.IMPORT_SESSION">
@@ -3312,6 +3318,7 @@
           <EntitySetMapping Name="S_CHINA_PATENT_TEXTCODE">
             <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_TEXTCODE">
               <MappingFragment StoreEntitySet="S_CHINA_PATENT_TEXTCODE">
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="APPL_TYPE" ColumnName="APPL_TYPE" />
                 <ScalarProperty Name="PUB_COUNTRY" ColumnName="PUB_COUNTRY" />
@@ -3769,6 +3776,8 @@
           <EntitySetMapping Name="IMPORT_ERROR">
             <EntityTypeMapping TypeName="Model.IMPORT_ERROR">
               <MappingFragment StoreEntitySet="IMPORT_ERROR">
+                <ScalarProperty Name="ERROR_DETAIL" ColumnName="ERROR_DETAIL" />
+                <ScalarProperty Name="ERROR_MESSAGE" ColumnName="ERROR_MESSAGE" />
                 <ScalarProperty Name="OCURREDTIME" ColumnName="OCURREDTIME" />
                 <ScalarProperty Name="REIMPORTED" ColumnName="REIMPORTED" />
                 <ScalarProperty Name="IGNORED" ColumnName="IGNORED" />
@@ -3786,22 +3795,22 @@
     </edmx:Mappings>
   </edmx:Runtime>
   <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
-  <Designer xmlns="http://schemas.microsoft.com/ado/2008/10/edmx">
-    <Connection>
-      <DesignerInfoPropertySet>
-        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
-      </DesignerInfoPropertySet>
-    </Connection>
-    <Options>
-      <DesignerInfoPropertySet>
-        <DesignerProperty Name="ValidateOnBuild" Value="true" />
-        <DesignerProperty Name="EnablePluralization" Value="false" />
-        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
-        <DesignerProperty Name="UseLegacyProvider" Value="true" />
-        <DesignerProperty Name="CodeGenerationStrategy" Value="无" />
-      </DesignerInfoPropertySet>
-    </Options>
+  <edmx:Designer>
+    <edmx:Connection>
+      <edmx:DesignerInfoPropertySet>
+        <edmx:DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </edmx:DesignerInfoPropertySet>
+    </edmx:Connection>
+    <edmx:Options>
+      <edmx:DesignerInfoPropertySet>
+        <edmx:DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <edmx:DesignerProperty Name="EnablePluralization" Value="false" />
+        <edmx:DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <edmx:DesignerProperty Name="UseLegacyProvider" Value="true" />
+        <edmx:DesignerProperty Name="CodeGenerationStrategy" Value="无" />
+      </edmx:DesignerInfoPropertySet>
+    </edmx:Options>
     <!-- Diagram content (shape and connector positions) -->
-    <Diagrams></Diagrams>
-  </Designer>
+    <edmx:Diagrams />
+  </edmx:Designer>
 </edmx:Edmx>

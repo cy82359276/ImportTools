@@ -23,5 +23,7 @@ namespace TheDataResourceImporter
         public string IGNORED { get; set; }
         public string REIMPORTED { get; set; }
         public Nullable<System.DateTime> OCURREDTIME { get; set; }
+        public string ERROR_MESSAGE { get; set; }
+        public string ERROR_DETAIL { get; set; }
     }
 }

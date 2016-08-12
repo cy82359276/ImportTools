@@ -39,7 +39,6 @@ namespace TheDataResourceImporter
             currentFile = "";
             totalCount = 0;
             handledCount = 0;
-            handledXMLCount = 0;
             withExceptionButExtracted = 0;
             withExcepthonAndFiled2Exracted = 0;
             fileCount = 0;
@@ -94,15 +93,16 @@ namespace TheDataResourceImporter
         }
 
 
-        public static bool  ImportByPath(string filePath, string fileType, DataSourceEntities entiesContext)
+        public static bool ImportByPath(string filePath, string fileType, DataSourceEntities entiesContext)
         {
             currentFile = filePath;
 
+
             //导入操作信息
-            IMPORT_SESSION importSession = new IMPORT_SESSION() { SESSION_ID = System.Guid.NewGuid().ToString(), ROLLED_BACK = "N", DATA_RES_TYPE = fileType, START_TIME = System.DateTime.Now, ZIP_OR_DIR_PATH = filePath, HAS_ERROR = "N", FAILED_COUNT = 0, COMPLETED = "N", LAST_TIME = 0, ZIP_ENTRIES_COUNT = 0, ZIP_ENTRY_POINTOR = 0, IS_ZIP = "Y" };
-
+            IMPORT_SESSION importSession = MiscUtil.getNewImportSession(fileType, filePath);
+            entiesContext.IMPORT_SESSION.Add(importSession);
+            entiesContext.SaveChanges();
             //判断是否是
-
             #region 分文件类型进行处理
             #region 中国专利全文代码化数据
             //压缩包内解析XML
@@ -110,54 +110,52 @@ namespace TheDataResourceImporter
             if (fileType == "中国专利全文代码化数据")
             {
                 FileInfo selectedFileInfo = new FileInfo(filePath);
-               
+
+
+                //清零
+                handledCount = 0;
+                MessageUtil.DoAppendTBDetail("当前压缩包：" + selectedFileInfo.Name);
+
+                MessageUtil.DoAppendTBDetail("您选择的资源类型为：" + fileType);
+                
                 SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
 
                 IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+                //总条目数
+                totalCount = archive.Entries.Count();
 
-                int entiresCount = archive.Entries.Count();
-
-                totalCount = entiresCount;
-                //清零
-                handledCount = 0;
-
-                MessageUtil.DoAppendTBDetail("您选择的资源类型为：" + fileType);
-
-                MessageUtil.DoAppendTBDetail("在压缩包中发现" + entiresCount + "个条目，目录详细如下：");
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
 
 
-
-                
-
-
-
-                //检查目录内无XML的情况
-                var dirNameSetEntires = (from entry in archive.Entries
-                                        where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
-                                        select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
-
-
-                var xmlEntryParentDirEntries = (from entry in archive.Entries
-                                               where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML")
-                                               select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML")
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
 
                 var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
 
-
                 //发现存在XML不存在的情况
-                if(dirEntriesWithoutXML.Count() > 0)
+                if (dirEntriesWithoutXML.Count() > 0)
                 {
-                    foreach(string entryKey in dirEntriesWithoutXML)
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
                     {
-                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = 0, ZIP_OR_DIR_PATH=filePath, REIMPORTED="N", ZIP_PATH=entryKey, OCURREDTIME = System.DateTime.Now};
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE="文件夹中不存在XML"};
+                        importSession.FAILED_COUNT++;
                         entiesContext.IMPORT_ERROR.Add(importError);
                         entiesContext.SaveChanges();
                     }
                 }
+                #endregion
 
-
-
-
+                #region ----待删除 检查目录内无XML的情况 已Linq重构
+                /***
                 //确认是否是存在缺失XML的情况
                 HashSet<string> dirNameSet = new HashSet<string>();
                 HashSet<string> entryFileParentFullPathNameSet = new HashSet<string>();
@@ -212,21 +210,25 @@ namespace TheDataResourceImporter
 
                     LogHelper.WriteErrorLog(msg);
                 }
+                **/
+                #endregion
 
-
-
-
-
-
-
-
-
-
-
-                MessageUtil.DoAppendTBDetail("当前压缩包：" + selectedFileInfo.Name);
                 MessageUtil.DoAppendTBDetail("开始寻找专利XML文件：");
-                foreach (IArchiveEntry entry in archive.Entries)
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML")
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                foreach (IArchiveEntry entry in allXMLEntires)
                 {
+                    //计数变量
                     handledCount++;
 
                     if (forcedStop)
@@ -235,194 +237,454 @@ namespace TheDataResourceImporter
                         break;
                     }
 
-                    //MessageUtil.DoAppendTBDetail("当前条目：" + entry.Key + "，是" + (entry.IsDirectory ? "目录" : "文件"));
                     var keyTemp = entry.Key;
-                    //当前文件为XML文件
-                    if (keyTemp.ToUpper().EndsWith(".XML"))
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
                     {
-                        handledXMLCount++;
-                        //解压当前的XML文件
-                        string entryFullPath = CompressUtil.writeEntryToTemp(entry);
-
-                        if ("" == entryFullPath.Trim())
-                        {
-                            MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
-                            continue;
-                        }
-
-                        XDocument doc = XDocument.Load(entryFullPath);
-
-                        string insertStr = "";
-                        string valuesStr = "";
-
-                        var appl_typeEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference");
-
-                        if (appl_typeEles.Count() > 0)
-                        {
-                            insertStr = insertStr + "APPL_TYPE,";
-                            var valueTemp = appl_typeEles.ElementAt(0).Attribute("appl-type").Value;
-                            valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                            valuesStr = valuesStr + "'" + valueTemp + "',";
-                        }
-                        var pub_countryEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/country");
-
-                        if (pub_countryEles.Count() > 0)
-                        {
-                            insertStr = insertStr + "PUB_COUNTRY,";
-                            var valueTemp = pub_countryEles.ElementAt(0).Value;
-                            valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                            valuesStr = valuesStr + "'" + valueTemp + "',";
-                        }
-                        var pub_numberEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/doc-number");
-
-                        if (pub_numberEles.Count() > 0)
-                        {
-                            insertStr = insertStr + "PUB_NUMBER,";
-                            var valueTemp = pub_numberEles.ElementAt(0).Value;
-                            valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                            valuesStr = valuesStr + "'" + valueTemp + "',";
-                        }
-                        var pub_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/date");
-
-                        if (pub_dateEles.Count() > 0)
-                        {
-                            insertStr = insertStr + "PUB_DATE,";
-                            var valueTemp = pub_dateEles.ElementAt(0).Value;
-                            valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                            valuesStr = valuesStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
-                        }
-                        var pub_kindEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/kind");
-
-                        if (pub_kindEles.Count() > 0)
-                        {
-                            insertStr = insertStr + "PUB_KIND,";
-                            var valueTemp = pub_kindEles.ElementAt(0).Value;
-                            valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                            valuesStr = valuesStr + "'" + valueTemp + "',";
-                        }
-
-
-                        var gazette_numEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/gazette-num");
-
-                        if (gazette_numEles.Count() > 0)
-                        {
-                            insertStr = insertStr + "GAZETTE_NUM,";
-                            var valueTemp = gazette_numEles.ElementAt(0).Value;
-                            valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                            valuesStr = valuesStr + "'" + valueTemp + "',";
-                        }
-                        var gazette_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/date");
-
-                        if (gazette_dateEles.Count() > 0)
-                        {
-                            insertStr = insertStr + "GAZETTE_DATE,";
-                            var valueTemp = gazette_dateEles.ElementAt(0).Value;
-                            valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                            valuesStr = valuesStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
-                        }
-                        var app_countryEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/country");
-
-                        if (app_countryEles.Count() > 0)
-                        {
-                            insertStr = insertStr + "APP_COUNTRY,";
-                            var valueTemp = app_countryEles.ElementAt(0).Value;
-                            valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                            valuesStr = valuesStr + "'" + valueTemp + "',";
-                        }
-                        var app_numberEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/doc-number");
-
-                        if (app_numberEles.Count() > 0)
-                        {
-                            insertStr = insertStr + "APP_NUMBER,";
-                            var valueTemp = app_numberEles.ElementAt(0).Value;
-                            valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                            valuesStr = valuesStr + "'" + valueTemp + "',";
-                        }
-                        var app_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/date");
-
-                        if (app_dateEles.Count() > 0)
-                        {
-                            insertStr = insertStr + "APP_DATE,";
-                            var valueTemp = app_dateEles.ElementAt(0).Value;
-                            valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                            valuesStr = valuesStr = insertStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
-                        }
-                        var classification_ipcrEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/classifications-ipcr/classification-ipcr[0]/text");
-
-                        if (classification_ipcrEles.Count() > 0)
-                        {
-                            insertStr = insertStr + "CLASSIFICATION-IPCR,";
-                            var valueTemp = classification_ipcrEles.ElementAt(0).Value;
-                            valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                            valuesStr = valuesStr + "'" + valueTemp + "',";
-                        }
-                        var invention_titleEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/invention-title");
-
-                        if (invention_titleEles.Count() > 0)
-                        {
-                            insertStr = insertStr + "INVENTION_TITLE,";
-                            var valueTemp = invention_titleEles.ElementAt(0).Value;
-                            valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                            valuesStr = valuesStr + "'" + valueTemp + "',";
-                        }
-                        var abstractEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/abstract");
-
-
-                        if (abstractEles.Count() > 0)
-                        {
-                            insertStr = insertStr + "ABSTRACT,";
-                            var valueTemp = abstractEles.ElementAt(0).Value;
-                            valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-
-                            //处理文本出现单引号的情况
-                            valueTemp = valueTemp.Replace("'", "''");
-
-                            valuesStr = valuesStr + "'" + valueTemp + "',";
-                        }
-
-                        insertStr = insertStr + "PATH_XML,";
-                        valuesStr = valuesStr + "'" + entry.Key + "',";
-
-
-                        insertStr = insertStr + "EXIST_XML,";
-
-                        valuesStr = valuesStr + "'1',";
-
-                        var id = System.Guid.NewGuid().ToString();
-
-                        insertStr = insertStr + "ID,";
-
-                        valuesStr = valuesStr + String.Format("'{0}',", id);
-
-                        if (',' == insertStr.Last())
-                        {
-                            insertStr = insertStr.Substring(0, insertStr.Length - 1);
-                        }
-
-                        if (',' == valuesStr.Last())
-                        {
-                            valuesStr = valuesStr.Substring(0, valuesStr.Length - 1);
-                        }
-
-                        string sql = "insert into S_CHINA_PATENT_TEXTCODE(" + insertStr + ") values (" + valuesStr + ")";
-
-                        MessageUtil.DoAppendTBDetail("SQL 当前插入语句：" + sql);
-
-                        int insertedCount = OracleDB.ExecuteSql(sql);
-
-                        if (1 == insertedCount)
-                        {
-                            MessageUtil.DoAppendTBDetail("记录：" + entry.Key + "插入成功!!!");
-                        }
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
                     }
+
+                    S_CHINA_PATENT_TEXTCODE sCNPatentTextCode = new S_CHINA_PATENT_TEXTCODE() { ID= System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID};
+                    entiesContext.S_CHINA_PATENT_TEXTCODE.Add(sCNPatentTextCode);
+                    entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+                    //appl-type
+                    var rootElement = doc.Root;
+
+                    var appl_type = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/application-reference", "appl-type");
+                    sCNPatentTextCode.APPL_TYPE = appl_type;
+                    entiesContext.SaveChanges();
+
+                    var pub_country = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/country");
+                    sCNPatentTextCode.PUB_COUNTRY = pub_country;
+
+                    var pub_number = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/doc-number");
+                    sCNPatentTextCode.PUB_NUMBER = pub_number;
+
+                    var pub_date = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/date");
+
+                    try
+                    {
+                        sCNPatentTextCode.PUB_DATE = DateTime.ParseExact(pub_date, "yyyyMMdd", System.Globalization.CultureInfo.CurrentCulture);
+                    }
+                    catch (Exception)
+                    {
+                    }
+
+
+                    var pub_kind = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/kind");
+                    sCNPatentTextCode.PUB_KIND = pub_kind;
+
+                    var gazette_num = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/gazette-num");
+                    sCNPatentTextCode.GAZETTE_NUM = gazette_num;
+
+                    var gazette_date = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/date");
+                    try
+                    {
+                        sCNPatentTextCode.GAZETTE_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(gazette_date);
+                    }
+                    catch (Exception)
+                    {
+                    }
+
+                    var app_country = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/application-reference/document-id/country");
+                    sCNPatentTextCode.APP_COUNTRY = app_country;
+
+                    var app_number = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/application-reference/document-id/doc-number");
+                    sCNPatentTextCode.APP_NUMBER = app_number;
+
+
+                    var app_date = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/application-reference/document-id/date");
+                    try
+                    {
+                        sCNPatentTextCode.APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(app_date);
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+
+                    var classification_ipcr = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/classifications-ipcr/main-classification");
+
+                    sCNPatentTextCode.CLASSIFICATION_IPCR = classification_ipcr;
+
+                    var invention_title = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/invention-title");
+                    sCNPatentTextCode.INVENTION_TITLE = invention_title;
+
+                    var abstractEle = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/abstract");
+                    sCNPatentTextCode.ABSTRACT = abstractEle;
+
+                    sCNPatentTextCode.PATH_XML = entry.Key;
+
+                    sCNPatentTextCode.EXIST_XML = "1";
+
+                    sCNPatentTextCode.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+                    var currentValue = entiesContext.Entry(sCNPatentTextCode).CurrentValues.ToString();
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    /**
+                    var pub_numberEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/doc-number");
+
+                    if (pub_numberEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "PUB_NUMBER,";
+                        var valueTemp = pub_numberEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+                    var pub_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/date");
+
+                    if (pub_dateEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "PUB_DATE,";
+                        var valueTemp = pub_dateEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
+                    }
+
+
+
+                    var pub_kindEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/kind");
+
+                    if (pub_kindEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "PUB_KIND,";
+                        var valueTemp = pub_kindEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+
+
+                    var gazette_numEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/gazette-num");
+
+                    if (gazette_numEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "GAZETTE_NUM,";
+                        var valueTemp = gazette_numEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+
+
+                    var gazette_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/date");
+
+                    if (gazette_dateEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "GAZETTE_DATE,";
+                        var valueTemp = gazette_dateEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
+                    }
+
+
+
+                    var app_countryEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/country");
+
+                    if (app_countryEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "APP_COUNTRY,";
+                        var valueTemp = app_countryEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+
+
+
+                    var app_numberEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/doc-number");
+
+                    if (app_numberEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "APP_NUMBER,";
+                        var valueTemp = app_numberEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+
+
+
+                    var app_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/date");
+
+                    if (app_dateEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "APP_DATE,";
+                        var valueTemp = app_dateEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr = insertStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
+                    }
+
+
+
+                    var classification_ipcrEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/classifications-ipcr/classification-ipcr[0]/text");
+
+                    if (classification_ipcrEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "CLASSIFICATION-IPCR,";
+                        var valueTemp = classification_ipcrEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+
+
+
+
+
+                    var invention_titleEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/invention-title");
+
+                    if (invention_titleEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "INVENTION_TITLE,";
+                        var valueTemp = invention_titleEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+
+
+
+                    var abstractEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/abstract");
+
+                    if (abstractEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "ABSTRACT,";
+                        var valueTemp = abstractEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+
+                        //处理文本出现单引号的情况
+                        valueTemp = valueTemp.Replace("'", "''");
+
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+
+
+
+
+
+                    insertStr = insertStr + "PATH_XML,";
+                    valuesStr = valuesStr + "'" + entry.Key + "',";
+
+
+                    insertStr = insertStr + "EXIST_XML,";
+
+                    valuesStr = valuesStr + "'1',";
+
+                    var id = System.Guid.NewGuid().ToString();
+
+                    insertStr = insertStr + "ID,";
+
+                    valuesStr = valuesStr + String.Format("'{0}',", id);
+
+                    if (',' == insertStr.Last())
+                    {
+                        insertStr = insertStr.Substring(0, insertStr.Length - 1);
+                    }
+
+                    if (',' == valuesStr.Last())
+                    {
+                        valuesStr = valuesStr.Substring(0, valuesStr.Length - 1);
+                    }
+
+                    string sql = "insert into S_CHINA_PATENT_TEXTCODE(" + insertStr + ") values (" + valuesStr + ")";
+
+                    MessageUtil.DoAppendTBDetail("SQL 当前插入语句：" + sql);
+
+                    int insertedCount = OracleDB.ExecuteSql(sql);
+
+                    if (1 == insertedCount)
+                    {
+                        MessageUtil.DoAppendTBDetail("记录：" + entry.Key + "插入成功!!!");
+                    }
+                    **/
+
+
+                    #endregion
+
+
+                    #region 解析XML,插入数据库 已使用EF重构
+                    /**
+                    string insertStr = "";
+                    string valuesStr = "";
+
+                    var appl_typeEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference");
+
+                    if (appl_typeEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "APPL_TYPE,";
+                        var valueTemp = appl_typeEles.ElementAt(0).Attribute("appl-type").Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+                    var pub_countryEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/country");
+
+                    if (pub_countryEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "PUB_COUNTRY,";
+                        var valueTemp = pub_countryEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+                    var pub_numberEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/doc-number");
+
+                    if (pub_numberEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "PUB_NUMBER,";
+                        var valueTemp = pub_numberEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+                    var pub_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/date");
+
+                    if (pub_dateEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "PUB_DATE,";
+                        var valueTemp = pub_dateEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
+                    }
+                    var pub_kindEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/kind");
+
+                    if (pub_kindEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "PUB_KIND,";
+                        var valueTemp = pub_kindEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+
+
+                    var gazette_numEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/gazette-num");
+
+                    if (gazette_numEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "GAZETTE_NUM,";
+                        var valueTemp = gazette_numEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+                    var gazette_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/date");
+
+                    if (gazette_dateEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "GAZETTE_DATE,";
+                        var valueTemp = gazette_dateEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
+                    }
+                    var app_countryEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/country");
+
+                    if (app_countryEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "APP_COUNTRY,";
+                        var valueTemp = app_countryEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+                    var app_numberEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/doc-number");
+
+                    if (app_numberEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "APP_NUMBER,";
+                        var valueTemp = app_numberEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+                    var app_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/date");
+
+                    if (app_dateEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "APP_DATE,";
+                        var valueTemp = app_dateEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr = insertStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
+                    }
+                    var classification_ipcrEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/classifications-ipcr/classification-ipcr[0]/text");
+
+                    if (classification_ipcrEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "CLASSIFICATION-IPCR,";
+                        var valueTemp = classification_ipcrEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+                    var invention_titleEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/invention-title");
+
+                    if (invention_titleEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "INVENTION_TITLE,";
+                        var valueTemp = invention_titleEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+                    var abstractEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/abstract");
+
+
+                    if (abstractEles.Count() > 0)
+                    {
+                        insertStr = insertStr + "ABSTRACT,";
+                        var valueTemp = abstractEles.ElementAt(0).Value;
+                        valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
+
+                        //处理文本出现单引号的情况
+                        valueTemp = valueTemp.Replace("'", "''");
+
+                        valuesStr = valuesStr + "'" + valueTemp + "',";
+                    }
+
+                    insertStr = insertStr + "PATH_XML,";
+                    valuesStr = valuesStr + "'" + entry.Key + "',";
+
+
+                    insertStr = insertStr + "EXIST_XML,";
+
+                    valuesStr = valuesStr + "'1',";
+
+                    var id = System.Guid.NewGuid().ToString();
+
+                    insertStr = insertStr + "ID,";
+
+                    valuesStr = valuesStr + String.Format("'{0}',", id);
+
+                    if (',' == insertStr.Last())
+                    {
+                        insertStr = insertStr.Substring(0, insertStr.Length - 1);
+                    }
+
+                    if (',' == valuesStr.Last())
+                    {
+                        valuesStr = valuesStr.Substring(0, valuesStr.Length - 1);
+                    }
+
+                    string sql = "insert into S_CHINA_PATENT_TEXTCODE(" + insertStr + ") values (" + valuesStr + ")";
+
+                    MessageUtil.DoAppendTBDetail("SQL 当前插入语句：" + sql);
+
+                    int insertedCount = OracleDB.ExecuteSql(sql);
+
+                    if (1 == insertedCount)
+                    {
+                        MessageUtil.DoAppendTBDetail("记录：" + entry.Key + "插入成功!!!");
+                    }
+                    **/
+                    #endregion
+
 
                     //更新进度信息
                     MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, handledXMLCount, 0, filePath);
-
-
-
-
-
                 }
 
 
@@ -881,11 +1143,10 @@ namespace TheDataResourceImporter
             #endregion
             #endregion
 
-
-
             importSession.LAST_TIME = importSession.START_TIME != null ? DateTime.Now.Subtract(importSession.START_TIME.Value).Seconds : 0;
             //是否发生错误
             importSession.HAS_ERROR = importSession.FAILED_COUNT > 0 ? "Y" : "N";
+            entiesContext.SaveChanges();
             return true;
         }
     }
