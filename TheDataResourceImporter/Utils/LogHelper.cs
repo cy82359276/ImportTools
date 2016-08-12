@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using System.Configuration;
 using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace TheDataResourceImporter.Utils
 {
@@ -35,7 +36,15 @@ namespace TheDataResourceImporter.Utils
         {
             string logDir = ConfigurationManager.AppSettings["tempDir"];
 
-            WriteLog(logDir, "Import", msg);
+
+            var task = new Task(() =>
+            {
+                lock (typeof(LogHelper))
+                {
+                    WriteLog(logDir, "Import", msg);
+                } });
+            task.Start();
+            //WriteLog(logDir, "Import", msg);
         }
 
 
@@ -49,7 +58,14 @@ namespace TheDataResourceImporter.Utils
 
             string logDir = ConfigurationManager.AppSettings["tempDir"];
 
-            WriteLog(logDir, "Import_Error", msg);
+            var task = new Task(() =>
+            {
+                lock (typeof(LogHelper))
+                {
+                    WriteLog(logDir, "Import_Error", msg);
+                }
+            });
+            task.Start();
         }
     }
 }

@@ -42,12 +42,16 @@ namespace TheDataResourceImporter.Utils
             string timeStamp = now.ToLocalTime().ToString() + " " + now.Millisecond;
             //添加消息换行
             msg = Environment.NewLine + timeStamp + Environment.NewLine + msg;
-            appendTbDetail?.Invoke(msg);
+            //异步更新
+            appendTbDetail?.BeginInvoke(msg, ia=> { }, null);
+            //appendTbDetail?.Invoke(msg);
         }
 
         public static void DoupdateProgressIndicator(int totalCount, int handledCount, int handledXMLCount, int handledDirCount, string achievePath)
         {
-            updateProgressIndicator?.Invoke(totalCount, handledCount, handledXMLCount, handledDirCount, achievePath);
+            //updateProgressIndicator?.Invoke(totalCount, handledCount, handledXMLCount, handledDirCount, achievePath);
+            //异步更新
+            updateProgressIndicator?.BeginInvoke(totalCount, handledCount, handledXMLCount, handledDirCount, achievePath, ia => { }, null);
         }
     }
 }

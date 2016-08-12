@@ -126,7 +126,10 @@ namespace TheDataResourceImporter
             }
             else
             {
-                textBoxDetail.Text = msg;
+                lock (textBoxDetail)
+                {
+                    textBoxDetail.Text = msg;
+                }
             }
         }
 
@@ -141,38 +144,41 @@ namespace TheDataResourceImporter
             }
             else
             {
-                labelcurrentArchive.Text = achievePath;
-                string status = handledCount + "/" + totalCount;
 
-                labelStatus.Text = status;
-
-                string progressMsg = $"发现待入库{totalCount}件条目，已入库{handledCount}件，剩余{totalCount - handledCount}件";
-
-                labelProgressMsg.Text = progressMsg;
-
-                int currentPercentage = 0;
-                if (totalCount > 0)
+                lock (this)
                 {
-                    //计算百分比
-                    currentPercentage =  (Int32)Math.Floor((double)handledCount * 100 / totalCount);
+                    labelcurrentArchive.Text = achievePath;
+                    string status = handledCount + "/" + totalCount;
+
+                    labelStatus.Text = status;
+
+                    string progressMsg = $"发现待入库{totalCount}件条目，已入库{handledCount}件，剩余{totalCount - handledCount}件";
+
+                    labelProgressMsg.Text = progressMsg;
+
+                    int currentPercentage = 0;
+                    if (totalCount > 0)
+                    {
+                        //计算百分比
+                        currentPercentage =  (Int32)Math.Floor((double)handledCount * 100 / totalCount);
+                    }
+
+                    //当前进度百分比
+                    importProgressBar.Value = currentPercentage;
+
+                    //更新耗时信息
+                    double totalSecCount = System.DateTime.Now.Subtract(ImportManger.importStartTime).TotalSeconds;
+
+                    double averageTime = totalSecCount / ImportManger.handledCount;
+
+                    double importCountPerSec = ImportManger.handledCount / totalSecCount;
+
+                    labelelapsedTotalTime.Text = totalSecCount.ToString("0.####") + "S";
+
+                    labelAverageElapsedTime.Text = averageTime.ToString("0.####") + "S";
+
+                    labelImportCountPerSec.Text = importCountPerSec.ToString("0.####" + "件/S");
                 }
-
-                //当前进度百分比
-                importProgressBar.Value = currentPercentage;
-
-                //更新耗时信息
-                double totalSecCount = System.DateTime.Now.Subtract(ImportManger.importStartTime).TotalSeconds;
-
-                double averageTime = totalSecCount / ImportManger.handledCount;
-
-                double importCountPerSec = ImportManger.handledCount / totalSecCount;
-
-                labelelapsedTotalTime.Text = totalSecCount.ToString("0.####") + "S";
-
-                labelAverageElapsedTime.Text = averageTime.ToString("0.####") + "S";
-
-                labelImportCountPerSec.Text = importCountPerSec.ToString("0.####" + "件/S");
-
             }
         }
 
@@ -188,9 +194,12 @@ namespace TheDataResourceImporter
             else
             {
                 //textBoxDetail.Text = textBoxDetail.Text + msg;
-                textBoxDetail.SelectionStart = textBoxDetail.Text.Length;
-                textBoxDetail.AppendText(msg);
-                textBoxDetail.ScrollToCaret();
+                lock (textBoxDetail)
+                {
+                    textBoxDetail.SelectionStart = textBoxDetail.Text.Length;
+                    textBoxDetail.AppendText(msg);
+                    textBoxDetail.ScrollToCaret();
+                }
             }
         }
 

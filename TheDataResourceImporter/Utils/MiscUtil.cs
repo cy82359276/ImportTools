@@ -100,7 +100,7 @@ namespace TheDataResourceImporter.Utils
         public static string jsonSerilizeObject(Object source)
         {
             var jSetting = new JsonSerializerSettings();
-            jSetting.NullValueHandling = NullValueHandling.Include;
+            jSetting.NullValueHandling = NullValueHandling.Ignore;
             IsoDateTimeConverter dtConverter = new IsoDateTimeConverter { DateTimeFormat = "yyyy-MM-dd" };
             jSetting.Converters.Add(dtConverter);
             string json = JsonConvert.SerializeObject(source, jSetting);

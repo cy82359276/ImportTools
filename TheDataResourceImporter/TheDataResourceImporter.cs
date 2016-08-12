@@ -42,6 +42,7 @@ namespace TheDataResourceImporter
             withExceptionButExtracted = 0;
             withExcepthonAndFiled2Exracted = 0;
             fileCount = 0;
+            ImportManger.importStartTime = System.DateTime.Now;
             //清空进度信息
             MessageUtil.DoupdateProgressIndicator(0, 0, 0, 0, "");
         }
@@ -253,6 +254,7 @@ namespace TheDataResourceImporter
                     if ("" == entryFullPath.Trim())
                     {
                         MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.PathSeparator}{entry.Key}解压失败!!!");
                         importSession.FAILED_COUNT++;
                         IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
                         entiesContext.IMPORT_ERROR.Add(errorTemp);
@@ -302,6 +304,7 @@ namespace TheDataResourceImporter
                     sCNPatentTextCode.GAZETTE_NUM = gazette_num;
 
                     var gazette_date = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/date");
+
                     try
                     {
                         sCNPatentTextCode.GAZETTE_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(gazette_date);
@@ -333,7 +336,6 @@ namespace TheDataResourceImporter
                     {
                         classification_ipcr = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/classifications-ipcr/classification-ipcr/text");
                     }
-
 
                     sCNPatentTextCode.CLASSIFICATION_IPCR = classification_ipcr;
 
