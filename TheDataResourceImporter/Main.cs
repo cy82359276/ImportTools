@@ -17,6 +17,8 @@ namespace TheDataResourceImporter
         public Main()
         {
             InitializeComponent();
+
+            cbFileType.Items.Add()
             //MessageUtil.SetMessage = SetLabelMsg;
             MessageUtil.setTbDetail = SetTextBoxDetail;
             MessageUtil.appendTbDetail = appendTextBoxDetail;

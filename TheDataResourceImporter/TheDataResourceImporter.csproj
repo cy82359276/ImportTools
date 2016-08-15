@@ -236,6 +236,9 @@
     <Compile Include="S_COMPANY_CODE_LIBRARY.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="S_DATA_RESOURCE_TYPES_DETAIL.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="S_DOCDB.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>

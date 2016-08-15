@@ -74,5 +74,6 @@ namespace TheDataResourceImporter
         public DbSet<S_ZONE_CODE_BASE> S_ZONE_CODE_BASE { get; set; }
         public DbSet<IMPORT_ERROR> IMPORT_ERROR { get; set; }
         public DbSet<S_CHINA_PATENT_TEXTIMAGE> S_CHINA_PATENT_TEXTIMAGE { get; set; }
+        public DbSet<S_DATA_RESOURCE_TYPES_DETAIL> S_DATA_RESOURCE_TYPES_DETAIL { get; set; }
     }
 }

@@ -54,6 +54,7 @@
         <EntityTypeShape EntityType="Model.S_ZONE_CODE_BASE" Width="1.5" PointX="24.75" PointY="6.75" IsExpanded="true" />
         <EntityTypeShape EntityType="Model.IMPORT_ERROR" Width="1.5" PointX="25.25" PointY="9.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_TEXTIMAGE" Width="1.5" PointX="25.375" PointY="13.75" />
+        <EntityTypeShape EntityType="Model.S_DATA_RESOURCE_TYPES_DETAIL" Width="1.5" PointX="25.375" PointY="17.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

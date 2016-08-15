@@ -1,4 +1,6 @@
-﻿namespace TheDataResourceImporter
+﻿using System.Windows.Forms;
+
+namespace TheDataResourceImporter
 {
     partial class Main
     {
@@ -117,6 +119,7 @@
             // cbFileType
             // 
             this.cbFileType.FormattingEnabled = true;
+
             this.cbFileType.Items.AddRange(new object[] {
             "中国专利全文代码化数据",
             "中国专利全文图像数据",
