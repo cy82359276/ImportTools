@@ -37,7 +37,6 @@
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_STAND_TEXTIMAGE" Width="1.5" PointX="18.75" PointY="14.75" IsExpanded="true" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_STANDARDFULLTXT" Width="1.5" PointX="14.75" PointY="18.75" IsExpanded="true" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_TEXTCODE" Width="1.5" PointX="16.75" PointY="18.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="Model.S_CHINA_PATENT_TEXTIMAGE" Width="1.5" PointX="18.75" PointY="18.75" IsExpanded="true" />
         <EntityTypeShape EntityType="Model.S_CHINA_PHARMACEUTICAL_PATENT" Width="1.5" PointX="20.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="Model.S_CHINA_WELLKNOWN_BRAND" Width="1.5" PointX="0.75" PointY="20.75" IsExpanded="true" />
         <EntityTypeShape EntityType="Model.S_COMMUNITY_INTELLECTUALRECORD" Width="1.5" PointX="6.75" PointY="20.75" IsExpanded="true" />
@@ -54,6 +53,7 @@
         <EntityTypeShape EntityType="Model.S_WORLD_LEGAL_STATUS" Width="1.5" PointX="24.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="Model.S_ZONE_CODE_BASE" Width="1.5" PointX="24.75" PointY="6.75" IsExpanded="true" />
         <EntityTypeShape EntityType="Model.IMPORT_ERROR" Width="1.5" PointX="25.25" PointY="9.75" />
+        <EntityTypeShape EntityType="Model.S_CHINA_PATENT_TEXTIMAGE" Width="1.5" PointX="25.375" PointY="13.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

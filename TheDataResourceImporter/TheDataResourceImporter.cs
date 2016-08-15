@@ -235,6 +235,7 @@ namespace TheDataResourceImporter
 
                 //已处理计数清零
                 handledCount = 0;
+                #region 循环入库
                 foreach (IArchiveEntry entry in allXMLEntires)
                 {
                     //计数变量
@@ -247,7 +248,6 @@ namespace TheDataResourceImporter
                         entiesContext.SaveChanges();
                         break;
                     }
-
 
                     var keyTemp = entry.Key;
 
@@ -705,6 +705,17 @@ namespace TheDataResourceImporter
                     //更新进度信息
                     MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
                 }
+                #endregion 循环入库
+
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+
             }
             #endregion
 
@@ -761,40 +772,48 @@ namespace TheDataResourceImporter
                                          where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
                                          select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
 
-                //总数
-                totalCount = dirNameSetEntires.Count();
+
 
 
                 //所有包含Tif的条目
                 var tifEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
                                                 where !entry.IsDirectory&& entry.Key.ToUpper().EndsWith(".TIF")
                                                 select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+
+                var intersectDirs = dirNameSetEntires.Intersect(tifEntryParentDirEntries);
+
+
                 //不包含tif的目录
                 var dirEntiresWithoutTif = dirNameSetEntires.Except(tifEntryParentDirEntries);
 
+                //总数
+                totalCount = tifEntryParentDirEntries.Count() + dirEntiresWithoutTif.Count();
+
                 //包含tif
                 Parallel.ForEach<string>(tifEntryParentDirEntries, key => {
-                    S_CHINA_PATENT_TEXTIMAGE sCNPatTxtImg = new S_CHINA_PATENT_TEXTIMAGE();
-                    
-
-
-
-
+                    lock (typeof(ImportManger))
+                    {
+                        handledCount++;
+                        string importedMsg = ImportLogicUtil.importS_China_Patent_TextImage(entiesContext, filePath, importSession.SESSION_ID, APPL_TYPE, PUB_DATE, key, "1");
+                        MessageUtil.appendTbDetail($"记录:{importedMsg}插入成功");
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                    }
                 });
 
                 //不包含tif
                 Parallel.ForEach<string>(dirEntiresWithoutTif, key => {
-
-
-
-
-
-
+                    lock (typeof(ImportManger))
+                    {
+                        handledCount++;
+                        string importedMsg = ImportLogicUtil.importS_China_Patent_TextImage(entiesContext, filePath, importSession.SESSION_ID, APPL_TYPE, PUB_DATE, key, "0");
+                        MessageUtil.appendTbDetail($"记录:{importedMsg}插入成功");
+                     }
                 });
 
+                
 
-
-
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
 
             }
             else if (fileType == "中国专利标准化全文文本数据")
@@ -1257,6 +1276,7 @@ namespace TheDataResourceImporter
             importSession.TOTAL_ITEM = totalCount;
 
             entiesContext.SaveChanges();
+
             return true;
         }
     }

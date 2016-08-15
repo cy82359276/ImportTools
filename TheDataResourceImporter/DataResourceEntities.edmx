@@ -807,12 +807,12 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="APPL_TYPE" Type="varchar2" MaxLength="2" />
-          <Property Name="APP_NUMBER" Type="varchar2" MaxLength="16" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="APPL_TYPE" Type="varchar2" MaxLength="20" />
+          <Property Name="APP_NUMBER" Type="varchar2" MaxLength="200" />
           <Property Name="PUB_DATE" Type="date" />
-          <Property Name="PATH_TIF" Type="varchar2" MaxLength="300" />
-          <Property Name="EXIST_TIF" Type="varchar2" MaxLength="1" />
+          <Property Name="PATH_TIF" Type="varchar2" MaxLength="1000" />
+          <Property Name="EXIST_TIF" Type="varchar2" MaxLength="10" />
           <Property Name="IMPORT_SESSION_ID" Type="varchar2" MaxLength="100" />
           <Property Name="IMPORT_TIME" Type="date" />
           <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
@@ -2061,21 +2061,6 @@
           <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
         </EntityType>
-        <EntityType Name="S_CHINA_PATENT_TEXTIMAGE">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="APPL_TYPE" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
-          <Property Name="APP_NUMBER" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
-          <Property Name="PUB_DATE" Type="DateTime" />
-          <Property Name="PATH_TIF" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_TIF" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="IMPORT_TIME" Type="DateTime" />
-          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-        </EntityType>
         <EntityType Name="S_CHINA_PHARMACEUTICAL_PATENT">
           <Key>
             <PropertyRef Name="ID" />
@@ -2515,7 +2500,6 @@
           <EntitySet Name="S_CHINA_PATENT_STAND_TEXTIMAGE" EntityType="Self.S_CHINA_PATENT_STAND_TEXTIMAGE" />
           <EntitySet Name="S_CHINA_PATENT_STANDARDFULLTXT" EntityType="Self.S_CHINA_PATENT_STANDARDFULLTXT" />
           <EntitySet Name="S_CHINA_PATENT_TEXTCODE" EntityType="Self.S_CHINA_PATENT_TEXTCODE" />
-          <EntitySet Name="S_CHINA_PATENT_TEXTIMAGE" EntityType="Self.S_CHINA_PATENT_TEXTIMAGE" />
           <EntitySet Name="S_CHINA_PHARMACEUTICAL_PATENT" EntityType="Self.S_CHINA_PHARMACEUTICAL_PATENT" />
           <EntitySet Name="S_CHINA_WELLKNOWN_BRAND" EntityType="Self.S_CHINA_WELLKNOWN_BRAND" />
           <EntitySet Name="S_COMMUNITY_INTELLECTUALRECORD" EntityType="Self.S_COMMUNITY_INTELLECTUALRECORD" />
@@ -2532,6 +2516,7 @@
           <EntitySet Name="S_WORLD_LEGAL_STATUS" EntityType="Self.S_WORLD_LEGAL_STATUS" />
           <EntitySet Name="S_ZONE_CODE_BASE" EntityType="Self.S_ZONE_CODE_BASE" />
           <EntitySet Name="IMPORT_ERROR" EntityType="Model.IMPORT_ERROR" />
+          <EntitySet Name="S_CHINA_PATENT_TEXTIMAGE" EntityType="Model.S_CHINA_PATENT_TEXTIMAGE" />
         </EntityContainer>
         <EntityType Name="IMPORT_ERROR">
           <Key>
@@ -2548,6 +2533,21 @@
           <Property Name="OCURREDTIME" Type="DateTime" />
           <Property Name="ERROR_MESSAGE" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
           <Property Name="ERROR_DETAIL" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="S_CHINA_PATENT_TEXTIMAGE">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="APPL_TYPE" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="APP_NUMBER" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="PUB_DATE" Type="DateTime" />
+          <Property Name="PATH_TIF" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_TIF" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -3369,22 +3369,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="S_CHINA_PATENT_TEXTIMAGE">
-            <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_TEXTIMAGE">
-              <MappingFragment StoreEntitySet="S_CHINA_PATENT_TEXTIMAGE">
-                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
-                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
-                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
-                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="APPL_TYPE" ColumnName="APPL_TYPE" />
-                <ScalarProperty Name="APP_NUMBER" ColumnName="APP_NUMBER" />
-                <ScalarProperty Name="PUB_DATE" ColumnName="PUB_DATE" />
-                <ScalarProperty Name="PATH_TIF" ColumnName="PATH_TIF" />
-                <ScalarProperty Name="EXIST_TIF" ColumnName="EXIST_TIF" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="S_CHINA_PHARMACEUTICAL_PATENT">
             <EntityTypeMapping TypeName="Model.S_CHINA_PHARMACEUTICAL_PATENT">
               <MappingFragment StoreEntitySet="S_CHINA_PHARMACEUTICAL_PATENT">
@@ -3819,6 +3803,22 @@
                 <ScalarProperty Name="ISZIP" ColumnName="ISZIP" />
                 <ScalarProperty Name="ZIP_OR_DIR_PATH" ColumnName="ZIP_OR_DIR_PATH" />
                 <ScalarProperty Name="SESSION_ID" ColumnName="SESSION_ID" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_CHINA_PATENT_TEXTIMAGE">
+            <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_TEXTIMAGE">
+              <MappingFragment StoreEntitySet="S_CHINA_PATENT_TEXTIMAGE">
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="EXIST_TIF" ColumnName="EXIST_TIF" />
+                <ScalarProperty Name="PATH_TIF" ColumnName="PATH_TIF" />
+                <ScalarProperty Name="PUB_DATE" ColumnName="PUB_DATE" />
+                <ScalarProperty Name="APP_NUMBER" ColumnName="APP_NUMBER" />
+                <ScalarProperty Name="APPL_TYPE" ColumnName="APPL_TYPE" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>
