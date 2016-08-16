@@ -105,7 +105,7 @@ namespace TheDataResourceImporter
             entiesContext.SaveChanges();
             //判断是否是
             #region 分文件类型进行处理
-            #region 中国专利全文代码化数据
+            #region 01 中国专利全文代码化数据
             //压缩包内解析XML
             //目前监测了XML文件缺失的情况
             if (fileType == "中国专利全文代码化数据")
@@ -718,7 +718,7 @@ namespace TheDataResourceImporter
             }
             #endregion
 
-            #region 中国专利全文图像数据
+            #region 02 中国专利全文图像数据
             else if (fileType == "中国专利全文图像数据")
             {
                 importStartTime = System.DateTime.Now;
@@ -777,13 +777,11 @@ namespace TheDataResourceImporter
                                                 select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
 
 
-                var intersectDirs = dirNameSetEntires.Intersect(tifEntryParentDirEntries);
-                var tifDirCount = intersectDirs.Count();
-
 
                 //不包含tif的目录
                 var dirEntiresWithoutTif = dirNameSetEntires.Except(tifEntryParentDirEntries);
-                var emptyDirCount = dirEntiresWithoutTif.Count();
+
+                totalCount = dirEntiresWithoutTif.Count() + tifEntryParentDirEntries.Count();
 
                 handledCount = 0;
 
@@ -811,21 +809,18 @@ namespace TheDataResourceImporter
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
 
             }
-            else if (fileType == "中国专利标准化全文文本数据")
+            #endregion
+
+            #region 03 中国专利标准化全文文本数据
+            else if(fileType == "中国专利标准化全文文本数据")
             {
 
-
-
-
-
-
-
-
-
-
-
-
             }
+
+            #endregion
+
+            #region 中国专利标准化全文图像数据
+
             else if (fileType == "中国专利标准化全文图像数据")
             {
 

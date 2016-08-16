@@ -18,7 +18,18 @@ namespace TheDataResourceImporter
         {
             InitializeComponent();
 
-            cbFileType.Items.Add()
+
+            DataSourceEntities entitiesDataSource = new DataSourceEntities();
+            //绑定数据类型 下拉列表
+            var availableDataTypes = from dataType in entitiesDataSource.S_DATA_RESOURCE_TYPES_DETAIL.Where(dataType => "Y".Equals(dataType.IMPLEMENTED_IMPORT_LOGIC)).ToList()
+                                     orderby dataType.ID ascending
+                                     select new {diplayName = dataType.ID + "-" + dataType.CHINESE_NAME, selectedValue = dataType.CHINESE_NAME };
+            cbFileType.DisplayMember = "diplayName";
+            cbFileType.ValueMember = "selectedValue";
+
+            cbFileType.DataSource = availableDataTypes.ToList();
+
+
             //MessageUtil.SetMessage = SetLabelMsg;
             MessageUtil.setTbDetail = SetTextBoxDetail;
             MessageUtil.appendTbDetail = appendTextBoxDetail;
@@ -26,7 +37,7 @@ namespace TheDataResourceImporter
             //MessageUtil.appendTbDetail += LogHelper.WriteLog;
 
             MessageUtil.updateProgressIndicator = updateProgressIndicator;
-            cbFileType.SelectedIndex = 0;
+            //cbFileType.SelectedIndex = 0;
             SetStyle(ControlStyles.UserPaint, true);
             SetStyle(ControlStyles.AllPaintingInWmPaint, true); // 禁止擦除背景.  
             SetStyle(ControlStyles.DoubleBuffer, true); // 双缓冲  
@@ -81,7 +92,9 @@ namespace TheDataResourceImporter
                 return;
             }
 
-            var fileType = cbFileType.Text;
+            //var fileType = cbFileType.Text;
+            var fileType = cbFileType.SelectedValue.ToString();
+
             //未选中文件类型
             if (String.IsNullOrEmpty(fileType))
             {

@@ -6,7 +6,7 @@
     <edmx:Diagrams>
       <Diagram DiagramId="6f5f703121db478281619b0d0080a358" Name="Diagram1">
         <EntityTypeShape EntityType="Model.IMPORT_SESSION" Width="1.5" PointX="1" PointY="0.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="Model.S_AMERICA_APPLY_BRAND" Width="1.5" PointX="4.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Model.S_AMERICA_APPLY_BRAND" Width="1.5" PointX="3.25" PointY="0.5" IsExpanded="true" />
         <EntityTypeShape EntityType="Model.S_AMERICA_TRANSFER_BRAND" Width="1.5" PointX="0.75" PointY="4.75" IsExpanded="true" />
         <EntityTypeShape EntityType="Model.S_AMERICA_TRIAL_BRAND" Width="1.5" PointX="6.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="Model.S_AMERICAN_BRAND_GRAPHCLASSIFY" Width="1.5" PointX="6.75" PointY="5.75" IsExpanded="true" />
