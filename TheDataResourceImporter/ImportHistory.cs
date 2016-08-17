@@ -34,7 +34,7 @@ namespace TheDataResourceImporter
 
         public void showPage(int pageNum, DataSourceEntities entitiesDataSource)
         {
-            var sessionArray = entitiesDataSource.IMPORT_SESSION.OrderByDescending(r => r.START_TIME).ToList();
+            var sessionArray = entitiesDataSource.IMPORT_SESSION.OrderByDescending(r => r.START_TIME);
 
             //总记录数
             nMax = sessionArray.Count();
@@ -51,7 +51,7 @@ namespace TheDataResourceImporter
 
             dataGridViewImportHistory.AutoGenerateColumns = false;
 
-            var pageArray = sessionArray.Skip(StartPosition).Take(pageSize);
+            var pageArray = sessionArray.Skip(StartPosition).Take(pageSize).ToList();
             dataGridViewImportHistory.DataSource = pageArray;
 
             dataGridViewImportHistory.AllowUserToAddRows = false;
