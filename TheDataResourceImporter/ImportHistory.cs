@@ -26,13 +26,15 @@ namespace TheDataResourceImporter
             //var importSessions = from session in entitiesDataSource.IMPORT_SESSION.ToList()
             //                     orderby session.START_TIME descending
             //                     select session;
+            dataGridViewImportHistory.AutoGenerateColumns = false;
+
 
             showPage(1, entitiesDataSource);
         }
 
         public void showPage(int pageNum, DataSourceEntities entitiesDataSource)
         {
-            var sessionArray = entitiesDataSource.IMPORT_SESSION.OrderByDescending(r => r.START_TIME).ToList();
+            var sessionArray = entitiesDataSource.IMPORT_SESSION.OrderByDescending(r => r.START_TIME);
 
             //总记录数
             nMax = sessionArray.Count();
@@ -49,18 +51,12 @@ namespace TheDataResourceImporter
 
             dataGridViewImportHistory.AutoGenerateColumns = false;
 
-            var pageArray = sessionArray.Skip(StartPosition).Take(pageSize);
-
-
+            var pageArray = sessionArray.Skip(StartPosition).Take(pageSize).ToList();
             dataGridViewImportHistory.DataSource = pageArray;
-
 
             dataGridViewImportHistory.AllowUserToAddRows = false;
             dataGridViewImportHistory.AllowUserToResizeColumns = true;
             dataGridViewImportHistory.AllowUserToResizeRows = true;
-
-
-
 
             DataGridViewTextBoxColumn dGVResType = new DataGridViewTextBoxColumn();
             dGVResType.Name = "DATA_RES_TYPE";
@@ -278,11 +274,6 @@ namespace TheDataResourceImporter
                 }
             }
             showPage(currentPageTemp, new DataSourceEntities());
-        }
-
-        private void bindingNavigatorMoveFirstItem_Click_1(object sender, EventArgs e)
-        {
-
         }
     }
 }

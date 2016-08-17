@@ -36,11 +36,11 @@
             this.bindingNavigatorMoveFirstItem = new System.Windows.Forms.ToolStripButton();
             this.bindingNavigatorMovePreviousItem = new System.Windows.Forms.ToolStripButton();
             this.bindingNavigatorSeparator = new System.Windows.Forms.ToolStripSeparator();
+            this.bindingNavigatorPositionItem = new System.Windows.Forms.ToolStripTextBox();
             this.bindingNavigatorSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.bindingNavigatorMoveNextItem = new System.Windows.Forms.ToolStripButton();
             this.bindingNavigatorMoveLastItem = new System.Windows.Forms.ToolStripButton();
             this.bindingNavigatorSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.bindingNavigatorPositionItem = new System.Windows.Forms.ToolStripLabel();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewImportHistory)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.bindedNavigator)).BeginInit();
             this.bindedNavigator.SuspendLayout();
@@ -53,7 +53,7 @@
             this.dataGridViewImportHistory.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewImportHistory.Name = "dataGridViewImportHistory";
             this.dataGridViewImportHistory.RowTemplate.Height = 23;
-            this.dataGridViewImportHistory.Size = new System.Drawing.Size(756, 603);
+            this.dataGridViewImportHistory.Size = new System.Drawing.Size(756, 606);
             this.dataGridViewImportHistory.TabIndex = 0;
             // 
             // bindedNavigator
@@ -71,14 +71,14 @@
             this.bindingNavigatorMoveNextItem,
             this.bindingNavigatorMoveLastItem,
             this.bindingNavigatorSeparator2});
-            this.bindedNavigator.Location = new System.Drawing.Point(0, 603);
+            this.bindedNavigator.Location = new System.Drawing.Point(0, 606);
             this.bindedNavigator.MoveFirstItem = this.bindingNavigatorMoveFirstItem;
             this.bindedNavigator.MoveLastItem = this.bindingNavigatorMoveLastItem;
             this.bindedNavigator.MoveNextItem = this.bindingNavigatorMoveNextItem;
             this.bindedNavigator.MovePreviousItem = this.bindingNavigatorMovePreviousItem;
             this.bindedNavigator.Name = "bindedNavigator";
-            this.bindedNavigator.PositionItem = null;
-            this.bindedNavigator.Size = new System.Drawing.Size(756, 26);
+            this.bindedNavigator.PositionItem = this.bindingNavigatorPositionItem;
+            this.bindedNavigator.Size = new System.Drawing.Size(756, 25);
             this.bindedNavigator.TabIndex = 1;
             this.bindedNavigator.Text = "bindingNavigator1";
             // 
@@ -95,7 +95,7 @@
             this.bindingNavigatorMoveFirstItem.Image = ((System.Drawing.Image)(resources.GetObject("bindingNavigatorMoveFirstItem.Image")));
             this.bindingNavigatorMoveFirstItem.Name = "bindingNavigatorMoveFirstItem";
             this.bindingNavigatorMoveFirstItem.RightToLeftAutoMirrorImage = true;
-            this.bindingNavigatorMoveFirstItem.Size = new System.Drawing.Size(23, 23);
+            this.bindingNavigatorMoveFirstItem.Size = new System.Drawing.Size(23, 22);
             this.bindingNavigatorMoveFirstItem.Text = "移到第一条记录";
             this.bindingNavigatorMoveFirstItem.Click += new System.EventHandler(this.bindingNavigatorMoveFirstItem_Click);
             // 
@@ -113,6 +113,15 @@
             // 
             this.bindingNavigatorSeparator.Name = "bindingNavigatorSeparator";
             this.bindingNavigatorSeparator.Size = new System.Drawing.Size(6, 25);
+            // 
+            // bindingNavigatorPositionItem
+            // 
+            this.bindingNavigatorPositionItem.AccessibleName = "位置";
+            this.bindingNavigatorPositionItem.AutoSize = false;
+            this.bindingNavigatorPositionItem.Name = "bindingNavigatorPositionItem";
+            this.bindingNavigatorPositionItem.Size = new System.Drawing.Size(50, 23);
+            this.bindingNavigatorPositionItem.Text = "0";
+            this.bindingNavigatorPositionItem.ToolTipText = "当前位置";
             // 
             // bindingNavigatorSeparator1
             // 
@@ -144,15 +153,6 @@
             this.bindingNavigatorSeparator2.Name = "bindingNavigatorSeparator2";
             this.bindingNavigatorSeparator2.Size = new System.Drawing.Size(6, 25);
             // 
-            // bindingNavigatorPositionItem
-            // 
-            this.bindingNavigatorPositionItem.AccessibleName = "位置";
-            this.bindingNavigatorPositionItem.AutoSize = false;
-            this.bindingNavigatorPositionItem.Name = "bindingNavigatorPositionItem";
-            this.bindingNavigatorPositionItem.Size = new System.Drawing.Size(50, 23);
-            this.bindingNavigatorPositionItem.Text = "0";
-            this.bindingNavigatorPositionItem.ToolTipText = "当前位置";
-            // 
             // ImportHistory
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -180,10 +180,10 @@
         private System.Windows.Forms.ToolStripButton bindingNavigatorMoveFirstItem;
         private System.Windows.Forms.ToolStripButton bindingNavigatorMovePreviousItem;
         private System.Windows.Forms.ToolStripSeparator bindingNavigatorSeparator;
+        private System.Windows.Forms.ToolStripTextBox bindingNavigatorPositionItem;
         private System.Windows.Forms.ToolStripSeparator bindingNavigatorSeparator1;
         private System.Windows.Forms.ToolStripButton bindingNavigatorMoveNextItem;
         private System.Windows.Forms.ToolStripButton bindingNavigatorMoveLastItem;
         private System.Windows.Forms.ToolStripSeparator bindingNavigatorSeparator2;
-        private System.Windows.Forms.ToolStripLabel bindingNavigatorPositionItem;
     }
 }
