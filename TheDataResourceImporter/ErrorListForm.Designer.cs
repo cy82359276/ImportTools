@@ -28,99 +28,124 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.Retry = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.IgnoreEror = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.ErrorMsg = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ErrorType = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.errorEntryNum = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ZipOrDirPath = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ErrorId = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.sessionID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.dataGridViewErrorList = new System.Windows.Forms.DataGridView();
+            this.labelTotal = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.labelCurrentPage = new System.Windows.Forms.Label();
+            this.buttonLast = new System.Windows.Forms.Button();
+            this.buttonNext = new System.Windows.Forms.Button();
+            this.buttonPrevious = new System.Windows.Forms.Button();
+            this.buttonFirst = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewErrorList)).BeginInit();
             this.SuspendLayout();
             // 
-            // Retry
+            // dataGridViewErrorList
             // 
-            this.Retry.HeaderText = "重试";
-            this.Retry.Name = "Retry";
+            this.dataGridViewErrorList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewErrorList.Dock = System.Windows.Forms.DockStyle.Top;
+            this.dataGridViewErrorList.Location = new System.Drawing.Point(0, 0);
+            this.dataGridViewErrorList.Name = "dataGridViewErrorList";
+            this.dataGridViewErrorList.RowTemplate.Height = 23;
+            this.dataGridViewErrorList.Size = new System.Drawing.Size(854, 549);
+            this.dataGridViewErrorList.TabIndex = 0;
+            this.dataGridViewErrorList.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewErrorList_CellClick);
             // 
-            // IgnoreEror
+            // labelTotal
             // 
-            this.IgnoreEror.HeaderText = "忽略错误";
-            this.IgnoreEror.Name = "IgnoreEror";
+            this.labelTotal.AutoSize = true;
+            this.labelTotal.Location = new System.Drawing.Point(229, 565);
+            this.labelTotal.Name = "labelTotal";
+            this.labelTotal.Size = new System.Drawing.Size(29, 12);
+            this.labelTotal.TabIndex = 14;
+            this.labelTotal.Text = "    ";
             // 
-            // ErrorMsg
+            // label2
             // 
-            this.ErrorMsg.HeaderText = "错误内容";
-            this.ErrorMsg.Name = "ErrorMsg";
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(212, 565);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(11, 12);
+            this.label2.TabIndex = 13;
+            this.label2.Text = "/";
             // 
-            // ErrorType
+            // labelCurrentPage
             // 
-            this.ErrorType.HeaderText = "错误类型";
-            this.ErrorType.Name = "ErrorType";
+            this.labelCurrentPage.AutoSize = true;
+            this.labelCurrentPage.Location = new System.Drawing.Point(177, 565);
+            this.labelCurrentPage.Name = "labelCurrentPage";
+            this.labelCurrentPage.Size = new System.Drawing.Size(29, 12);
+            this.labelCurrentPage.TabIndex = 12;
+            this.labelCurrentPage.Text = "    ";
             // 
-            // errorEntryNum
+            // buttonLast
             // 
-            this.errorEntryNum.HeaderText = "错误表目编号";
-            this.errorEntryNum.Name = "errorEntryNum";
+            this.buttonLast.Location = new System.Drawing.Point(125, 560);
+            this.buttonLast.Name = "buttonLast";
+            this.buttonLast.Size = new System.Drawing.Size(31, 23);
+            this.buttonLast.TabIndex = 11;
+            this.buttonLast.Text = ">>";
+            this.buttonLast.UseVisualStyleBackColor = true;
+            this.buttonLast.Click += new System.EventHandler(this.bindingNavigatorMoveLastItem_Click);
             // 
-            // ZipOrDirPath
+            // buttonNext
             // 
-            this.ZipOrDirPath.HeaderText = "错误压缩包或目录路径";
-            this.ZipOrDirPath.Name = "ZipOrDirPath";
+            this.buttonNext.Location = new System.Drawing.Point(87, 560);
+            this.buttonNext.Name = "buttonNext";
+            this.buttonNext.Size = new System.Drawing.Size(32, 23);
+            this.buttonNext.TabIndex = 10;
+            this.buttonNext.Text = ">";
+            this.buttonNext.UseVisualStyleBackColor = true;
+            this.buttonNext.Click += new System.EventHandler(this.bindingNavigatorMoveNextItem_Click);
             // 
-            // ErrorId
+            // buttonPrevious
             // 
-            this.ErrorId.HeaderText = "错误编号";
-            this.ErrorId.Name = "ErrorId";
+            this.buttonPrevious.Location = new System.Drawing.Point(49, 560);
+            this.buttonPrevious.Name = "buttonPrevious";
+            this.buttonPrevious.Size = new System.Drawing.Size(32, 23);
+            this.buttonPrevious.TabIndex = 9;
+            this.buttonPrevious.Text = "<";
+            this.buttonPrevious.UseVisualStyleBackColor = true;
+            this.buttonPrevious.Click += new System.EventHandler(this.bindingNavigatorMovePreviousItem_Click);
             // 
-            // sessionID
+            // buttonFirst
             // 
-            this.sessionID.HeaderText = "导入操作ID";
-            this.sessionID.Name = "sessionID";
+            this.buttonFirst.Location = new System.Drawing.Point(12, 560);
+            this.buttonFirst.Name = "buttonFirst";
+            this.buttonFirst.Size = new System.Drawing.Size(31, 23);
+            this.buttonFirst.TabIndex = 8;
+            this.buttonFirst.Text = "<<";
+            this.buttonFirst.UseVisualStyleBackColor = true;
+            this.buttonFirst.Click += new System.EventHandler(this.bindingNavigatorMoveFirstItem_Click);
             // 
-            // dataGridView1
-            // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.sessionID,
-            this.ErrorId,
-            this.ZipOrDirPath,
-            this.errorEntryNum,
-            this.ErrorType,
-            this.ErrorMsg,
-            this.IgnoreEror,
-            this.Retry});
-            this.dataGridView1.Location = new System.Drawing.Point(3, 13);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowTemplate.Height = 23;
-            this.dataGridView1.Size = new System.Drawing.Size(848, 568);
-            this.dataGridView1.TabIndex = 0;
-            // 
-            // errorList
+            // ErrorListForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(854, 595);
-            this.Controls.Add(this.dataGridView1);
-            this.Name = "errorList";
+            this.Controls.Add(this.labelTotal);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.labelCurrentPage);
+            this.Controls.Add(this.buttonLast);
+            this.Controls.Add(this.buttonNext);
+            this.Controls.Add(this.buttonPrevious);
+            this.Controls.Add(this.buttonFirst);
+            this.Controls.Add(this.dataGridViewErrorList);
+            this.Name = "ErrorListForm";
             this.Text = "错误列表";
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewErrorList)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.DataGridViewButtonColumn Retry;
-        private System.Windows.Forms.DataGridViewButtonColumn IgnoreEror;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorMsg;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorType;
-        private System.Windows.Forms.DataGridViewTextBoxColumn errorEntryNum;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ZipOrDirPath;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorId;
-        private System.Windows.Forms.DataGridViewTextBoxColumn sessionID;
-        private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.DataGridView dataGridViewErrorList;
+        private System.Windows.Forms.Label labelTotal;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label labelCurrentPage;
+        private System.Windows.Forms.Button buttonLast;
+        private System.Windows.Forms.Button buttonNext;
+        private System.Windows.Forms.Button buttonPrevious;
+        private System.Windows.Forms.Button buttonFirst;
     }
 }

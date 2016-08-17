@@ -295,8 +295,7 @@ namespace TheDataResourceImporter
             //有错 弹出错误详情
             if("Y".Equals(hasError))
             {
-                var errorList = new ErrorListForm();
-                errorList.SessionId = session_Id;
+                var errorList = new ErrorListForm(session_Id);
                 errorList.Show();
             }
         }
@@ -318,7 +317,6 @@ namespace TheDataResourceImporter
 
                     try
                     {
-
                         var sqlCommand = $"delete from {tableName} where import_session_id='{session_Id}'";
                         //删除本session的记录
                         entitiesDataSource.Database.ExecuteSqlCommand(sqlCommand);
@@ -347,8 +345,7 @@ namespace TheDataResourceImporter
                 //有错 弹出错误详情
                 if ("Y".Equals(hasError))
                 {
-                    var errorList = new ErrorListForm();
-                    errorList.SessionId = session_Id;
+                    var errorList = new ErrorListForm(session_Id);
                     errorList.Show();
                 }
             }
