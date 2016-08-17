@@ -26,8 +26,6 @@ namespace TheDataResourceImporter
             //var importSessions = from session in entitiesDataSource.IMPORT_SESSION.ToList()
             //                     orderby session.START_TIME descending
             //                     select session;
-            dataGridViewImportHistory.AutoGenerateColumns = false;
-
 
             showPage(1, entitiesDataSource);
         }
@@ -44,19 +42,22 @@ namespace TheDataResourceImporter
             pageCurrent = pageNum;
 
             //总页数
-            bindedNavigator.CountItem.Text = pageCount.ToString();
-            bindedNavigator.PositionItem.Text = pageCurrent.ToString();
+            //bindedNavigator.CountItem.Text = pageCount.ToString();
+            //bindedNavigator.PositionItem.Text = pageCurrent.ToString();
 
             int StartPosition = pageSize * (pageNum - 1);
 
             dataGridViewImportHistory.AutoGenerateColumns = false;
 
             var pageArray = sessionArray.Skip(StartPosition).Take(pageSize);
+
+
             dataGridViewImportHistory.DataSource = pageArray;
 
             dataGridViewImportHistory.AllowUserToAddRows = false;
             dataGridViewImportHistory.AllowUserToResizeColumns = true;
             dataGridViewImportHistory.AllowUserToResizeRows = true;
+
 
             DataGridViewTextBoxColumn dGVResType = new DataGridViewTextBoxColumn();
             dGVResType.Name = "DATA_RES_TYPE";
@@ -229,51 +230,51 @@ namespace TheDataResourceImporter
 
         }
 
-        private void bindingNavigatorMoveFirstItem_Click(object sender, EventArgs e)
-        {
-            showPage(1, entitiesDataSource);
-        }
+        //private void bindingNavigatorMoveFirstItem_Click(object sender, EventArgs e)
+        //{
+        //    showPage(1, entitiesDataSource);
+        //}
 
-        private void bindingNavigatorMoveLastItem_Click(object sender, EventArgs e)
-        {
-            showPage(pageCount, entitiesDataSource);
-        }
+        //private void bindingNavigatorMoveLastItem_Click(object sender, EventArgs e)
+        //{
+        //    showPage(pageCount, entitiesDataSource);
+        //}
 
-        private void bindingNavigatorMovePreviousItem_Click(object sender, EventArgs e)
-        {
-            string currentPageStr = bindedNavigator.PositionItem.Text;
-            int currentPageTemp = 1;
-            if (Int32.TryParse(currentPageStr, out currentPageTemp))
-            {
-                if(currentPageTemp - 1 <= 0)
-                {
-                    currentPageTemp = 1;
-                }
-                else
-                {
-                    currentPageTemp = currentPageTemp - 1;
-                }
-            }
+        //private void bindingNavigatorMovePreviousItem_Click(object sender, EventArgs e)
+        //{
+        //    string currentPageStr = bindedNavigator.PositionItem.Text;
+        //    int currentPageTemp = 1;
+        //    if (Int32.TryParse(currentPageStr, out currentPageTemp))
+        //    {
+        //        if(currentPageTemp - 1 <= 0)
+        //        {
+        //            currentPageTemp = 1;
+        //        }
+        //        else
+        //        {
+        //            currentPageTemp = currentPageTemp - 1;
+        //        }
+        //    }
             
-            showPage(currentPageTemp, new DataSourceEntities());
-        }
+        //    showPage(currentPageTemp, new DataSourceEntities());
+        //}
 
-        private void bindingNavigatorMoveNextItem_Click(object sender, EventArgs e)
-        {
-            string currentPageStr = bindedNavigator.PositionItem.Text;
-            int currentPageTemp = 1;
-            if (Int32.TryParse(currentPageStr, out currentPageTemp))
-            {
-                if (currentPageTemp + 1 >= pageCount)
-                {
-                    currentPageTemp = pageCount;
-                }
-                else
-                {
-                    currentPageTemp = currentPageTemp + 1;
-                }
-            }
-            showPage(currentPageTemp, new DataSourceEntities());
-        }
+        //private void bindingNavigatorMoveNextItem_Click(object sender, EventArgs e)
+        //{
+        //    string currentPageStr = bindedNavigator.PositionItem.Text;
+        //    int currentPageTemp = 1;
+        //    if (Int32.TryParse(currentPageStr, out currentPageTemp))
+        //    {
+        //        if (currentPageTemp + 1 >= pageCount)
+        //        {
+        //            currentPageTemp = pageCount;
+        //        }
+        //        else
+        //        {
+        //            currentPageTemp = currentPageTemp + 1;
+        //        }
+        //    }
+        //    showPage(currentPageTemp, new DataSourceEntities());
+        //}
     }
 }
