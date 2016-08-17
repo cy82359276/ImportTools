@@ -1,6 +1,6 @@
 ﻿namespace TheDataResourceImporter
 {
-    partial class errorList
+    partial class ErrorListForm
     {
         /// <summary>
         /// Required designer variable.

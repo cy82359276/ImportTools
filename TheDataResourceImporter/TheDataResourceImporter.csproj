@@ -110,17 +110,17 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DataResourceEntities.edmx</DependentUpon>
     </Compile>
-    <Compile Include="errorList.cs">
+    <Compile Include="ErrorListForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="errorList.Designer.cs">
-      <DependentUpon>errorList.cs</DependentUpon>
+    <Compile Include="ErrorListForm.Designer.cs">
+      <DependentUpon>ErrorListForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ImportHistory.cs">
+    <Compile Include="ImportHistoryForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ImportHistory.Designer.cs">
-      <DependentUpon>ImportHistory.cs</DependentUpon>
+    <Compile Include="ImportHistoryForm.Designer.cs">
+      <DependentUpon>ImportHistoryForm.cs</DependentUpon>
     </Compile>
     <Compile Include="IMPORT_ERROR.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
@@ -291,11 +291,11 @@
     <EmbeddedResource Include="AboutBoxUS.resx">
       <DependentUpon>AboutBoxUS.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="errorList.resx">
-      <DependentUpon>errorList.cs</DependentUpon>
+    <EmbeddedResource Include="ErrorListForm.resx">
+      <DependentUpon>ErrorListForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ImportHistory.resx">
-      <DependentUpon>ImportHistory.cs</DependentUpon>
+    <EmbeddedResource Include="ImportHistoryForm.resx">
+      <DependentUpon>ImportHistoryForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>

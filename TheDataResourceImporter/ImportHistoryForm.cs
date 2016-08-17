@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace TheDataResourceImporter
 {
-    public partial class ImportHistory : Form
+    public partial class ImportHistoryForm : Form
     {
 
         int pageSize = 15;     //每页显示行数
@@ -19,7 +19,7 @@ namespace TheDataResourceImporter
         int nCurrent = 0;      //当前记录行
         DataSourceEntities entitiesDataSource = new DataSourceEntities();
 
-        public ImportHistory()
+        public ImportHistoryForm()
         {
             InitializeComponent();
             DataSourceEntities entitiesDataSource = new DataSourceEntities();
@@ -27,13 +27,14 @@ namespace TheDataResourceImporter
             //                     orderby session.START_TIME descending
             //                     select session;
             dataGridViewImportHistory.AutoGenerateColumns = false;
-
-
             showPage(1, entitiesDataSource);
         }
 
         public void showPage(int pageNum, DataSourceEntities entitiesDataSource)
         {
+
+            dataGridViewImportHistory.Columns.Clear();
+
             var sessionArray = entitiesDataSource.IMPORT_SESSION.OrderByDescending(r => r.START_TIME);
 
             //总记录数
@@ -41,11 +42,12 @@ namespace TheDataResourceImporter
 
             //页数
             pageCount = (int)Math.Ceiling(nMax * 1.0 / pageSize);
-            pageCurrent = pageNum;
+
+            pageCurrent = pageNum > pageCount? pageCurrent: pageNum;
 
             //总页数
-            bindedNavigator.CountItem.Text = pageCount.ToString();
-            bindedNavigator.PositionItem.Text = pageCurrent.ToString();
+            labelTotal.Text = pageCount.ToString();
+            labelCurrentPage.Text = pageCurrent.ToString();
 
             int StartPosition = pageSize * (pageNum - 1);
 
@@ -163,12 +165,11 @@ namespace TheDataResourceImporter
             //dataGridViewImportHistory.Columns["HAS_ERROR"].HeaderText = "是否有错";
 
             DataGridViewTextBoxColumn dGVRolledBack = new DataGridViewTextBoxColumn();
-            dGVRolledBack.Name = "IS_ZIP";
+            dGVRolledBack.Name = "ROLLED_BACK";
             dGVRolledBack.ReadOnly = true;
-            dGVRolledBack.DataPropertyName = "IS_ZIP";
+            dGVRolledBack.DataPropertyName = "ROLLED_BACK";
             dGVRolledBack.DisplayIndex = 8;
-            dGVRolledBack.HeaderText = "已回滚?";
-            //dGVRolledBack.AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
+            dGVRolledBack.HeaderText = "是否已回滚";
             dGVRolledBack.Resizable = DataGridViewTriState.True;
             dataGridViewImportHistory.Columns.Add(dGVRolledBack);
 
@@ -241,7 +242,7 @@ namespace TheDataResourceImporter
 
         private void bindingNavigatorMovePreviousItem_Click(object sender, EventArgs e)
         {
-            string currentPageStr = bindedNavigator.PositionItem.Text;
+            string currentPageStr = labelCurrentPage.Text;
             int currentPageTemp = 1;
             if (Int32.TryParse(currentPageStr, out currentPageTemp))
             {
@@ -254,13 +255,12 @@ namespace TheDataResourceImporter
                     currentPageTemp = currentPageTemp - 1;
                 }
             }
-            
             showPage(currentPageTemp, new DataSourceEntities());
         }
 
         private void bindingNavigatorMoveNextItem_Click(object sender, EventArgs e)
         {
-            string currentPageStr = bindedNavigator.PositionItem.Text;
+            string currentPageStr = labelCurrentPage.Text;
             int currentPageTemp = 1;
             if (Int32.TryParse(currentPageStr, out currentPageTemp))
             {
@@ -274,6 +274,84 @@ namespace TheDataResourceImporter
                 }
             }
             showPage(currentPageTemp, new DataSourceEntities());
+        }
+
+        private void refreshDataGrid()
+        {
+            string currentPageStr = labelCurrentPage.Text;
+            int currentPageTemp = 1;
+            if (Int32.TryParse(currentPageStr, out currentPageTemp))
+            {
+ 
+            }
+            showPage(currentPageTemp, new DataSourceEntities());
+        }
+
+        private void dataGridViewImportHistory_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            var session_Id = dataGridViewImportHistory.Rows[e.RowIndex].Cells["SESSION_ID"].Value.ToString();
+            var hasError = dataGridViewImportHistory.Rows[e.RowIndex].Cells["HAS_ERROR"].Value.ToString();
+
+            //有错 弹出错误详情
+            if("Y".Equals(hasError))
+            {
+                var errorList = new ErrorListForm();
+                errorList.SessionId = session_Id;
+                errorList.Show();
+            }
+        }
+
+        private void dataGridViewImportHistory_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            //选中的列的 名称
+            var targetColName = dataGridViewImportHistory.Columns[e.ColumnIndex].Name;
+            var session_Id = dataGridViewImportHistory.Rows[e.RowIndex].Cells["SESSION_ID"].Value.ToString();
+            var hasError = dataGridViewImportHistory.Rows[e.RowIndex].Cells["HAS_ERROR"].Value.ToString();
+            var selectedSession = entitiesDataSource.IMPORT_SESSION.Find(session_Id);
+            string tableName = selectedSession.TABLENAME;
+            if ("rollBackButton".Equals(targetColName))//回滚
+            {
+                var messageBoxResult = MessageBox.Show("确定回滚本次导入的全部记录么?", "是否回滚", MessageBoxButtons.YesNo);
+
+                if (messageBoxResult == System.Windows.Forms.DialogResult.Yes)
+                {
+
+                    try
+                    {
+
+                        var sqlCommand = $"delete from {tableName} where import_session_id='{session_Id}'";
+                        //删除本session的记录
+                        entitiesDataSource.Database.ExecuteSqlCommand(sqlCommand);
+
+
+                        sqlCommand = $"delete from import_error where session_id ='{session_Id}'";
+                        //删除错误记录
+                        entitiesDataSource.Database.ExecuteSqlCommand(sqlCommand);
+
+                        sqlCommand = $"delete from IMPORT_SESSION t where t.session_id ='{session_Id}'";
+                        //删除错误记录
+                        entitiesDataSource.Database.ExecuteSqlCommand(sqlCommand);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        
+                    }
+
+                    //刷新DataGridView
+                    refreshDataGrid();
+                }
+            }
+            else if("checkErrorButton".Equals(targetColName))//查看详情
+            {
+                //有错 弹出错误详情
+                if ("Y".Equals(hasError))
+                {
+                    var errorList = new ErrorListForm();
+                    errorList.SessionId = session_Id;
+                    errorList.Show();
+                }
+            }
         }
     }
 }

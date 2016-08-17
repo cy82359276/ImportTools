@@ -41,6 +41,7 @@
           <Property Name="TOTAL_ITEM" Type="number" Precision="38" Scale="0" />
           <Property Name="ZIP_ENTRY_PATH" Type="varchar2" MaxLength="1000" />
           <Property Name="NOTE" Type="varchar2" MaxLength="1000" />
+          <Property Name="TABLENAME" Type="varchar2" MaxLength="500" />
         </EntityType>
         <EntityType Name="S_AMERICA_APPLY_BRAND">
           <Key>
@@ -1314,6 +1315,7 @@
           <Property Name="TOTAL_ITEM" Type="Decimal" Precision="38" Scale="0" />
           <Property Name="ZIP_ENTRY_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="NOTE" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="TABLENAME" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="S_AMERICA_APPLY_BRAND">
           <Key>
@@ -2588,6 +2590,7 @@
           <EntitySetMapping Name="IMPORT_SESSION">
             <EntityTypeMapping TypeName="Model.IMPORT_SESSION">
               <MappingFragment StoreEntitySet="IMPORT_SESSION">
+                <ScalarProperty Name="TABLENAME" ColumnName="TABLENAME" />
                 <ScalarProperty Name="NOTE" ColumnName="NOTE" />
                 <ScalarProperty Name="ZIP_ENTRY_PATH" ColumnName="ZIP_ENTRY_PATH" />
                 <ScalarProperty Name="TOTAL_ITEM" ColumnName="TOTAL_ITEM" />

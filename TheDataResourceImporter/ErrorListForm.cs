@@ -9,10 +9,18 @@ using System.Windows.Forms;
 
 namespace TheDataResourceImporter
 {
-    public partial class errorList : Form
+    public partial class ErrorListForm : Form
     {
-        public errorList()
+        public string SessionId { get; set; }
+
+        public ErrorListForm()
         {
+            InitializeComponent();
+        }
+
+        public ErrorListForm(string sessionId)
+        {
+            SessionId = sessionId;
             InitializeComponent();
         }
     }

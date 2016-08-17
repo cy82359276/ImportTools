@@ -30,5 +30,6 @@ namespace TheDataResourceImporter
         public Nullable<decimal> TOTAL_ITEM { get; set; }
         public string ZIP_ENTRY_PATH { get; set; }
         public string NOTE { get; set; }
+        public string TABLENAME { get; set; }
     }
 }

@@ -267,7 +267,7 @@ namespace TheDataResourceImporter
 
         private void menuShowImportHistory_Click(object sender, EventArgs e)
         {
-            new ImportHistory().Show();
+            new ImportHistoryForm().Show();
         }
     }
 }
