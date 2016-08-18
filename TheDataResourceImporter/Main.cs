@@ -23,7 +23,7 @@ namespace TheDataResourceImporter
             //绑定数据类型 下拉列表
             var availableDataTypes = from dataType in entitiesDataSource.S_DATA_RESOURCE_TYPES_DETAIL.Where(dataType => "Y".Equals(dataType.IMPLEMENTED_IMPORT_LOGIC)).ToList()
                                      orderby dataType.ID ascending
-                                     select new {diplayName = dataType.ID + "-" + dataType.CHINESE_NAME, selectedValue = dataType.CHINESE_NAME };
+                                     select new {diplayName = dataType.ID + "-" + dataType.CHINESE_NAME + ("Y".Equals(dataType.IN_PROCESS)?"--建设中,勿选!!!":""), selectedValue = dataType.CHINESE_NAME };
             cbFileType.DisplayMember = "diplayName";
             cbFileType.ValueMember = "selectedValue";
 

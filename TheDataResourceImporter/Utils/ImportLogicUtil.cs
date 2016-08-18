@@ -11,7 +11,7 @@ namespace TheDataResourceImporter.Utils
     {
 
 
-        public  static string importS_China_Patent_TextImage(DataSourceEntities entitiesContext,string filePath,string session_id, string app_type, DateTime pub_date, string entryKey, string hasTif)
+        public  static string importS_China_Patent_TextImage(DataSourceEntities entitiesContext,string filePath,string session_id, string app_type, DateTime? pub_date, string entryKey, string hasTif)
         {
             S_CHINA_PATENT_TEXTIMAGE sCNPatTxtImg = new S_CHINA_PATENT_TEXTIMAGE() { APPL_TYPE = app_type, APP_NUMBER = CompressUtil.getEntryShortName(entryKey), ARCHIVE_INNER_PATH = entryKey, EXIST_TIF = hasTif, FILE_PATH = filePath, ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = session_id, IMPORT_TIME = System.DateTime.Now, PATH_TIF = entryKey, PUB_DATE = pub_date };
 

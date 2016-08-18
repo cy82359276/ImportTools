@@ -937,6 +937,7 @@
           <Property Name="CHINESE_NAME" Type="varchar2" MaxLength="500" />
           <Property Name="TABLE_NAME" Type="varchar2" MaxLength="500" />
           <Property Name="IMPLEMENTED_IMPORT_LOGIC" Type="varchar2" MaxLength="10" />
+          <Property Name="IN_PROCESS" Type="varchar2" MaxLength="10" />
         </EntityType>
         <EntityType Name="S_DOCDB">
           <Key>
@@ -2013,49 +2014,6 @@
           <Property Name="PATH_XML" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="EXIST_XML" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
         </EntityType>
-        <EntityType Name="S_CHINA_PATENT_STANDARDFULLTXT">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="STA_PUB_COUNTRY" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
-          <Property Name="STA_PUB_NUMBER" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
-          <Property Name="STA_PUB_KIND" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
-          <Property Name="STA_PUB_DATE" Type="DateTime" />
-          <Property Name="ORI_PUB_COUNTRY" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
-          <Property Name="ORI_PUB_NUMBER" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
-          <Property Name="ORI_PUB_KIND" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
-          <Property Name="ORI_PUB_DATE" Type="DateTime" />
-          <Property Name="STA_APP_COUNTRY" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
-          <Property Name="STA_APP_NUMBER" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
-          <Property Name="STA_APP_DATE" Type="DateTime" />
-          <Property Name="ORI_APP_COUNTRY" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
-          <Property Name="ORI_APP_NUMBER" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
-          <Property Name="ORI_APP_DATE" Type="DateTime" />
-          <Property Name="DESIGN_PATENTNUMBER" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
-          <Property Name="CLASSIFICATIONIPCR" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="CLASSIFICATIONLOCARNO" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="INVENTIONTITLE" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="ABSTRACT" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="DESIGNBRIEFEXPLANATION" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="FULLDOCIMAGE_NUMBEROFFIGURES" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="FULLDOCIMAGE_TYPE" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_STA_FULLTEXT" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_STA_FULLTEXT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_DI_ABS_BIB" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_DI_CLA_DES_DRA" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_DI_BRI_DBI" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_DI_ABS_BIB" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_DI_CLA_DES_DRA" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_DI_BRI_DBI" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_FULLTEXT" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_FULLTEXT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="IMPORT_TIME" Type="DateTime" />
-          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
-        </EntityType>
         <EntityType Name="S_CHINA_PATENT_TEXTCODE">
           <Key>
             <PropertyRef Name="ID" />
@@ -2520,7 +2478,6 @@
           <EntitySet Name="S_CHINA_PATENT_NOTICES" EntityType="Self.S_CHINA_PATENT_NOTICES" />
           <EntitySet Name="S_CHINA_PATENT_REVIEW" EntityType="Self.S_CHINA_PATENT_REVIEW" />
           <EntitySet Name="S_CHINA_PATENT_STAND_TEXTIMAGE" EntityType="Self.S_CHINA_PATENT_STAND_TEXTIMAGE" />
-          <EntitySet Name="S_CHINA_PATENT_STANDARDFULLTXT" EntityType="Self.S_CHINA_PATENT_STANDARDFULLTXT" />
           <EntitySet Name="S_CHINA_PATENT_TEXTCODE" EntityType="Self.S_CHINA_PATENT_TEXTCODE" />
           <EntitySet Name="S_CHINA_PHARMACEUTICAL_PATENT" EntityType="Self.S_CHINA_PHARMACEUTICAL_PATENT" />
           <EntitySet Name="S_CHINA_WELLKNOWN_BRAND" EntityType="Self.S_CHINA_WELLKNOWN_BRAND" />
@@ -2540,6 +2497,7 @@
           <EntitySet Name="IMPORT_ERROR" EntityType="Model.IMPORT_ERROR" />
           <EntitySet Name="S_CHINA_PATENT_TEXTIMAGE" EntityType="Model.S_CHINA_PATENT_TEXTIMAGE" />
           <EntitySet Name="S_DATA_RESOURCE_TYPES_DETAIL" EntityType="Model.S_DATA_RESOURCE_TYPES_DETAIL" />
+          <EntitySet Name="S_CHINA_PATENT_STANDARDFULLTXT" EntityType="Model.S_CHINA_PATENT_STANDARDFULLTXT" />
         </EntityContainer>
         <EntityType Name="IMPORT_ERROR">
           <Key>
@@ -2580,6 +2538,50 @@
           <Property Name="CHINESE_NAME" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
           <Property Name="TABLE_NAME" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
           <Property Name="IMPLEMENTED_IMPORT_LOGIC" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="IN_PROCESS" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="S_CHINA_PATENT_STANDARDFULLTXT">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="STA_PUB_COUNTRY" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="STA_PUB_NUMBER" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="STA_PUB_KIND" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="STA_PUB_DATE" Type="DateTime" />
+          <Property Name="ORI_PUB_COUNTRY" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="ORI_PUB_NUMBER" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="ORI_PUB_KIND" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="ORI_PUB_DATE" Type="DateTime" />
+          <Property Name="STA_APP_COUNTRY" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="STA_APP_NUMBER" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="STA_APP_DATE" Type="DateTime" />
+          <Property Name="ORI_APP_COUNTRY" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="ORI_APP_NUMBER" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="ORI_APP_DATE" Type="DateTime" />
+          <Property Name="DESIGN_PATENTNUMBER" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="CLASSIFICATIONIPCR" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="CLASSIFICATIONLOCARNO" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="INVENTIONTITLE" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="ABSTRACT" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="DESIGNBRIEFEXPLANATION" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="FULLDOCIMAGE_NUMBEROFFIGURES" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="FULLDOCIMAGE_TYPE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_STA_FULLTEXT" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_STA_FULLTEXT" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_DI_ABS_BIB" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_DI_CLA_DES_DRA" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_DI_BRI_DBI" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_DI_ABS_BIB" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_DI_CLA_DES_DRA" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_DI_BRI_DBI" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_FULLTEXT" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_FULLTEXT" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -3335,50 +3337,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="S_CHINA_PATENT_STANDARDFULLTXT">
-            <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_STANDARDFULLTXT">
-              <MappingFragment StoreEntitySet="S_CHINA_PATENT_STANDARDFULLTXT">
-                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
-                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
-                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
-                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
-                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="STA_PUB_COUNTRY" ColumnName="STA_PUB_COUNTRY" />
-                <ScalarProperty Name="STA_PUB_NUMBER" ColumnName="STA_PUB_NUMBER" />
-                <ScalarProperty Name="STA_PUB_KIND" ColumnName="STA_PUB_KIND" />
-                <ScalarProperty Name="STA_PUB_DATE" ColumnName="STA_PUB_DATE" />
-                <ScalarProperty Name="ORI_PUB_COUNTRY" ColumnName="ORI_PUB_COUNTRY" />
-                <ScalarProperty Name="ORI_PUB_NUMBER" ColumnName="ORI_PUB_NUMBER" />
-                <ScalarProperty Name="ORI_PUB_KIND" ColumnName="ORI_PUB_KIND" />
-                <ScalarProperty Name="ORI_PUB_DATE" ColumnName="ORI_PUB_DATE" />
-                <ScalarProperty Name="STA_APP_COUNTRY" ColumnName="STA_APP_COUNTRY" />
-                <ScalarProperty Name="STA_APP_NUMBER" ColumnName="STA_APP_NUMBER" />
-                <ScalarProperty Name="STA_APP_DATE" ColumnName="STA_APP_DATE" />
-                <ScalarProperty Name="ORI_APP_COUNTRY" ColumnName="ORI_APP_COUNTRY" />
-                <ScalarProperty Name="ORI_APP_NUMBER" ColumnName="ORI_APP_NUMBER" />
-                <ScalarProperty Name="ORI_APP_DATE" ColumnName="ORI_APP_DATE" />
-                <ScalarProperty Name="DESIGN_PATENTNUMBER" ColumnName="DESIGN_PATENTNUMBER" />
-                <ScalarProperty Name="CLASSIFICATIONIPCR" ColumnName="CLASSIFICATIONIPCR" />
-                <ScalarProperty Name="CLASSIFICATIONLOCARNO" ColumnName="CLASSIFICATIONLOCARNO" />
-                <ScalarProperty Name="INVENTIONTITLE" ColumnName="INVENTIONTITLE" />
-                <ScalarProperty Name="ABSTRACT" ColumnName="ABSTRACT" />
-                <ScalarProperty Name="DESIGNBRIEFEXPLANATION" ColumnName="DESIGNBRIEFEXPLANATION" />
-                <ScalarProperty Name="FULLDOCIMAGE_NUMBEROFFIGURES" ColumnName="FULLDOCIMAGE_NUMBEROFFIGURES" />
-                <ScalarProperty Name="FULLDOCIMAGE_TYPE" ColumnName="FULLDOCIMAGE_TYPE" />
-                <ScalarProperty Name="PATH_STA_FULLTEXT" ColumnName="PATH_STA_FULLTEXT" />
-                <ScalarProperty Name="EXIST_STA_FULLTEXT" ColumnName="EXIST_STA_FULLTEXT" />
-                <ScalarProperty Name="PATH_DI_ABS_BIB" ColumnName="PATH_DI_ABS_BIB" />
-                <ScalarProperty Name="PATH_DI_CLA_DES_DRA" ColumnName="PATH_DI_CLA_DES_DRA" />
-                <ScalarProperty Name="PATH_DI_BRI_DBI" ColumnName="PATH_DI_BRI_DBI" />
-                <ScalarProperty Name="EXIST_DI_ABS_BIB" ColumnName="EXIST_DI_ABS_BIB" />
-                <ScalarProperty Name="EXIST_DI_CLA_DES_DRA" ColumnName="EXIST_DI_CLA_DES_DRA" />
-                <ScalarProperty Name="EXIST_DI_BRI_DBI" ColumnName="EXIST_DI_BRI_DBI" />
-                <ScalarProperty Name="PATH_FULLTEXT" ColumnName="PATH_FULLTEXT" />
-                <ScalarProperty Name="EXIST_FULLTEXT" ColumnName="EXIST_FULLTEXT" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="S_CHINA_PATENT_TEXTCODE">
             <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_TEXTCODE">
               <MappingFragment StoreEntitySet="S_CHINA_PATENT_TEXTCODE">
@@ -3864,9 +3822,54 @@
           <EntitySetMapping Name="S_DATA_RESOURCE_TYPES_DETAIL">
             <EntityTypeMapping TypeName="Model.S_DATA_RESOURCE_TYPES_DETAIL">
               <MappingFragment StoreEntitySet="S_DATA_RESOURCE_TYPES_DETAIL">
+                <ScalarProperty Name="IN_PROCESS" ColumnName="IN_PROCESS" />
                 <ScalarProperty Name="IMPLEMENTED_IMPORT_LOGIC" ColumnName="IMPLEMENTED_IMPORT_LOGIC" />
                 <ScalarProperty Name="TABLE_NAME" ColumnName="TABLE_NAME" />
                 <ScalarProperty Name="CHINESE_NAME" ColumnName="CHINESE_NAME" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_CHINA_PATENT_STANDARDFULLTXT">
+            <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_STANDARDFULLTXT">
+              <MappingFragment StoreEntitySet="S_CHINA_PATENT_STANDARDFULLTXT">
+                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="EXIST_FULLTEXT" ColumnName="EXIST_FULLTEXT" />
+                <ScalarProperty Name="PATH_FULLTEXT" ColumnName="PATH_FULLTEXT" />
+                <ScalarProperty Name="EXIST_DI_BRI_DBI" ColumnName="EXIST_DI_BRI_DBI" />
+                <ScalarProperty Name="EXIST_DI_CLA_DES_DRA" ColumnName="EXIST_DI_CLA_DES_DRA" />
+                <ScalarProperty Name="EXIST_DI_ABS_BIB" ColumnName="EXIST_DI_ABS_BIB" />
+                <ScalarProperty Name="PATH_DI_BRI_DBI" ColumnName="PATH_DI_BRI_DBI" />
+                <ScalarProperty Name="PATH_DI_CLA_DES_DRA" ColumnName="PATH_DI_CLA_DES_DRA" />
+                <ScalarProperty Name="PATH_DI_ABS_BIB" ColumnName="PATH_DI_ABS_BIB" />
+                <ScalarProperty Name="EXIST_STA_FULLTEXT" ColumnName="EXIST_STA_FULLTEXT" />
+                <ScalarProperty Name="PATH_STA_FULLTEXT" ColumnName="PATH_STA_FULLTEXT" />
+                <ScalarProperty Name="FULLDOCIMAGE_TYPE" ColumnName="FULLDOCIMAGE_TYPE" />
+                <ScalarProperty Name="FULLDOCIMAGE_NUMBEROFFIGURES" ColumnName="FULLDOCIMAGE_NUMBEROFFIGURES" />
+                <ScalarProperty Name="DESIGNBRIEFEXPLANATION" ColumnName="DESIGNBRIEFEXPLANATION" />
+                <ScalarProperty Name="ABSTRACT" ColumnName="ABSTRACT" />
+                <ScalarProperty Name="INVENTIONTITLE" ColumnName="INVENTIONTITLE" />
+                <ScalarProperty Name="CLASSIFICATIONLOCARNO" ColumnName="CLASSIFICATIONLOCARNO" />
+                <ScalarProperty Name="CLASSIFICATIONIPCR" ColumnName="CLASSIFICATIONIPCR" />
+                <ScalarProperty Name="DESIGN_PATENTNUMBER" ColumnName="DESIGN_PATENTNUMBER" />
+                <ScalarProperty Name="ORI_APP_DATE" ColumnName="ORI_APP_DATE" />
+                <ScalarProperty Name="ORI_APP_NUMBER" ColumnName="ORI_APP_NUMBER" />
+                <ScalarProperty Name="ORI_APP_COUNTRY" ColumnName="ORI_APP_COUNTRY" />
+                <ScalarProperty Name="STA_APP_DATE" ColumnName="STA_APP_DATE" />
+                <ScalarProperty Name="STA_APP_NUMBER" ColumnName="STA_APP_NUMBER" />
+                <ScalarProperty Name="STA_APP_COUNTRY" ColumnName="STA_APP_COUNTRY" />
+                <ScalarProperty Name="ORI_PUB_DATE" ColumnName="ORI_PUB_DATE" />
+                <ScalarProperty Name="ORI_PUB_KIND" ColumnName="ORI_PUB_KIND" />
+                <ScalarProperty Name="ORI_PUB_NUMBER" ColumnName="ORI_PUB_NUMBER" />
+                <ScalarProperty Name="ORI_PUB_COUNTRY" ColumnName="ORI_PUB_COUNTRY" />
+                <ScalarProperty Name="STA_PUB_DATE" ColumnName="STA_PUB_DATE" />
+                <ScalarProperty Name="STA_PUB_KIND" ColumnName="STA_PUB_KIND" />
+                <ScalarProperty Name="STA_PUB_NUMBER" ColumnName="STA_PUB_NUMBER" />
+                <ScalarProperty Name="STA_PUB_COUNTRY" ColumnName="STA_PUB_COUNTRY" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>

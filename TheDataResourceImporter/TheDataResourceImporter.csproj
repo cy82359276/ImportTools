@@ -288,6 +288,7 @@
     <Compile Include="Utils\MessageUtil.cs" />
     <Compile Include="Utils\MiscUtil.cs" />
     <Compile Include="Utils\OracleDb.cs" />
+    <Compile Include="Utils\TRSUtil.cs" />
     <EmbeddedResource Include="AboutBoxUS.resx">
       <DependentUpon>AboutBoxUS.cs</DependentUpon>
     </EmbeddedResource>

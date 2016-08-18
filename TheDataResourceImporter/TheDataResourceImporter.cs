@@ -99,6 +99,12 @@ namespace TheDataResourceImporter
         {
             currentFile = filePath;
 
+            MessageUtil.DoAppendTBDetail("您选择的资源类型为：" + fileType);
+
+            MessageUtil.DoAppendTBDetail("当前文件：" + filePath);
+
+
+
             //导入操作信息
             IMPORT_SESSION importSession = MiscUtil.getNewImportSession(fileType, filePath);
             entiesContext.IMPORT_SESSION.Add(importSession);
@@ -110,16 +116,15 @@ namespace TheDataResourceImporter
             //目前监测了XML文件缺失的情况
             if (fileType == "中国专利全文代码化数据")
             {
-                importStartTime = System.DateTime.Now;
 
-                FileInfo selectedFileInfo = new FileInfo(filePath);
+                importSession.TABLENAME = "S_CHINA_PATENT_TEXTCODE";
+                entiesContext.SaveChanges();
+
+                importStartTime = System.DateTime.Now;
 
                 //清零
                 handledCount = 0;
 
-                MessageUtil.DoAppendTBDetail("您选择的资源类型为：" + fileType);
-
-                MessageUtil.DoAppendTBDetail("当前压缩包：" + selectedFileInfo.Name);
 
                 SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
 
@@ -721,13 +726,14 @@ namespace TheDataResourceImporter
             #region 02 中国专利全文图像数据
             else if (fileType == "中国专利全文图像数据")
             {
+                importSession.TABLENAME = "s_China_Patent_Textimage".ToUpper();
+                entiesContext.SaveChanges();
+
+
                 importStartTime = System.DateTime.Now;
 
                 FileInfo selectedFileInfo = new FileInfo(filePath);
 
-                MessageUtil.DoAppendTBDetail("您选择的资源类型为：" + fileType);
-
-                MessageUtil.DoAppendTBDetail("当前压缩包：" + selectedFileInfo.Name);
 
                 SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
 
@@ -757,7 +763,7 @@ namespace TheDataResourceImporter
                                      where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 1
                                      select CompressUtil.removeDirEntrySlash(entry.Key)).FirstOrDefault();
 
-                var PUB_DATE = System.DateTime.Now;
+                DateTime? PUB_DATE = System.DateTime.Now;
                 if (null != pub_dateEntry)
                 {
                     PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(pub_dateEntry);
@@ -811,21 +817,219 @@ namespace TheDataResourceImporter
             }
             #endregion
 
-            #region 03 中国专利标准化全文文本数据
+            #region 03 中国专利标准化全文文本数据 
+            //有疑问: XML结构不同, 文件路径不确定
             else if(fileType == "中国专利标准化全文文本数据")
             {
 
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.PathSeparator}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+                    //appl-type
+                    var rootElement = doc.Root;
+
+
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[dataFormat='standard']/base:DocumentID/base:WIPOST3Code");
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[dataFormat='standard']/base:DocumentID/base:DocNumber");
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[dataFormat='standard']/base:DocumentID/base:Kind");
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[dataFormat='standard']/base:DocumentID/base:Date"));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[dataFormat='original']/base:DocumentID/base:WIPOST3Code");
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[dataFormat='original']/base:DocumentID/base:DocNumber");
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[dataFormat='original']/base:DocumentID/base:Kind");
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:PublicationReference[dataFormat='original']/base:DocumentID/base:Date"));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[dataFormat='standard']/base:DocumentID/base:WIPOST3Code");
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:ApplicationReference[dataFormat='standard']/base:DocumentID/base:DocNumber");
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:ApplicationReference[dataFormat='standard']/base:DocumentID/base:Date"));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[dataFormat='original']/base:DocumentID/base:WIPOST3Code");
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[dataFormat='original']/base:DocumentID/base:DocNumber");
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[dataFormat='original']/base:DocumentID/base:Date"));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber");
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:ClassificationIPCRDetails/business:ClassificationIPCR/base:Text");
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno");
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle");
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs");
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation");
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures");
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type");
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePath(filePath, 2) + Path.PathSeparator + entry.Key;
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    entityObject.PATH_DI_ABS_BIB = null;
+
+                    entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    entityObject.PATH_DI_BRI_DBI = null;
+
+                    entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    entityObject.PATH_FULLTEXT = null;
+
+                    entityObject.EXIST_FULLTEXT = "0";
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
             }
 
             #endregion
 
-            #region 中国专利标准化全文图像数据
+            #region 04 中国专利标准化全文图像数据
 
             else if (fileType == "中国专利标准化全文图像数据")
             {
 
 
+
+
+
+
+
             }
+
+            #endregion
+
+            #region 05 中国专利公报数据
             else if (fileType == "中国专利公报数据")
             {
 

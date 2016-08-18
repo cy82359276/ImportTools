@@ -109,10 +109,35 @@ namespace TheDataResourceImporter.Utils
 
 
 
-        public  static  DateTime pareseDateTimeExactUseCurrentCultureInfo(string dataStr, string format = "yyyyMMdd")
+        public  static  DateTime? pareseDateTimeExactUseCurrentCultureInfo(string dataStr, string format = "yyyyMMdd")
         {
-            return DateTime.ParseExact(dataStr, format, System.Globalization.CultureInfo.CurrentCulture);
+            DateTime? resultDate = null;
+            try
+            {
+                resultDate = DateTime.ParseExact(dataStr, format, System.Globalization.CultureInfo.CurrentCulture);
+            }
+            catch (Exception)
+            {
+
+            }
+
+            return resultDate;
         }
 
+        public static  string getRelativeFilePath(string path, int depth)
+        {
+            string relativeFilePath = "";
+            FileInfo fileInfoTmp = new FileInfo(path);
+            if(fileInfoTmp.Exists)
+            {
+                var parentDir = fileInfoTmp.Directory;
+                for (int index = 0; index < depth - 1; index++)
+                {
+                    parentDir = parentDir.Parent;
+                }
+                relativeFilePath = fileInfoTmp.FullName.Substring(parentDir.FullName.Length);
+            }
+            return relativeFilePath;
+        }
     }
 }

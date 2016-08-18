@@ -18,5 +18,6 @@ namespace TheDataResourceImporter
         public string CHINESE_NAME { get; set; }
         public string TABLE_NAME { get; set; }
         public string IMPLEMENTED_IMPORT_LOGIC { get; set; }
+        public string IN_PROCESS { get; set; }
     }
 }
