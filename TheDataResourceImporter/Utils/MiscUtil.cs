@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.Xml;
 
 namespace TheDataResourceImporter.Utils
 {
@@ -47,10 +48,20 @@ namespace TheDataResourceImporter.Utils
         /***
          *获取指定XPath的值 
          ***/
-        public static string getXElementValueByXPath(XElement currentNode, string xPath, string attribute = "")
+        public static string getXElementValueByXPath(XElement currentNode, string xPath, string attribute = "", IXmlNamespaceResolver resolver = null)
         {
             string value = "";
-            XElement target = currentNode.XPathSelectElement(xPath);
+
+            XElement target = null;
+            if (null != resolver)
+            {
+                target = currentNode.XPathSelectElement(xPath, resolver);
+            }
+            else
+            {
+                target = currentNode.XPathSelectElement(xPath);
+            }
+            
             if(null != target)
             {
                 if(String.IsNullOrEmpty(attribute))
@@ -124,7 +135,7 @@ namespace TheDataResourceImporter.Utils
             return resultDate;
         }
 
-        public static  string getRelativeFilePath(string path, int depth)
+        public static  string getRelativeFilePathInclude(string path, int depth)
         {
             string relativeFilePath = "";
             FileInfo fileInfoTmp = new FileInfo(path);
@@ -135,7 +146,7 @@ namespace TheDataResourceImporter.Utils
                 {
                     parentDir = parentDir.Parent;
                 }
-                relativeFilePath = fileInfoTmp.FullName.Substring(parentDir.FullName.Length);
+                relativeFilePath =parentDir.Name +  fileInfoTmp.FullName.Substring(parentDir.FullName.Length);
             }
             return relativeFilePath;
         }
