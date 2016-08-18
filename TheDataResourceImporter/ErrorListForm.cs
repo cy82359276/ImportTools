@@ -231,6 +231,10 @@ namespace TheDataResourceImporter
 
         private void refreshDataGrid()
         {
+            //var selectedCell = dataGridViewErrorList.SelectedCells[0];
+            //var rowIndex = selectedCell.RowIndex;
+            //var columnIndex = selectedCell.ColumnIndex;
+            var currentCell = dataGridViewErrorList.CurrentCell;
             string currentPageStr = labelCurrentPage.Text;
             int currentPageTemp = 1;
             if (Int32.TryParse(currentPageStr, out currentPageTemp))
@@ -238,6 +242,8 @@ namespace TheDataResourceImporter
 
             }
             showPage(currentPageTemp, new DataSourceEntities());
+            //currentCell.Selected = true;
+            //dataGridViewErrorList.Rows[currentCell.RowIndex].Cells[currentCell.ColumnIndex].Selected = true;
         }
 
         private void bindingNavigatorMoveFirstItem_Click(object sender, EventArgs e)
