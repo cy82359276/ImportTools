@@ -14,12 +14,19 @@ namespace TheDataResourceImporter.Utils
         /***
          * TRS文件入库
          * **/
-        public static List<Dictionary<string, string>> paraseTrsRecord(string filePath)
+        public static List<Dictionary<string, string>> paraseTrsRecord(string filePath, Encoding encode=null)
         {
             List<Dictionary<string, string>> resultList = new List<Dictionary<string, string>>();
 
             FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            StreamReader sr = new StreamReader(fs, Encoding.UTF8);
+
+            
+            StreamReader sr = new StreamReader(fs, Encoding.UTF8);//默认UTF8
+
+            if(null != encode)
+            {
+                sr = new StreamReader(fs, encode);//使用指定的编码
+            }
 
             string str = "";
 

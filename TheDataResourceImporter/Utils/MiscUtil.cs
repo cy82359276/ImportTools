@@ -150,5 +150,15 @@ namespace TheDataResourceImporter.Utils
             }
             return relativeFilePath;
         }
+
+
+        public static string  getDictValueOrDefaultByKey(Dictionary<string, string> dict, string key)
+        {
+            string value = "";//默认值
+
+            dict.TryGetValue(key, out value);
+
+            return value;
+        }
     }
 }

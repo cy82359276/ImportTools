@@ -883,6 +883,14 @@ namespace TheDataResourceImporter
 
                 //已处理计数清零
                 handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
                 #region 循环入库
                 foreach (IArchiveEntry entry in allXMLEntires)
                 {
@@ -1007,15 +1015,6 @@ namespace TheDataResourceImporter
                     MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
                 }
                 #endregion 循环入库
-
-                if (0 == allXMLEntires.Count())
-                {
-                    MessageUtil.DoAppendTBDetail("没有找到XML");
-                    importSession.NOTE = "没有找到XML";
-                    //添加错误信息
-                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
-                    entiesContext.SaveChanges();
-                }
             }
 
             #endregion
@@ -1037,6 +1036,9 @@ namespace TheDataResourceImporter
             #region 05 中国专利公报数据
             else if (fileType == "中国专利公报数据")
             {
+
+                MessageUtil.DoAppendTBDetail($"正在解析TRS文件");
+
                 List<Dictionary<string, string>> result = TRSUtil.paraseTrsRecord(filePath);
 
                 MessageUtil.DoAppendTBDetail($"发现{result.Count}条记录");
@@ -1049,17 +1051,34 @@ namespace TheDataResourceImporter
                 importSession.IS_ZIP = "N";
                 entiesContext.SaveChanges();
 
+                var parsedEntites = from rec in result
+                                     select new S_CHINA_PATENT_GAZETTE()
+                                     {
+                                         APPL_TYPE = MiscUtil.getDictValueOrDefaultByKey(rec, "类型"),
+                                         APP_NUMBER = MiscUtil.getDictValueOrDefaultByKey(rec, "申请号"),
+                                         PATH_TIF = MiscUtil.getDictValueOrDefaultByKey(rec, "图形路径"),
+                                         PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getDictValueOrDefaultByKey(rec, "公开（公告）日")),
+                                         THE_PAGE = MiscUtil.getDictValueOrDefaultByKey(rec, "专利所在页"),
+                                         TURN_PAGE_INFORMATION = MiscUtil.getDictValueOrDefaultByKey(rec, "翻页信息"),
+                                         FILE_PATH = filePath,
+                                         ID = System.Guid.NewGuid().ToString(),
+                                         IMPORT_SESSION_ID = importSession.SESSION_ID,
+                                         IMPORT_TIME = System.DateTime.Now,
+                                     };
 
+                foreach (var entityObject in parsedEntites)
+                {
+                    handledCount++;
+                    entiesContext.S_CHINA_PATENT_GAZETTE.Add(entityObject);
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
 
-
-
-
-
-
-
-
-
-
+                    //每500条, 提交下
+                    if(handledCount % 500 == 0)
+                    {
+                        entiesContext.SaveChanges();
+                    }
+                }
+                entiesContext.SaveChanges();
             }
 
             #endregion
@@ -1069,21 +1088,69 @@ namespace TheDataResourceImporter
 
 
             }
+            #endregion
+            #region 10 中国专利数据法律状态数据
             else if (fileType == "中国专利法律状态数据")
             {
+                MessageUtil.DoAppendTBDetail($"正在解析TRS文件");
 
+                List<Dictionary<string, string>> result = TRSUtil.paraseTrsRecord(filePath, System.Text.Encoding.Default);
+
+                MessageUtil.DoAppendTBDetail($"发现{result.Count}条记录");
+
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+                totalCount = result.Count();
+                importSession.TOTAL_ITEM = totalCount;
+                importSession.TABLENAME = "S_CHINA_PATENT_GAZETTE".ToUpper();
+                importSession.IS_ZIP = "N";
+                entiesContext.SaveChanges();
+
+                var parsedEntites = from rec in result
+                                    select new S_CHINA_PATENT_LAWSTATE()
+                                    {
+                                        ID = System.Guid.NewGuid().ToString(),
+                                        APP_NUMBER = MiscUtil.getDictValueOrDefaultByKey(rec, "申请号"),
+                                        PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getDictValueOrDefaultByKey(rec, "法律状态公告日"), "yyyy.MM.dd"),
+                                        LAW_STATE = MiscUtil.getDictValueOrDefaultByKey(rec, "法律状态"),
+                                        LAW_STATE_INFORMATION = MiscUtil.getDictValueOrDefaultByKey(rec, "法律状态信息"),
+                                        FILE_PATH = filePath,
+                                        IMPORT_SESSION_ID = importSession.SESSION_ID,
+                                        IMPORT_TIME = System.DateTime.Now
+                                    };
+
+                foreach (var entityObject in parsedEntites)
+                {
+                    handledCount++;
+                    entiesContext.S_CHINA_PATENT_LAWSTATE.Add(entityObject);
+
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+
+                    //每500条, 提交下
+                    if (handledCount % 500 == 0)
+                    {
+                        entiesContext.SaveChanges();
+                    }
+                }
+                entiesContext.SaveChanges();
 
             }
+            #endregion
+            #region 
             else if (fileType == "中国专利法律状态变更翻译数据")
             {
 
 
             }
+            #endregion
+            #region 
             else if (fileType == "中国标准化简单引文数据")
             {
 
 
             }
+            #endregion
+            #region 
             else if (fileType == "专利缴费数据")
             {
 
@@ -1094,21 +1161,29 @@ namespace TheDataResourceImporter
 
 
             }
+            #endregion
+            #region 
             else if (fileType == "区域代码库")
             {
 
 
             }
+            #endregion
+            #region 
             else if (fileType == "美国专利全文文本数据（标准化）")
             {
 
 
             }
+            #endregion
+            #region 
             else if (fileType == "欧专局专利全文文本数据（标准化）")
             {
 
 
             }
+            #endregion
+            #region 
             else if (fileType == "韩国专利全文代码化数据（标准化）")
             {
 
@@ -1497,19 +1572,20 @@ namespace TheDataResourceImporter
             #endregion
             #endregion
 
-            importSession.LAST_TIME = new Decimal(importSession.START_TIME != null ? DateTime.Now.Subtract(importSession.START_TIME.Value).TotalSeconds : 0);
 
+
+
+
+
+
+
+            importSession.LAST_TIME = new Decimal(importSession.START_TIME != null ? DateTime.Now.Subtract(importSession.START_TIME.Value).TotalSeconds : 0);
             //是否发生错误
             importSession.HAS_ERROR = importSession.FAILED_COUNT > 0 ? "Y" : "N";
-
             importSession.ZIP_ENTRY_POINTOR = handledCount;
-
             importSession.COMPLETED = totalCount == handledCount ? "Y" : "N";
-
             importSession.ITEMS_POINT = handledCount;
-
             importSession.TOTAL_ITEM = totalCount;
-
             entiesContext.SaveChanges();
 
             return true;

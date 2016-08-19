@@ -49,7 +49,6 @@ namespace TheDataResourceImporter
         public DbSet<S_CHINA_PATENT_INVALID> S_CHINA_PATENT_INVALID { get; set; }
         public DbSet<S_CHINA_PATENT_JUDGMENT> S_CHINA_PATENT_JUDGMENT { get; set; }
         public DbSet<S_CHINA_PATENT_LAWSPROCESS> S_CHINA_PATENT_LAWSPROCESS { get; set; }
-        public DbSet<S_CHINA_PATENT_LAWSTATE> S_CHINA_PATENT_LAWSTATE { get; set; }
         public DbSet<S_CHINA_PATENT_LAWSTATE_CHANGE> S_CHINA_PATENT_LAWSTATE_CHANGE { get; set; }
         public DbSet<S_CHINA_PATENT_NOTICES> S_CHINA_PATENT_NOTICES { get; set; }
         public DbSet<S_CHINA_PATENT_REVIEW> S_CHINA_PATENT_REVIEW { get; set; }
@@ -75,5 +74,6 @@ namespace TheDataResourceImporter
         public DbSet<S_DATA_RESOURCE_TYPES_DETAIL> S_DATA_RESOURCE_TYPES_DETAIL { get; set; }
         public DbSet<S_CHINA_PATENT_STANDARDFULLTXT> S_CHINA_PATENT_STANDARDFULLTXT { get; set; }
         public DbSet<S_CHINA_PATENT_GAZETTE> S_CHINA_PATENT_GAZETTE { get; set; }
+        public DbSet<S_CHINA_PATENT_LAWSTATE> S_CHINA_PATENT_LAWSTATE { get; set; }
     }
 }

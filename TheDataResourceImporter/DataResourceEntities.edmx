@@ -662,11 +662,15 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="APP_NUMBER" Type="varchar2" MaxLength="20" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="APP_NUMBER" Type="varchar2" MaxLength="200" />
           <Property Name="PUB_DATE" Type="date" />
-          <Property Name="LAW_STATE" Type="varchar2" MaxLength="50" />
-          <Property Name="LAW_STATE_INFORMATION" Type="varchar2" MaxLength="150" />
+          <Property Name="LAW_STATE" Type="varchar2" MaxLength="200" />
+          <Property Name="LAW_STATE_INFORMATION" Type="varchar2" MaxLength="500" />
+          <Property Name="IMPORT_SESSION_ID" Type="varchar2" MaxLength="100" />
+          <Property Name="IMPORT_TIME" Type="date" />
+          <Property Name="FILE_PATH" Type="varchar2" MaxLength="1000" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
         </EntityType>
         <EntityType Name="S_CHINA_PATENT_LAWSTATE_CHANGE">
           <Key>
@@ -1921,16 +1925,6 @@
           <Property Name="PATH_XML" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="EXIST_XML" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
         </EntityType>
-        <EntityType Name="S_CHINA_PATENT_LAWSTATE">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="APP_NUMBER" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="PUB_DATE" Type="DateTime" />
-          <Property Name="LAW_STATE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="LAW_STATE_INFORMATION" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
-        </EntityType>
         <EntityType Name="S_CHINA_PATENT_LAWSTATE_CHANGE">
           <Key>
             <PropertyRef Name="ID" />
@@ -2464,7 +2458,6 @@
           <EntitySet Name="S_CHINA_PATENT_INVALID" EntityType="Self.S_CHINA_PATENT_INVALID" />
           <EntitySet Name="S_CHINA_PATENT_JUDGMENT" EntityType="Self.S_CHINA_PATENT_JUDGMENT" />
           <EntitySet Name="S_CHINA_PATENT_LAWSPROCESS" EntityType="Self.S_CHINA_PATENT_LAWSPROCESS" />
-          <EntitySet Name="S_CHINA_PATENT_LAWSTATE" EntityType="Self.S_CHINA_PATENT_LAWSTATE" />
           <EntitySet Name="S_CHINA_PATENT_LAWSTATE_CHANGE" EntityType="Self.S_CHINA_PATENT_LAWSTATE_CHANGE" />
           <EntitySet Name="S_CHINA_PATENT_NOTICES" EntityType="Self.S_CHINA_PATENT_NOTICES" />
           <EntitySet Name="S_CHINA_PATENT_REVIEW" EntityType="Self.S_CHINA_PATENT_REVIEW" />
@@ -2490,6 +2483,7 @@
           <EntitySet Name="S_DATA_RESOURCE_TYPES_DETAIL" EntityType="Model.S_DATA_RESOURCE_TYPES_DETAIL" />
           <EntitySet Name="S_CHINA_PATENT_STANDARDFULLTXT" EntityType="Model.S_CHINA_PATENT_STANDARDFULLTXT" />
           <EntitySet Name="S_CHINA_PATENT_GAZETTE" EntityType="Model.S_CHINA_PATENT_GAZETTE" />
+          <EntitySet Name="S_CHINA_PATENT_LAWSTATE" EntityType="Model.S_CHINA_PATENT_LAWSTATE" />
         </EntityContainer>
         <EntityType Name="IMPORT_ERROR">
           <Key>
@@ -2586,6 +2580,20 @@
           <Property Name="PATH_TIF" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
           <Property Name="THE_PAGE" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
           <Property Name="TURN_PAGE_INFORMATION" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="S_CHINA_PATENT_LAWSTATE">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="APP_NUMBER" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="PUB_DATE" Type="DateTime" />
+          <Property Name="LAW_STATE" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="LAW_STATE_INFORMATION" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
           <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="IMPORT_TIME" Type="DateTime" />
           <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
@@ -3242,17 +3250,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="S_CHINA_PATENT_LAWSTATE">
-            <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_LAWSTATE">
-              <MappingFragment StoreEntitySet="S_CHINA_PATENT_LAWSTATE">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="APP_NUMBER" ColumnName="APP_NUMBER" />
-                <ScalarProperty Name="PUB_DATE" ColumnName="PUB_DATE" />
-                <ScalarProperty Name="LAW_STATE" ColumnName="LAW_STATE" />
-                <ScalarProperty Name="LAW_STATE_INFORMATION" ColumnName="LAW_STATE_INFORMATION" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="S_CHINA_PATENT_LAWSTATE_CHANGE">
             <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_LAWSTATE_CHANGE">
               <MappingFragment StoreEntitySet="S_CHINA_PATENT_LAWSTATE_CHANGE">
@@ -3882,6 +3879,21 @@
                 <ScalarProperty Name="APPL_TYPE" ColumnName="APPL_TYPE" />
                 <ScalarProperty Name="APP_NUMBER" ColumnName="APP_NUMBER" />
                 <ScalarProperty Name="PUB_DATE" ColumnName="PUB_DATE" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_CHINA_PATENT_LAWSTATE">
+            <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_LAWSTATE">
+              <MappingFragment StoreEntitySet="S_CHINA_PATENT_LAWSTATE">
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="LAW_STATE_INFORMATION" ColumnName="LAW_STATE_INFORMATION" />
+                <ScalarProperty Name="LAW_STATE" ColumnName="LAW_STATE" />
+                <ScalarProperty Name="PUB_DATE" ColumnName="PUB_DATE" />
+                <ScalarProperty Name="APP_NUMBER" ColumnName="APP_NUMBER" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>
