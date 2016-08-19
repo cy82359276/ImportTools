@@ -21,5 +21,9 @@ namespace TheDataResourceImporter
         public string PATH_TIF { get; set; }
         public string THE_PAGE { get; set; }
         public string TURN_PAGE_INFORMATION { get; set; }
+        public string IMPORT_SESSION_ID { get; set; }
+        public Nullable<System.DateTime> IMPORT_TIME { get; set; }
+        public string FILE_PATH { get; set; }
+        public string ARCHIVE_INNER_PATH { get; set; }
     }
 }
