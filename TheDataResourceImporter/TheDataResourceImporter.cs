@@ -798,7 +798,7 @@ namespace TheDataResourceImporter
                     {
                         handledCount++;
                         string importedMsg = ImportLogicUtil.importS_China_Patent_TextImage(entiesContext, filePath, importSession.SESSION_ID, APPL_TYPE, PUB_DATE, key, "1");
-                        MessageUtil.appendTbDetail($"记录:{importedMsg}插入成功");
+                        MessageUtil.DoAppendTBDetail($"记录:{importedMsg}插入成功");
                         MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
                     }
                 });
@@ -809,7 +809,7 @@ namespace TheDataResourceImporter
                     {
                         handledCount++;
                         string importedMsg = ImportLogicUtil.importS_China_Patent_TextImage(entiesContext, filePath, importSession.SESSION_ID, APPL_TYPE, PUB_DATE, key, "0");
-                        MessageUtil.appendTbDetail($"记录:{importedMsg}插入成功");
+                        MessageUtil.DoAppendTBDetail($"记录:{importedMsg}插入成功");
                      }
                 });
                 
@@ -991,6 +991,8 @@ namespace TheDataResourceImporter
 
                     //entityObject.EXIST_FULLTEXT = "0";
 
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
                     entiesContext.SaveChanges();
 
 
@@ -1032,13 +1034,36 @@ namespace TheDataResourceImporter
             }
 
             #endregion
-
             #region 05 中国专利公报数据
             else if (fileType == "中国专利公报数据")
             {
+                List<Dictionary<string, string>> result = TRSUtil.paraseTrsRecord(filePath);
+
+                MessageUtil.DoAppendTBDetail($"发现{result.Count}条记录");
+
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+                totalCount = result.Count();
+                importSession.TOTAL_ITEM = totalCount;
+                importSession.TABLENAME = "S_CHINA_PATENT_GAZETTE".ToUpper();
+                importSession.IS_ZIP = "N";
+                entiesContext.SaveChanges();
+
+
+
+
+
+
+
+
+
+
 
 
             }
+
+            #endregion
+            #region 06 中国专利著录项目与文摘数据
             else if (fileType == "中国专利著录项目与文摘数据")
             {
 

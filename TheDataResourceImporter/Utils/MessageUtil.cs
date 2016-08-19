@@ -44,7 +44,6 @@ namespace TheDataResourceImporter.Utils
             //添加消息换行
             msg = Environment.NewLine + timeStamp + Environment.NewLine + msg;
 
-
             //var task = new Task(()=> appendTbDetail?.Invoke(msg));
             //task.Start();
             //异步更新

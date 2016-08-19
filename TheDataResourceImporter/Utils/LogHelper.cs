@@ -37,14 +37,14 @@ namespace TheDataResourceImporter.Utils
             string logDir = ConfigurationManager.AppSettings["tempDir"];
 
 
-            var task = new Task(() =>
-            {
-                lock (typeof(LogHelper))
-                {
-                    WriteLog(logDir, "Import", msg);
-                } });
-            task.Start();
-            //WriteLog(logDir, "Import", msg);
+            //var task = new Task(() =>
+            //{
+            //    lock (typeof(LogHelper))
+            //    {
+            //        WriteLog(logDir, "Import", msg);
+            //    } });
+            //task.Start();
+            WriteLog(logDir, "Import", msg);
         }
 
 
