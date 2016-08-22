@@ -676,10 +676,14 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="AP" Type="varchar2" MaxLength="20" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="AP" Type="varchar2" MaxLength="200" />
           <Property Name="PD" Type="date" />
-          <Property Name="FLZTINFOENRLT" Type="varchar2" MaxLength="500" />
+          <Property Name="IMPORT_SESSION_ID" Type="varchar2" MaxLength="100" />
+          <Property Name="IMPORT_TIME" Type="date" />
+          <Property Name="FILE_PATH" Type="varchar2" MaxLength="1000" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
+          <Property Name="FLZTINFOENRLT" Type="clob" />
         </EntityType>
         <EntityType Name="S_CHINA_PATENT_NOTICES">
           <Key>
@@ -1202,20 +1206,24 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="FEE" Type="varchar2" MaxLength="10" />
-          <Property Name="FEETYPE" Type="varchar2" MaxLength="50" />
-          <Property Name="RECEIPTION" Type="varchar2" MaxLength="50" />
-          <Property Name="REGISTERCODE" Type="varchar2" MaxLength="20" />
-          <Property Name="APPLYNUM" Type="varchar2" MaxLength="20" />
-          <Property Name="HKINFO" Type="varchar2" MaxLength="100" />
-          <Property Name="STATE" Type="varchar2" MaxLength="50" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="FEE" Type="varchar2" MaxLength="50" />
+          <Property Name="FEETYPE" Type="varchar2" MaxLength="100" />
+          <Property Name="RECEIPTION" Type="varchar2" MaxLength="100" />
+          <Property Name="REGISTERCODE" Type="varchar2" MaxLength="50" />
+          <Property Name="APPLYNUM" Type="varchar2" MaxLength="50" />
+          <Property Name="HKINFO" Type="varchar2" MaxLength="500" />
+          <Property Name="STATE" Type="varchar2" MaxLength="100" />
           <Property Name="HKDATE" Type="date" />
           <Property Name="RECEIPTIONDATE" Type="date" />
-          <Property Name="PAYMENTUNITTYPE" Type="varchar2" MaxLength="50" />
-          <Property Name="EN_FEETYPE" Type="varchar2" MaxLength="50" />
-          <Property Name="EN_STATE" Type="varchar2" MaxLength="50" />
-          <Property Name="APPLYNUM_NEW" Type="varchar2" MaxLength="20" />
+          <Property Name="PAYMENTUNITTYPE" Type="varchar2" MaxLength="100" />
+          <Property Name="EN_FEETYPE" Type="varchar2" MaxLength="100" />
+          <Property Name="EN_STATE" Type="varchar2" MaxLength="100" />
+          <Property Name="APPLYNUM_NEW" Type="varchar2" MaxLength="50" />
+          <Property Name="IMPORT_SESSION_ID" Type="varchar2" MaxLength="100" />
+          <Property Name="IMPORT_TIME" Type="date" />
+          <Property Name="FILE_PATH" Type="varchar2" MaxLength="1000" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
         </EntityType>
         <EntityType Name="S_WORLD_LEGAL_STATUS">
           <Key>
@@ -1925,15 +1933,6 @@
           <Property Name="PATH_XML" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="EXIST_XML" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
         </EntityType>
-        <EntityType Name="S_CHINA_PATENT_LAWSTATE_CHANGE">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="AP" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="PD" Type="DateTime" />
-          <Property Name="FLZTINFOENRLT" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-        </EntityType>
         <EntityType Name="S_CHINA_PATENT_NOTICES">
           <Key>
             <PropertyRef Name="ID" />
@@ -2383,25 +2382,6 @@
           <Property Name="PATH_XML" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="EXIST_XML" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
         </EntityType>
-        <EntityType Name="S_PATENT_PAYMENT">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="FEE" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="FEETYPE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="RECEIPTION" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="REGISTERCODE" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="APPLYNUM" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="HKINFO" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="STATE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="HKDATE" Type="DateTime" />
-          <Property Name="RECEIPTIONDATE" Type="DateTime" />
-          <Property Name="PAYMENTUNITTYPE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="EN_FEETYPE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="EN_STATE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="APPLYNUM_NEW" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-        </EntityType>
         <EntityType Name="S_WORLD_LEGAL_STATUS">
           <Key>
             <PropertyRef Name="ID" />
@@ -2458,7 +2438,6 @@
           <EntitySet Name="S_CHINA_PATENT_INVALID" EntityType="Self.S_CHINA_PATENT_INVALID" />
           <EntitySet Name="S_CHINA_PATENT_JUDGMENT" EntityType="Self.S_CHINA_PATENT_JUDGMENT" />
           <EntitySet Name="S_CHINA_PATENT_LAWSPROCESS" EntityType="Self.S_CHINA_PATENT_LAWSPROCESS" />
-          <EntitySet Name="S_CHINA_PATENT_LAWSTATE_CHANGE" EntityType="Self.S_CHINA_PATENT_LAWSTATE_CHANGE" />
           <EntitySet Name="S_CHINA_PATENT_NOTICES" EntityType="Self.S_CHINA_PATENT_NOTICES" />
           <EntitySet Name="S_CHINA_PATENT_REVIEW" EntityType="Self.S_CHINA_PATENT_REVIEW" />
           <EntitySet Name="S_CHINA_PATENT_STAND_TEXTIMAGE" EntityType="Self.S_CHINA_PATENT_STAND_TEXTIMAGE" />
@@ -2475,7 +2454,6 @@
           <EntitySet Name="S_MADRID_BRAND_ENTER_CHINA" EntityType="Self.S_MADRID_BRAND_ENTER_CHINA" />
           <EntitySet Name="S_MADRID_BRAND_PURCHASE" EntityType="Self.S_MADRID_BRAND_PURCHASE" />
           <EntitySet Name="S_PATENT_FAMILY" EntityType="Self.S_PATENT_FAMILY" />
-          <EntitySet Name="S_PATENT_PAYMENT" EntityType="Self.S_PATENT_PAYMENT" />
           <EntitySet Name="S_WORLD_LEGAL_STATUS" EntityType="Self.S_WORLD_LEGAL_STATUS" />
           <EntitySet Name="S_ZONE_CODE_BASE" EntityType="Self.S_ZONE_CODE_BASE" />
           <EntitySet Name="IMPORT_ERROR" EntityType="Model.IMPORT_ERROR" />
@@ -2484,6 +2462,8 @@
           <EntitySet Name="S_CHINA_PATENT_STANDARDFULLTXT" EntityType="Model.S_CHINA_PATENT_STANDARDFULLTXT" />
           <EntitySet Name="S_CHINA_PATENT_GAZETTE" EntityType="Model.S_CHINA_PATENT_GAZETTE" />
           <EntitySet Name="S_CHINA_PATENT_LAWSTATE" EntityType="Model.S_CHINA_PATENT_LAWSTATE" />
+          <EntitySet Name="S_CHINA_PATENT_LAWSTATE_CHANGE" EntityType="Model.S_CHINA_PATENT_LAWSTATE_CHANGE" />
+          <EntitySet Name="S_PATENT_PAYMENT" EntityType="Model.S_PATENT_PAYMENT" />
         </EntityContainer>
         <EntityType Name="IMPORT_ERROR">
           <Key>
@@ -2594,6 +2574,42 @@
           <Property Name="PUB_DATE" Type="DateTime" />
           <Property Name="LAW_STATE" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="LAW_STATE_INFORMATION" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="S_CHINA_PATENT_LAWSTATE_CHANGE">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="AP" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="PD" Type="DateTime" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FLZTINFOENRLT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="S_PATENT_PAYMENT">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="FEE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="FEETYPE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="RECEIPTION" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="REGISTERCODE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="APPLYNUM" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="HKINFO" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="STATE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="HKDATE" Type="DateTime" />
+          <Property Name="RECEIPTIONDATE" Type="DateTime" />
+          <Property Name="PAYMENTUNITTYPE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="EN_FEETYPE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="EN_STATE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="APPLYNUM_NEW" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="IMPORT_TIME" Type="DateTime" />
           <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
@@ -3250,16 +3266,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="S_CHINA_PATENT_LAWSTATE_CHANGE">
-            <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_LAWSTATE_CHANGE">
-              <MappingFragment StoreEntitySet="S_CHINA_PATENT_LAWSTATE_CHANGE">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="AP" ColumnName="AP" />
-                <ScalarProperty Name="PD" ColumnName="PD" />
-                <ScalarProperty Name="FLZTINFOENRLT" ColumnName="FLZTINFOENRLT" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="S_CHINA_PATENT_NOTICES">
             <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_NOTICES">
               <MappingFragment StoreEntitySet="S_CHINA_PATENT_NOTICES">
@@ -3725,26 +3731,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="S_PATENT_PAYMENT">
-            <EntityTypeMapping TypeName="Model.S_PATENT_PAYMENT">
-              <MappingFragment StoreEntitySet="S_PATENT_PAYMENT">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="FEE" ColumnName="FEE" />
-                <ScalarProperty Name="FEETYPE" ColumnName="FEETYPE" />
-                <ScalarProperty Name="RECEIPTION" ColumnName="RECEIPTION" />
-                <ScalarProperty Name="REGISTERCODE" ColumnName="REGISTERCODE" />
-                <ScalarProperty Name="APPLYNUM" ColumnName="APPLYNUM" />
-                <ScalarProperty Name="HKINFO" ColumnName="HKINFO" />
-                <ScalarProperty Name="STATE" ColumnName="STATE" />
-                <ScalarProperty Name="HKDATE" ColumnName="HKDATE" />
-                <ScalarProperty Name="RECEIPTIONDATE" ColumnName="RECEIPTIONDATE" />
-                <ScalarProperty Name="PAYMENTUNITTYPE" ColumnName="PAYMENTUNITTYPE" />
-                <ScalarProperty Name="EN_FEETYPE" ColumnName="EN_FEETYPE" />
-                <ScalarProperty Name="EN_STATE" ColumnName="EN_STATE" />
-                <ScalarProperty Name="APPLYNUM_NEW" ColumnName="APPLYNUM_NEW" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="S_WORLD_LEGAL_STATUS">
             <EntityTypeMapping TypeName="Model.S_WORLD_LEGAL_STATUS">
               <MappingFragment StoreEntitySet="S_WORLD_LEGAL_STATUS">
@@ -3894,6 +3880,44 @@
                 <ScalarProperty Name="LAW_STATE" ColumnName="LAW_STATE" />
                 <ScalarProperty Name="PUB_DATE" ColumnName="PUB_DATE" />
                 <ScalarProperty Name="APP_NUMBER" ColumnName="APP_NUMBER" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_CHINA_PATENT_LAWSTATE_CHANGE">
+            <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_LAWSTATE_CHANGE">
+              <MappingFragment StoreEntitySet="S_CHINA_PATENT_LAWSTATE_CHANGE">
+                <ScalarProperty Name="FLZTINFOENRLT" ColumnName="FLZTINFOENRLT" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="PD" ColumnName="PD" />
+                <ScalarProperty Name="AP" ColumnName="AP" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_PATENT_PAYMENT">
+            <EntityTypeMapping TypeName="Model.S_PATENT_PAYMENT">
+              <MappingFragment StoreEntitySet="S_PATENT_PAYMENT">
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="APPLYNUM_NEW" ColumnName="APPLYNUM_NEW" />
+                <ScalarProperty Name="EN_STATE" ColumnName="EN_STATE" />
+                <ScalarProperty Name="EN_FEETYPE" ColumnName="EN_FEETYPE" />
+                <ScalarProperty Name="PAYMENTUNITTYPE" ColumnName="PAYMENTUNITTYPE" />
+                <ScalarProperty Name="RECEIPTIONDATE" ColumnName="RECEIPTIONDATE" />
+                <ScalarProperty Name="HKDATE" ColumnName="HKDATE" />
+                <ScalarProperty Name="STATE" ColumnName="STATE" />
+                <ScalarProperty Name="HKINFO" ColumnName="HKINFO" />
+                <ScalarProperty Name="APPLYNUM" ColumnName="APPLYNUM" />
+                <ScalarProperty Name="REGISTERCODE" ColumnName="REGISTERCODE" />
+                <ScalarProperty Name="RECEIPTION" ColumnName="RECEIPTION" />
+                <ScalarProperty Name="FEETYPE" ColumnName="FEETYPE" />
+                <ScalarProperty Name="FEE" ColumnName="FEE" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>

@@ -28,5 +28,9 @@ namespace TheDataResourceImporter
         public string EN_FEETYPE { get; set; }
         public string EN_STATE { get; set; }
         public string APPLYNUM_NEW { get; set; }
+        public string IMPORT_SESSION_ID { get; set; }
+        public Nullable<System.DateTime> IMPORT_TIME { get; set; }
+        public string FILE_PATH { get; set; }
+        public string ARCHIVE_INNER_PATH { get; set; }
     }
 }

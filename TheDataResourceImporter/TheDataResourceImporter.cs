@@ -13,6 +13,8 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using System.Threading.Tasks;
 using System.Xml;
+using UpdateDataFromExcel.Utils;
+using System.Windows.Forms;
 
 namespace TheDataResourceImporter
 {
@@ -780,7 +782,7 @@ namespace TheDataResourceImporter
 
                 //所有包含Tif的条目
                 var tifEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
-                                                where !entry.IsDirectory&& entry.Key.ToUpper().EndsWith(".TIF")
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".TIF")
                                                 select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
 
 
@@ -793,7 +795,8 @@ namespace TheDataResourceImporter
                 handledCount = 0;
 
                 //包含tif
-                Parallel.ForEach<string>(tifEntryParentDirEntries, key => {
+                Parallel.ForEach<string>(tifEntryParentDirEntries, key =>
+                {
                     lock (typeof(ImportManger))
                     {
                         handledCount++;
@@ -804,15 +807,16 @@ namespace TheDataResourceImporter
                 });
 
                 //不包含tif
-                Parallel.ForEach<string>(dirEntiresWithoutTif, key => {
+                Parallel.ForEach<string>(dirEntiresWithoutTif, key =>
+                {
                     lock (typeof(ImportManger))
                     {
                         handledCount++;
                         string importedMsg = ImportLogicUtil.importS_China_Patent_TextImage(entiesContext, filePath, importSession.SESSION_ID, APPL_TYPE, PUB_DATE, key, "0");
                         MessageUtil.DoAppendTBDetail($"记录:{importedMsg}插入成功");
-                     }
+                    }
                 });
-                
+
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
 
             }
@@ -820,7 +824,7 @@ namespace TheDataResourceImporter
 
             #region 03 中国专利标准化全文文本数据 
             //有疑问: XML结构不同, 文件路径不确定
-            else if(fileType == "中国专利标准化全文文本数据")
+            else if (fileType == "中国专利标准化全文文本数据")
             {
 
                 handledCount = 0;
@@ -954,7 +958,7 @@ namespace TheDataResourceImporter
                     entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);;
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
                     entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
                     entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
@@ -978,7 +982,7 @@ namespace TheDataResourceImporter
                     entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
                     entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
 
-                    
+
                     entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
 
                     entityObject.EXIST_STA_FULLTEXT = "1";
@@ -1052,19 +1056,19 @@ namespace TheDataResourceImporter
                 entiesContext.SaveChanges();
 
                 var parsedEntites = from rec in result
-                                     select new S_CHINA_PATENT_GAZETTE()
-                                     {
-                                         APPL_TYPE = MiscUtil.getDictValueOrDefaultByKey(rec, "类型"),
-                                         APP_NUMBER = MiscUtil.getDictValueOrDefaultByKey(rec, "申请号"),
-                                         PATH_TIF = MiscUtil.getDictValueOrDefaultByKey(rec, "图形路径"),
-                                         PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getDictValueOrDefaultByKey(rec, "公开（公告）日")),
-                                         THE_PAGE = MiscUtil.getDictValueOrDefaultByKey(rec, "专利所在页"),
-                                         TURN_PAGE_INFORMATION = MiscUtil.getDictValueOrDefaultByKey(rec, "翻页信息"),
-                                         FILE_PATH = filePath,
-                                         ID = System.Guid.NewGuid().ToString(),
-                                         IMPORT_SESSION_ID = importSession.SESSION_ID,
-                                         IMPORT_TIME = System.DateTime.Now,
-                                     };
+                                    select new S_CHINA_PATENT_GAZETTE()
+                                    {
+                                        APPL_TYPE = MiscUtil.getDictValueOrDefaultByKey(rec, "类型"),
+                                        APP_NUMBER = MiscUtil.getDictValueOrDefaultByKey(rec, "申请号"),
+                                        PATH_TIF = MiscUtil.getDictValueOrDefaultByKey(rec, "图形路径"),
+                                        PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getDictValueOrDefaultByKey(rec, "公开（公告）日")),
+                                        THE_PAGE = MiscUtil.getDictValueOrDefaultByKey(rec, "专利所在页"),
+                                        TURN_PAGE_INFORMATION = MiscUtil.getDictValueOrDefaultByKey(rec, "翻页信息"),
+                                        FILE_PATH = filePath,
+                                        ID = System.Guid.NewGuid().ToString(),
+                                        IMPORT_SESSION_ID = importSession.SESSION_ID,
+                                        IMPORT_TIME = System.DateTime.Now,
+                                    };
 
                 foreach (var entityObject in parsedEntites)
                 {
@@ -1073,7 +1077,7 @@ namespace TheDataResourceImporter
                     MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
 
                     //每500条, 提交下
-                    if(handledCount % 500 == 0)
+                    if (handledCount % 500 == 0)
                     {
                         entiesContext.SaveChanges();
                     }
@@ -1082,14 +1086,14 @@ namespace TheDataResourceImporter
             }
 
             #endregion
-            #region 06 中国专利著录项目与文摘数据
+            #region 06 中国专利著录项目与文摘数据 通用字段
             else if (fileType == "中国专利著录项目与文摘数据")
             {
 
 
             }
             #endregion
-            #region 10 中国专利数据法律状态数据
+            #region 10 中国专利数据法律状态数据 TRS
             else if (fileType == "中国专利法律状态数据")
             {
                 MessageUtil.DoAppendTBDetail($"正在解析TRS文件");
@@ -1124,346 +1128,569 @@ namespace TheDataResourceImporter
                     handledCount++;
                     entiesContext.S_CHINA_PATENT_LAWSTATE.Add(entityObject);
 
-                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
-
-                    //每500条, 提交下
-                    if (handledCount % 500 == 0)
+                    if (handledCount % 100 == 0)
                     {
-                        entiesContext.SaveChanges();
+                         MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                        //每500条, 提交下
+                        if (handledCount % 500 == 0)
+                        {
+                            entiesContext.SaveChanges();
+                        }
                     }
                 }
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
                 entiesContext.SaveChanges();
 
             }
             #endregion
-            #region 
+            #region  11 中国专利法律状态变更翻译数据 mdb文件
             else if (fileType == "中国专利法律状态变更翻译数据")
             {
+                string sql = "select ap, pd, flztinfoenrlt from [Legal_status]";
+                AccessUtil accUtil = new AccessUtil(filePath);
+                DataTable allRecsDt = accUtil.SelectToDataTable(sql);
+                totalCount = allRecsDt.Rows.Count;
+                MessageUtil.DoAppendTBDetail($"发现{allRecsDt.Rows.Count}条记录");
 
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+                importSession.TOTAL_ITEM = totalCount;
+                importSession.TABLENAME = "S_CHINA_PATENT_LAWSTATE_CHANGE".ToUpper();
+                importSession.IS_ZIP = "N";
+                entiesContext.SaveChanges();
 
+                foreach (DataRow dr in allRecsDt.Rows)
+                {
+                    handledCount++;
+                    var ap = dr["ap"].ToString();
+                    var pd = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(dr["pd"].ToString(), "yyyy.MM.dd");
+                    var flztinfoenrlt = dr["flztinfoenrlt"].ToString();
+                    var entityObject = new S_CHINA_PATENT_LAWSTATE_CHANGE()
+                    {
+                        ID = System.Guid.NewGuid().ToString(),
+                        FILE_PATH = filePath,
+                        IMPORT_SESSION_ID = importSession.SESSION_ID,
+                        IMPORT_TIME = System.DateTime.Now,
+
+                        AP = ap,
+                        PD = pd,
+                        FLZTINFOENRLT = flztinfoenrlt
+                    };
+
+                    entiesContext.S_CHINA_PATENT_LAWSTATE_CHANGE.Add(entityObject);
+
+                    if(0 == handledCount % 100)
+                    {
+
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                        if (0 == handledCount % 500) //每插入500条记录写库, 更新进度
+                        {
+                            entiesContext.SaveChanges();
+                        }
+
+                    }
+
+                }
+
+                entiesContext.SaveChanges();
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+
+                accUtil.Close();//关闭数据库
             }
             #endregion
-            #region 
+            #region 13 中国标准化简单引文数据 通用字段
             else if (fileType == "中国标准化简单引文数据")
             {
 
 
             }
             #endregion
-            #region 
+            #region 14 专利缴费数据 TRS
             else if (fileType == "专利缴费数据")
             {
+                MessageUtil.DoAppendTBDetail($"正在解析TRS文件");
 
+                List<Dictionary<string, string>> result = TRSUtil.paraseTrsRecord(filePath, System.Text.Encoding.Default);
+
+                MessageUtil.DoAppendTBDetail($"发现{result.Count}条记录");
+
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+                totalCount = result.Count();
+                importSession.TOTAL_ITEM = totalCount;
+                importSession.TABLENAME = "S_PATENT_PAYMENT".ToUpper();
+                importSession.IS_ZIP = "N";
+                entiesContext.SaveChanges();
+
+                var parsedEntites = from rec in result
+                                    select new S_PATENT_PAYMENT()
+                                    {
+                                        ID = System.Guid.NewGuid().ToString(),
+
+
+
+                                        APPLYNUM = MiscUtil.getDictValueOrDefaultByKey(rec, "ApplyNum"),
+                                        EN_FEETYPE = MiscUtil.getDictValueOrDefaultByKey(rec, "EN_FeeType"),
+                                        FEE = MiscUtil.getDictValueOrDefaultByKey(rec, "Fee"),
+                                        FEETYPE = MiscUtil.getDictValueOrDefaultByKey(rec, "FeeType"),
+                                        EN_STATE = MiscUtil.getDictValueOrDefaultByKey(rec, "EN_State"),
+                                        HKDATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getDictValueOrDefaultByKey(rec, "HKDate"), "yyyy.MM.dd"),
+                                        HKINFO = MiscUtil.getDictValueOrDefaultByKey(rec, "HKInfo"),
+                                        PAYMENTUNITTYPE = MiscUtil.getDictValueOrDefaultByKey(rec, "PaymentUnitType"),
+                                        RECEIPTION = MiscUtil.getDictValueOrDefaultByKey(rec, "Receiption"),
+                                        RECEIPTIONDATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getDictValueOrDefaultByKey(rec, "ReceiptionDate"), "yyyy.MM.dd"),
+                                        REGISTERCODE = MiscUtil.getDictValueOrDefaultByKey(rec, "RegisterCode"),
+                                        STATE = MiscUtil.getDictValueOrDefaultByKey(rec, "State"),
+                                        APPLYNUM_NEW = MiscUtil.getDictValueOrDefaultByKey(rec, "ApplyNum_new"),
+
+
+
+                                        FILE_PATH = filePath,
+                                        IMPORT_SESSION_ID = importSession.SESSION_ID,
+                                        IMPORT_TIME = System.DateTime.Now
+                                    };
+
+                foreach (var entityObject in parsedEntites)
+                {
+                    handledCount++;
+                    entiesContext.S_PATENT_PAYMENT.Add(entityObject);
+
+                    if (handledCount % 100 == 0)
+                    {
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                        //每500条, 提交下
+                        if (handledCount % 500 == 0)
+                        {
+                            entiesContext.SaveChanges();
+                        }
+                    }
+                }
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                entiesContext.SaveChanges();
 
             }
+            #endregion
+            #region 16  公司代码库 待确定
             else if (fileType == "公司代码库")
             {
 
 
             }
             #endregion
-            #region 
+            #region 17 区域代码库 待确定
             else if (fileType == "区域代码库")
             {
 
 
             }
             #endregion
-            #region 
+            #region 50 美国专利全文文本数据（标准化） 通用
             else if (fileType == "美国专利全文文本数据（标准化）")
             {
 
 
             }
             #endregion
-            #region 
+            #region 51 欧专局专利全文文本数据（标准化） 通用
             else if (fileType == "欧专局专利全文文本数据（标准化）")
             {
 
 
             }
             #endregion
-            #region 
+            #region  52 韩国专利全文代码化数据（标准化） 通用
             else if (fileType == "韩国专利全文代码化数据（标准化）")
             {
 
 
             }
+            #endregion
+            #region  53 瑞士专利全文代码化数据（标准化）通用
             else if (fileType == "瑞士专利全文代码化数据（标准化）")
             {
 
 
             }
+            #endregion
+            #region 54 英国专利全文代码化数据（标准化）通用
             else if (fileType == "英国专利全文代码化数据（标准化）")
             {
 
 
             }
+            #endregion
+            #region 55 日本专利全文代码化数据（标准化）通用
             else if (fileType == "日本专利全文代码化数据（标准化）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "中国发明申请专利数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "中国发明授权专利数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "中国实用新型专利数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "中国外观设计专利数据（DI）")
             {
 
 
             }
+            #endregion
+            #region 76 中国专利生物序列数据（DI）
             else if (fileType == "中国专利生物序列数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "中国专利摘要英文翻译数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "专利同族数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "全球专利引文数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "中国专利费用信息数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "中国专利通知书数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "中国法律状态标引库（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "专利分类数据(分类号码)（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "世界法律状态数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "DOCDB数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "美国专利著录项及全文数据（US）（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "韩国专利著录项及全文数据（KR）（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "欧洲专利局专利著录项及全文数据（EP）（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "国际知识产权组织专利著录项及全文数据（WIPO)（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "加拿大专利著录项及全文数据（CA）（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "俄罗斯专利著录项及全文数据（RU）（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "英国专利全文数据（GB）（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "瑞士专利全文数据（CH）（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "日本专利著录项及全文数据（JP）（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "德国专利著录项及全文数据（DE）（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "法国专利著录项及全文数据（FR）（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "比利时专利全文数据（BE）（标准化）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "奥地利专利全文数据（AT）（标准化）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "西班牙专利全文数据（ES）（标准化）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "波兰专利著录项及全文数据（PL）（标准化）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "以色列专利著录项及全文数据（IL）（标准化）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "新加坡专利著录项及全文数据（SG）（标准化）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "台湾专利著录项及全文数据（TW）（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "香港专利著录项数据（HK）（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "澳门专利著录项数据（MO）（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "欧亚组织专利著录项及全文数据（EA）（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "美国外观设计专利数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "日本外观设计专利数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "韩国外观设计专利数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "德国外观设计专利数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "法国外观设计专利数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "俄罗斯外观设计专利数据（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "中国专利全文数据PDF（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "国外专利全文数据PDF（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "日本专利文摘英文翻译数据（PAJ)（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "韩国专利文摘英文翻译数据(KPA)（DI）")
             {
 
 
             }
+            #endregion
+            #region
             else if (fileType == "俄罗斯专利文摘英文翻译数据（DI）")
             {
 
 
             }
+            #endregion
+            #region 132 中国商标 XML
             else if (fileType == "中国商标")
             {
 
 
             }
+            #endregion
+            #region 133 中国商标许可数据 XML
             else if (fileType == "中国商标许可数据")
             {
 
 
             }
+            #endregion
+            #region 134 中国商标转让数据 XML
             else if (fileType == "中国商标转让数据")
             {
 
 
             }
+            #endregion
+            #region 136 马德里商标进入中国 XML
             else if (fileType == "马德里商标进入中国")
             {
 
 
             }
+            #endregion
+            #region 137  中国驰名商标数据 XML
             else if (fileType == "中国驰名商标数据")
             {
 
 
             }
+            #endregion
+            #region 138 美国申请商标 XML
             else if (fileType == "美国申请商标")
             {
 
 
             }
+            #endregion
+            #region 139 美国转让商标 XML
             else if (fileType == "美国转让商标")
             {
 
@@ -1484,56 +1711,102 @@ namespace TheDataResourceImporter
 
 
             }
+            #endregion
+            #region 153 中外期刊的著录项目与文摘数据 XML
             else if (fileType == "中外期刊的著录项目与文摘数据")
             {
 
 
             }
+            #endregion
+            #region 162 中国法院判例初加工数据 XML
             else if (fileType == "中国法院判例初加工数据")
             {
 
 
             }
+            #endregion
+            #region 168 中国商标分类数据 EXCEL
             else if (fileType == "中国商标分类数据")
             {
+                string msg = "";
+                ExcelUtil excelUtil = new ExcelUtil();
+                DataTable xlsDt = excelUtil.ExcelToDataTable(filePath, out msg);
+
+
+                if (xlsDt == null)
+                {
+                    MessageBox.Show("出现错误:" + msg);
+                    return false;
+                }
+
+                if (xlsDt.Rows.Count == 0)
+                {
+                    MessageBox.Show("没有可用于更新的数据");
+                    return false;
+                }
+
+
+
+
+
+
 
 
             }
+            #endregion
+            #region 169 美国商标图形分类数据 EXCEL
             else if (fileType == "美国商标图形分类数据")
             {
 
 
             }
+            #endregion
+            #region 170 美国商标美国分类数据 EXCEL
             else if (fileType == "美国商标美国分类数据")
             {
 
 
             }
+            #endregion
+            #region 172 马德里商标购买数据 XML
             else if (fileType == "马德里商标购买数据")
             {
 
 
             }
+            #endregion
+            #region 180 中国专利代理知识产权法律法规加工数据 XML
             else if (fileType == "中国专利代理知识产权法律法规加工数据")
             {
 
 
             }
+            #endregion
+            #region 183 中国集成电路布图公告及事务数据 XML
             else if (fileType == "中国集成电路布图公告及事务数据")
             {
 
 
             }
+            #endregion
+            #region 184 中国知识产权海关备案数据 XML
+
             else if (fileType == "中国知识产权海关备案数据")
             {
 
 
             }
+            #endregion
+            #region 184 国外专利生物序列加工成品数据 XML
             else if (fileType == "国外专利生物序列加工成品数据")
             {
 
 
             }
+
+
+
             else if (fileType == "中国专利复审数据")
             {
 
@@ -1544,26 +1817,48 @@ namespace TheDataResourceImporter
 
 
             }
+
+
+
+            #endregion
+            #region 196 中国专利的判决书数据 XML
+
             else if (fileType == "中国专利的判决书数据")
             {
 
 
             }
+
+            #endregion
+            #region 209 中国生物序列深加工数据 mdb
+
             else if (fileType == "中国生物序列深加工数据")
             {
 
 
             }
+
+            #endregion
+            #region 210 中国中药专利翻译数据 mdb
+
             else if (fileType == "中国中药专利翻译数据")
             {
 
 
             }
+
+            #endregion
+            #region 211 中国化学药物专利深加工数据 mdb
+
             else if (fileType == "中国化学药物专利深加工数据")
             {
 
 
             }
+
+            #endregion
+            #region 212 中国中药专利深加工数据 mdb
+
             else if (fileType == "中国中药专利深加工数据")
             {
 

@@ -20,8 +20,11 @@ namespace TheDataResourceImporter.Utils
 
             FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
 
-
-            StreamReader sr = new StreamReader(fs, GetFileEncodeType(filePath));//默认UTF8
+            if (null == encode)
+            {
+                encode = GetFileEncodeType(filePath);
+            }
+            StreamReader sr = new StreamReader(fs, encode);//默认UTF8
 
             if (null != encode)
             {

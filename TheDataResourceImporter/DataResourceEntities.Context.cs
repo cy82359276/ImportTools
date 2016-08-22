@@ -49,7 +49,6 @@ namespace TheDataResourceImporter
         public DbSet<S_CHINA_PATENT_INVALID> S_CHINA_PATENT_INVALID { get; set; }
         public DbSet<S_CHINA_PATENT_JUDGMENT> S_CHINA_PATENT_JUDGMENT { get; set; }
         public DbSet<S_CHINA_PATENT_LAWSPROCESS> S_CHINA_PATENT_LAWSPROCESS { get; set; }
-        public DbSet<S_CHINA_PATENT_LAWSTATE_CHANGE> S_CHINA_PATENT_LAWSTATE_CHANGE { get; set; }
         public DbSet<S_CHINA_PATENT_NOTICES> S_CHINA_PATENT_NOTICES { get; set; }
         public DbSet<S_CHINA_PATENT_REVIEW> S_CHINA_PATENT_REVIEW { get; set; }
         public DbSet<S_CHINA_PATENT_STAND_TEXTIMAGE> S_CHINA_PATENT_STAND_TEXTIMAGE { get; set; }
@@ -66,7 +65,6 @@ namespace TheDataResourceImporter
         public DbSet<S_MADRID_BRAND_ENTER_CHINA> S_MADRID_BRAND_ENTER_CHINA { get; set; }
         public DbSet<S_MADRID_BRAND_PURCHASE> S_MADRID_BRAND_PURCHASE { get; set; }
         public DbSet<S_PATENT_FAMILY> S_PATENT_FAMILY { get; set; }
-        public DbSet<S_PATENT_PAYMENT> S_PATENT_PAYMENT { get; set; }
         public DbSet<S_WORLD_LEGAL_STATUS> S_WORLD_LEGAL_STATUS { get; set; }
         public DbSet<S_ZONE_CODE_BASE> S_ZONE_CODE_BASE { get; set; }
         public DbSet<IMPORT_ERROR> IMPORT_ERROR { get; set; }
@@ -75,5 +73,7 @@ namespace TheDataResourceImporter
         public DbSet<S_CHINA_PATENT_STANDARDFULLTXT> S_CHINA_PATENT_STANDARDFULLTXT { get; set; }
         public DbSet<S_CHINA_PATENT_GAZETTE> S_CHINA_PATENT_GAZETTE { get; set; }
         public DbSet<S_CHINA_PATENT_LAWSTATE> S_CHINA_PATENT_LAWSTATE { get; set; }
+        public DbSet<S_CHINA_PATENT_LAWSTATE_CHANGE> S_CHINA_PATENT_LAWSTATE_CHANGE { get; set; }
+        public DbSet<S_PATENT_PAYMENT> S_PATENT_PAYMENT { get; set; }
     }
 }
