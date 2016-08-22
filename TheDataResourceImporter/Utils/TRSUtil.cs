@@ -14,16 +14,16 @@ namespace TheDataResourceImporter.Utils
         /***
          * TRS文件入库
          * **/
-        public static List<Dictionary<string, string>> paraseTrsRecord(string filePath, Encoding encode=null)
+        public static List<Dictionary<string, string>> paraseTrsRecord(string filePath, Encoding encode = null)
         {
             List<Dictionary<string, string>> resultList = new List<Dictionary<string, string>>();
 
             FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
 
-            
-            StreamReader sr = new StreamReader(fs, Encoding.UTF8);//默认UTF8
 
-            if(null != encode)
+            StreamReader sr = new StreamReader(fs, GetFileEncodeType(filePath));//默认UTF8
+
+            if (null != encode)
             {
                 sr = new StreamReader(fs, encode);//使用指定的编码
             }
@@ -50,7 +50,6 @@ namespace TheDataResourceImporter.Utils
                             resultList.Add(recDict);
                         }
 
-                        
                         fieldName = "";
                         fieldValue = "";
 
@@ -59,7 +58,7 @@ namespace TheDataResourceImporter.Utils
                         continue;
                     }
 
-                   //if (newRec)
+                    //if (newRec)
                     //{
                     //    //如果当前记录不为空, 入库
                     //    if (recDict.Count > 0) //排除第一行REC
@@ -122,5 +121,51 @@ namespace TheDataResourceImporter.Utils
 
             return resultList;
         }
+
+
+        public static System.Text.Encoding GetFileEncodeType(string filename)
+        {
+            System.IO.FileStream fs = new System.IO.FileStream(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader br = new System.IO.BinaryReader(fs);
+            Byte[] buffer = br.ReadBytes(2);
+            if (buffer[0] >= 0xEF)
+            {
+                if (buffer[0] == 0xEF && buffer[1] == 0xBB)
+                {
+                    return System.Text.Encoding.UTF8;
+                }
+                else if (buffer[0] == 0xFE && buffer[1] == 0xFF)
+                {
+                    return System.Text.Encoding.BigEndianUnicode;
+                }
+                else if (buffer[0] == 0xFF && buffer[1] == 0xFE)
+                {
+                    return System.Text.Encoding.Unicode;
+                }
+                else
+                {
+                    return System.Text.Encoding.Default;
+                }
+            }
+            else
+            {
+                return System.Text.Encoding.Default;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }
