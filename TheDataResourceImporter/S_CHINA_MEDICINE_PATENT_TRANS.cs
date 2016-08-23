@@ -44,5 +44,9 @@ namespace TheDataResourceImporter
         public string T1_EDIAG { get; set; }
         public string T2_AP { get; set; }
         public string T2_EFORMULA { get; set; }
+        public string IMPORT_SESSION_ID { get; set; }
+        public Nullable<System.DateTime> IMPORT_TIME { get; set; }
+        public string FILE_PATH { get; set; }
+        public string ARCHIVE_INNER_PATH { get; set; }
     }
 }

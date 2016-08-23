@@ -54,5 +54,9 @@ namespace TheDataResourceImporter
         public string T3_ROLES { get; set; }
         public string T3_FS { get; set; }
         public string T3_NOTE { get; set; }
+        public string IMPORT_SESSION_ID { get; set; }
+        public Nullable<System.DateTime> IMPORT_TIME { get; set; }
+        public string FILE_PATH { get; set; }
+        public string ARCHIVE_INNER_PATH { get; set; }
     }
 }

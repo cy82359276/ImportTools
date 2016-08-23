@@ -459,21 +459,21 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="T1_TI" Type="varchar2" MaxLength="200" />
-          <Property Name="T1_AP" Type="varchar2" MaxLength="20" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="T1_TI" Type="varchar2" MaxLength="500" />
+          <Property Name="T1_AP" Type="varchar2" MaxLength="100" />
           <Property Name="T1_AD" Type="date" />
-          <Property Name="T1_PN" Type="varchar2" MaxLength="20" />
+          <Property Name="T1_PN" Type="varchar2" MaxLength="100" />
           <Property Name="T1_PD" Type="date" />
           <Property Name="T1_PA" Type="clob" />
-          <Property Name="T1_PAC" Type="varchar2" MaxLength="20" />
-          <Property Name="T1_ADDR" Type="varchar2" MaxLength="500" />
+          <Property Name="T1_PAC" Type="clob" />
+          <Property Name="T1_ADDR" Type="clob" />
           <Property Name="T1_INR" Type="clob" />
           <Property Name="T1_IC0" Type="clob" />
-          <Property Name="T1_IC1" Type="varchar2" MaxLength="20" />
+          <Property Name="T1_IC1" Type="clob" />
           <Property Name="T1_IC2" Type="clob" />
           <Property Name="T1_AB" Type="clob" />
-          <Property Name="T1_PHC" Type="varchar2" MaxLength="200" />
+          <Property Name="T1_PHC" Type="clob" />
           <Property Name="T1_ANA" Type="clob" />
           <Property Name="T1_BIO" Type="clob" />
           <Property Name="T1_EXT" Type="clob" />
@@ -487,38 +487,42 @@
           <Property Name="T1_DINT" Type="clob" />
           <Property Name="T1_TOXI" Type="clob" />
           <Property Name="T1_DIAG" Type="clob" />
-          <Property Name="T2_AP" Type="varchar2" MaxLength="20" />
+          <Property Name="T2_AP" Type="varchar2" MaxLength="100" />
           <Property Name="T2_FORMULA" Type="clob" />
-          <Property Name="T3_AP" Type="varchar2" MaxLength="20" />
-          <Property Name="T3_CMNO" Type="varchar2" MaxLength="20" />
-          <Property Name="T3_NOM1" Type="varchar2" MaxLength="1000" />
-          <Property Name="T3_NOM2" Type="varchar2" MaxLength="1000" />
-          <Property Name="T3_NOM3" Type="varchar2" MaxLength="1000" />
-          <Property Name="T3_CN" Type="varchar2" MaxLength="50" />
-          <Property Name="T3_RN" Type="varchar2" MaxLength="50" />
-          <Property Name="T3_ROLES" Type="varchar2" MaxLength="20" />
-          <Property Name="T3_FS" Type="varchar2" MaxLength="20" />
+          <Property Name="T3_AP" Type="varchar2" MaxLength="100" />
+          <Property Name="T3_CMNO" Type="clob" />
+          <Property Name="T3_NOM1" Type="clob" />
+          <Property Name="T3_NOM2" Type="clob" />
+          <Property Name="T3_NOM3" Type="clob" />
+          <Property Name="T3_CN" Type="clob" />
+          <Property Name="T3_RN" Type="clob" />
+          <Property Name="T3_ROLES" Type="clob" />
+          <Property Name="T3_FS" Type="clob" />
           <Property Name="T3_NOTE" Type="clob" />
+          <Property Name="IMPORT_SESSION_ID" Type="varchar2" MaxLength="100" />
+          <Property Name="IMPORT_TIME" Type="date" />
+          <Property Name="FILE_PATH" Type="varchar2" MaxLength="1000" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
         </EntityType>
         <EntityType Name="S_CHINA_MEDICINE_PATENT_TRANS">
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="T1_ETI" Type="varchar2" MaxLength="200" />
-          <Property Name="T1_AP" Type="varchar2" MaxLength="20" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="T1_ETI" Type="varchar2" MaxLength="500" />
+          <Property Name="T1_AP" Type="varchar2" MaxLength="100" />
           <Property Name="T1_AD" Type="date" />
-          <Property Name="T1_PN" Type="varchar2" MaxLength="20" />
+          <Property Name="T1_PN" Type="varchar2" MaxLength="100" />
           <Property Name="T1_PD" Type="date" />
           <Property Name="T1_EPA" Type="clob" />
-          <Property Name="T1_EPAC" Type="varchar2" MaxLength="20" />
-          <Property Name="T1_EADDR" Type="varchar2" MaxLength="500" />
+          <Property Name="T1_EPAC" Type="varchar2" MaxLength="100" />
+          <Property Name="T1_EADDR" Type="varchar2" MaxLength="1000" />
           <Property Name="T1_EINR" Type="clob" />
           <Property Name="T1_IC0" Type="clob" />
-          <Property Name="T1_IC1" Type="varchar2" MaxLength="20" />
+          <Property Name="T1_IC1" Type="varchar2" MaxLength="100" />
           <Property Name="T1_IC2" Type="clob" />
           <Property Name="T1_EAB" Type="clob" />
-          <Property Name="T1_PHC" Type="varchar2" MaxLength="200" />
+          <Property Name="T1_PHC" Type="varchar2" MaxLength="500" />
           <Property Name="T1_EANA" Type="clob" />
           <Property Name="T1_EBIO" Type="clob" />
           <Property Name="T1_EEXT" Type="clob" />
@@ -532,8 +536,12 @@
           <Property Name="T1_EDINT" Type="clob" />
           <Property Name="T1_ETOXI" Type="clob" />
           <Property Name="T1_EDIAG" Type="clob" />
-          <Property Name="T2_AP" Type="varchar2" MaxLength="20" />
+          <Property Name="T2_AP" Type="varchar2" MaxLength="100" />
           <Property Name="T2_EFORMULA" Type="clob" />
+          <Property Name="IMPORT_SESSION_ID" Type="varchar2" MaxLength="100" />
+          <Property Name="IMPORT_TIME" Type="date" />
+          <Property Name="FILE_PATH" Type="varchar2" MaxLength="1000" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
         </EntityType>
         <EntityType Name="S_CHINA_PATENT_BIOLOGICALSEQ">
           <Key>
@@ -852,21 +860,21 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="T1_TI" Type="varchar2" MaxLength="200" />
-          <Property Name="T1_AP" Type="varchar2" MaxLength="20" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="T1_TI" Type="clob" />
+          <Property Name="T1_AP" Type="varchar2" MaxLength="255" />
           <Property Name="T1_AD" Type="date" />
-          <Property Name="T1_PN" Type="varchar2" MaxLength="20" />
+          <Property Name="T1_PN" Type="varchar2" MaxLength="255" />
           <Property Name="T1_PD" Type="date" />
           <Property Name="T1_PA" Type="clob" />
-          <Property Name="T1_PAC" Type="varchar2" MaxLength="20" />
-          <Property Name="T1_ADDR" Type="varchar2" MaxLength="500" />
+          <Property Name="T1_PAC" Type="clob" />
+          <Property Name="T1_ADDR" Type="clob" />
           <Property Name="T1_INR" Type="clob" />
           <Property Name="T1_IC0" Type="clob" />
-          <Property Name="T1_IC1" Type="varchar2" MaxLength="20" />
+          <Property Name="T1_IC1" Type="clob" />
           <Property Name="T1_IC2" Type="clob" />
           <Property Name="T1_AB" Type="clob" />
-          <Property Name="T1_PHC" Type="varchar2" MaxLength="200" />
+          <Property Name="T1_PHC" Type="clob" />
           <Property Name="T1_ANA" Type="clob" />
           <Property Name="T1_BIO" Type="clob" />
           <Property Name="T1_EXT" Type="clob" />
@@ -880,18 +888,22 @@
           <Property Name="T1_DINT" Type="clob" />
           <Property Name="T1_TOXI" Type="clob" />
           <Property Name="T1_DIAG" Type="clob" />
-          <Property Name="T2_AP" Type="varchar2" MaxLength="20" />
+          <Property Name="T2_AP" Type="varchar2" MaxLength="255" />
           <Property Name="T2_FORMULA" Type="clob" />
-          <Property Name="T3_AP" Type="varchar2" MaxLength="20" />
-          <Property Name="T3_CMNO" Type="varchar2" MaxLength="20" />
-          <Property Name="T3_NOM1" Type="varchar2" MaxLength="1000" />
-          <Property Name="T3_NOM2" Type="varchar2" MaxLength="1000" />
-          <Property Name="T3_NOM3" Type="varchar2" MaxLength="1000" />
-          <Property Name="T3_CN" Type="varchar2" MaxLength="50" />
-          <Property Name="T3_RN" Type="varchar2" MaxLength="50" />
-          <Property Name="T3_ROLES" Type="varchar2" MaxLength="20" />
-          <Property Name="T3_FS" Type="varchar2" MaxLength="25" />
+          <Property Name="T3_AP" Type="varchar2" MaxLength="255" />
+          <Property Name="T3_CMNO" Type="varchar2" MaxLength="255" />
+          <Property Name="T3_NOM1" Type="clob" />
+          <Property Name="T3_NOM2" Type="clob" />
+          <Property Name="T3_NOM3" Type="clob" />
+          <Property Name="T3_CN" Type="clob" />
+          <Property Name="T3_RN" Type="clob" />
+          <Property Name="T3_ROLES" Type="clob" />
+          <Property Name="T3_FS" Type="clob" />
           <Property Name="T3_NOTE" Type="clob" />
+          <Property Name="IMPORT_SESSION_ID" Type="varchar2" MaxLength="100" />
+          <Property Name="IMPORT_TIME" Type="date" />
+          <Property Name="FILE_PATH" Type="varchar2" MaxLength="1000" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
         </EntityType>
         <EntityType Name="S_CHINA_WELLKNOWN_BRAND">
           <Key>
@@ -1717,86 +1729,6 @@
           <Property Name="PATH_XML" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="EXIST_XML" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
         </EntityType>
-        <EntityType Name="S_CHINA_MEDICINE_PATENT_HANDLE">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="T1_TI" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="T1_AP" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T1_AD" Type="DateTime" />
-          <Property Name="T1_PN" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T1_PD" Type="DateTime" />
-          <Property Name="T1_PA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_PAC" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T1_ADDR" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="T1_INR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_IC0" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_IC1" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T1_IC2" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_AB" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_PHC" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="T1_ANA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_BIO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EXT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_PHY" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_GAL" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_MIX" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_CHE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_NUS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_ANEF" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_THEF" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_DINT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_TOXI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_DIAG" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T2_AP" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T2_FORMULA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T3_AP" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T3_CMNO" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T3_NOM1" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="T3_NOM2" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="T3_NOM3" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="T3_CN" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="T3_RN" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="T3_ROLES" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T3_FS" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T3_NOTE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-        </EntityType>
-        <EntityType Name="S_CHINA_MEDICINE_PATENT_TRANS">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="T1_ETI" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="T1_AP" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T1_AD" Type="DateTime" />
-          <Property Name="T1_PN" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T1_PD" Type="DateTime" />
-          <Property Name="T1_EPA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EPAC" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EADDR" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EINR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_IC0" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_IC1" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T1_IC2" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EAB" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_PHC" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EANA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EBIO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EEXT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EPHY" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EGAL" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EMIX" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_ECHE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_ENUS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EANEF" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_ETHEF" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EDINT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_ETOXI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EDIAG" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T2_AP" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T2_EFORMULA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-        </EntityType>
         <EntityType Name="S_CHINA_PATENT_BIOLOGICALSEQ">
           <Key>
             <PropertyRef Name="ID" />
@@ -2008,51 +1940,6 @@
           <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
-        </EntityType>
-        <EntityType Name="S_CHINA_PHARMACEUTICAL_PATENT">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="T1_TI" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="T1_AP" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T1_AD" Type="DateTime" />
-          <Property Name="T1_PN" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T1_PD" Type="DateTime" />
-          <Property Name="T1_PA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_PAC" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T1_ADDR" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="T1_INR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_IC0" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_IC1" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T1_IC2" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_AB" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_PHC" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="T1_ANA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_BIO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_EXT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_PHY" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_GAL" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_MIX" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_CHE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_NUS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_ANEF" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_THEF" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_DINT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_TOXI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T1_DIAG" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T2_AP" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T2_FORMULA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="T3_AP" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T3_CMNO" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T3_NOM1" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="T3_NOM2" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="T3_NOM3" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="T3_CN" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="T3_RN" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="T3_ROLES" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="T3_FS" Type="String" MaxLength="25" FixedLength="false" Unicode="false" />
-          <Property Name="T3_NOTE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="S_CHINA_WELLKNOWN_BRAND">
           <Key>
@@ -2410,8 +2297,6 @@
           <EntitySet Name="S_CHINA_COURTCASE_PROCESS" EntityType="Self.S_CHINA_COURTCASE_PROCESS" />
           <EntitySet Name="S_CHINA_CUSTOMS_RECORD" EntityType="Self.S_CHINA_CUSTOMS_RECORD" />
           <EntitySet Name="S_CHINA_LAWSTATE_INDEXINGLIB" EntityType="Self.S_CHINA_LAWSTATE_INDEXINGLIB" />
-          <EntitySet Name="S_CHINA_MEDICINE_PATENT_HANDLE" EntityType="Self.S_CHINA_MEDICINE_PATENT_HANDLE" />
-          <EntitySet Name="S_CHINA_MEDICINE_PATENT_TRANS" EntityType="Self.S_CHINA_MEDICINE_PATENT_TRANS" />
           <EntitySet Name="S_CHINA_PATENT_BIOLOGICALSEQ" EntityType="Self.S_CHINA_PATENT_BIOLOGICALSEQ" />
           <EntitySet Name="S_CHINA_PATENT_FEEINFORMATION" EntityType="Self.S_CHINA_PATENT_FEEINFORMATION" />
           <EntitySet Name="S_CHINA_PATENT_FULLTEXT_PDF" EntityType="Self.S_CHINA_PATENT_FULLTEXT_PDF" />
@@ -2422,7 +2307,6 @@
           <EntitySet Name="S_CHINA_PATENT_REVIEW" EntityType="Self.S_CHINA_PATENT_REVIEW" />
           <EntitySet Name="S_CHINA_PATENT_STAND_TEXTIMAGE" EntityType="Self.S_CHINA_PATENT_STAND_TEXTIMAGE" />
           <EntitySet Name="S_CHINA_PATENT_TEXTCODE" EntityType="Self.S_CHINA_PATENT_TEXTCODE" />
-          <EntitySet Name="S_CHINA_PHARMACEUTICAL_PATENT" EntityType="Self.S_CHINA_PHARMACEUTICAL_PATENT" />
           <EntitySet Name="S_CHINA_WELLKNOWN_BRAND" EntityType="Self.S_CHINA_WELLKNOWN_BRAND" />
           <EntitySet Name="S_COMMUNITY_INTELLECTUALRECORD" EntityType="Self.S_COMMUNITY_INTELLECTUALRECORD" />
           <EntitySet Name="S_COMPANY_CODE_LIBRARY" EntityType="Self.S_COMPANY_CODE_LIBRARY" />
@@ -2447,6 +2331,9 @@
           <EntitySet Name="S_CHINA_BRAND_CLASSIFICATION" EntityType="Model.S_CHINA_BRAND_CLASSIFICATION" />
           <EntitySet Name="S_AMERICAN_BRAND_GRAPHCLASSIFY" EntityType="Model.S_AMERICAN_BRAND_GRAPHCLASSIFY" />
           <EntitySet Name="S_AMERICAN_BRAND_USCLASSIFY" EntityType="Model.S_AMERICAN_BRAND_USCLASSIFY" />
+          <EntitySet Name="S_CHINA_MEDICINE_PATENT_TRANS" EntityType="Model.S_CHINA_MEDICINE_PATENT_TRANS" />
+          <EntitySet Name="S_CHINA_PHARMACEUTICAL_PATENT" EntityType="Model.S_CHINA_PHARMACEUTICAL_PATENT" />
+          <EntitySet Name="S_CHINA_MEDICINE_PATENT_HANDLE" EntityType="Model.S_CHINA_MEDICINE_PATENT_HANDLE" />
         </EntityContainer>
         <EntityType Name="IMPORT_ERROR">
           <Key>
@@ -2634,6 +2521,143 @@
           <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="CLNO" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="ZHUSHI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="S_CHINA_MEDICINE_PATENT_TRANS">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="T1_ETI" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="T1_AP" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="T1_AD" Type="DateTime" />
+          <Property Name="T1_PN" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="T1_PD" Type="DateTime" />
+          <Property Name="T1_EPA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EPAC" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EADDR" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EINR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_IC0" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_IC1" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="T1_IC2" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EAB" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_PHC" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EANA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EBIO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EEXT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EPHY" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EGAL" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EMIX" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_ECHE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_ENUS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EANEF" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_ETHEF" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EDINT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_ETOXI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EDIAG" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T2_AP" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="T2_EFORMULA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="S_CHINA_PHARMACEUTICAL_PATENT">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="T1_TI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_AP" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="T1_AD" Type="DateTime" />
+          <Property Name="T1_PN" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="T1_PD" Type="DateTime" />
+          <Property Name="T1_PA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_PAC" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_ADDR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_INR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_IC0" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_IC1" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_IC2" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_AB" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_PHC" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_ANA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_BIO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EXT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_PHY" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_GAL" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_MIX" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_CHE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_NUS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_ANEF" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_THEF" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_DINT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_TOXI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_DIAG" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T2_AP" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="T2_FORMULA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_AP" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="T3_CMNO" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="T3_NOM1" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_NOM2" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_NOM3" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_RN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_ROLES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_FS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_NOTE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="S_CHINA_MEDICINE_PATENT_HANDLE">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="T1_TI" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="T1_AP" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="T1_AD" Type="DateTime" />
+          <Property Name="T1_PN" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="T1_PD" Type="DateTime" />
+          <Property Name="T1_PA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_PAC" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_ADDR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_INR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_IC0" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_IC1" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_IC2" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_AB" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_PHC" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_ANA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_BIO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_EXT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_PHY" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_GAL" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_MIX" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_CHE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_NUS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_ANEF" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_THEF" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_DINT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_TOXI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T1_DIAG" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T2_AP" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="T2_FORMULA" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_AP" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="T3_CMNO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_NOM1" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_NOM2" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_NOM3" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_RN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_ROLES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_FS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="T3_NOTE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="IMPORT_TIME" Type="DateTime" />
           <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
@@ -3051,88 +3075,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="S_CHINA_MEDICINE_PATENT_HANDLE">
-            <EntityTypeMapping TypeName="Model.S_CHINA_MEDICINE_PATENT_HANDLE">
-              <MappingFragment StoreEntitySet="S_CHINA_MEDICINE_PATENT_HANDLE">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="T1_TI" ColumnName="T1_TI" />
-                <ScalarProperty Name="T1_AP" ColumnName="T1_AP" />
-                <ScalarProperty Name="T1_AD" ColumnName="T1_AD" />
-                <ScalarProperty Name="T1_PN" ColumnName="T1_PN" />
-                <ScalarProperty Name="T1_PD" ColumnName="T1_PD" />
-                <ScalarProperty Name="T1_PA" ColumnName="T1_PA" />
-                <ScalarProperty Name="T1_PAC" ColumnName="T1_PAC" />
-                <ScalarProperty Name="T1_ADDR" ColumnName="T1_ADDR" />
-                <ScalarProperty Name="T1_INR" ColumnName="T1_INR" />
-                <ScalarProperty Name="T1_IC0" ColumnName="T1_IC0" />
-                <ScalarProperty Name="T1_IC1" ColumnName="T1_IC1" />
-                <ScalarProperty Name="T1_IC2" ColumnName="T1_IC2" />
-                <ScalarProperty Name="T1_AB" ColumnName="T1_AB" />
-                <ScalarProperty Name="T1_PHC" ColumnName="T1_PHC" />
-                <ScalarProperty Name="T1_ANA" ColumnName="T1_ANA" />
-                <ScalarProperty Name="T1_BIO" ColumnName="T1_BIO" />
-                <ScalarProperty Name="T1_EXT" ColumnName="T1_EXT" />
-                <ScalarProperty Name="T1_PHY" ColumnName="T1_PHY" />
-                <ScalarProperty Name="T1_GAL" ColumnName="T1_GAL" />
-                <ScalarProperty Name="T1_MIX" ColumnName="T1_MIX" />
-                <ScalarProperty Name="T1_CHE" ColumnName="T1_CHE" />
-                <ScalarProperty Name="T1_NUS" ColumnName="T1_NUS" />
-                <ScalarProperty Name="T1_ANEF" ColumnName="T1_ANEF" />
-                <ScalarProperty Name="T1_THEF" ColumnName="T1_THEF" />
-                <ScalarProperty Name="T1_DINT" ColumnName="T1_DINT" />
-                <ScalarProperty Name="T1_TOXI" ColumnName="T1_TOXI" />
-                <ScalarProperty Name="T1_DIAG" ColumnName="T1_DIAG" />
-                <ScalarProperty Name="T2_AP" ColumnName="T2_AP" />
-                <ScalarProperty Name="T2_FORMULA" ColumnName="T2_FORMULA" />
-                <ScalarProperty Name="T3_AP" ColumnName="T3_AP" />
-                <ScalarProperty Name="T3_CMNO" ColumnName="T3_CMNO" />
-                <ScalarProperty Name="T3_NOM1" ColumnName="T3_NOM1" />
-                <ScalarProperty Name="T3_NOM2" ColumnName="T3_NOM2" />
-                <ScalarProperty Name="T3_NOM3" ColumnName="T3_NOM3" />
-                <ScalarProperty Name="T3_CN" ColumnName="T3_CN" />
-                <ScalarProperty Name="T3_RN" ColumnName="T3_RN" />
-                <ScalarProperty Name="T3_ROLES" ColumnName="T3_ROLES" />
-                <ScalarProperty Name="T3_FS" ColumnName="T3_FS" />
-                <ScalarProperty Name="T3_NOTE" ColumnName="T3_NOTE" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="S_CHINA_MEDICINE_PATENT_TRANS">
-            <EntityTypeMapping TypeName="Model.S_CHINA_MEDICINE_PATENT_TRANS">
-              <MappingFragment StoreEntitySet="S_CHINA_MEDICINE_PATENT_TRANS">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="T1_ETI" ColumnName="T1_ETI" />
-                <ScalarProperty Name="T1_AP" ColumnName="T1_AP" />
-                <ScalarProperty Name="T1_AD" ColumnName="T1_AD" />
-                <ScalarProperty Name="T1_PN" ColumnName="T1_PN" />
-                <ScalarProperty Name="T1_PD" ColumnName="T1_PD" />
-                <ScalarProperty Name="T1_EPA" ColumnName="T1_EPA" />
-                <ScalarProperty Name="T1_EPAC" ColumnName="T1_EPAC" />
-                <ScalarProperty Name="T1_EADDR" ColumnName="T1_EADDR" />
-                <ScalarProperty Name="T1_EINR" ColumnName="T1_EINR" />
-                <ScalarProperty Name="T1_IC0" ColumnName="T1_IC0" />
-                <ScalarProperty Name="T1_IC1" ColumnName="T1_IC1" />
-                <ScalarProperty Name="T1_IC2" ColumnName="T1_IC2" />
-                <ScalarProperty Name="T1_EAB" ColumnName="T1_EAB" />
-                <ScalarProperty Name="T1_PHC" ColumnName="T1_PHC" />
-                <ScalarProperty Name="T1_EANA" ColumnName="T1_EANA" />
-                <ScalarProperty Name="T1_EBIO" ColumnName="T1_EBIO" />
-                <ScalarProperty Name="T1_EEXT" ColumnName="T1_EEXT" />
-                <ScalarProperty Name="T1_EPHY" ColumnName="T1_EPHY" />
-                <ScalarProperty Name="T1_EGAL" ColumnName="T1_EGAL" />
-                <ScalarProperty Name="T1_EMIX" ColumnName="T1_EMIX" />
-                <ScalarProperty Name="T1_ECHE" ColumnName="T1_ECHE" />
-                <ScalarProperty Name="T1_ENUS" ColumnName="T1_ENUS" />
-                <ScalarProperty Name="T1_EANEF" ColumnName="T1_EANEF" />
-                <ScalarProperty Name="T1_ETHEF" ColumnName="T1_ETHEF" />
-                <ScalarProperty Name="T1_EDINT" ColumnName="T1_EDINT" />
-                <ScalarProperty Name="T1_ETOXI" ColumnName="T1_ETOXI" />
-                <ScalarProperty Name="T1_EDIAG" ColumnName="T1_EDIAG" />
-                <ScalarProperty Name="T2_AP" ColumnName="T2_AP" />
-                <ScalarProperty Name="T2_EFORMULA" ColumnName="T2_EFORMULA" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="S_CHINA_PATENT_BIOLOGICALSEQ">
             <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_BIOLOGICALSEQ">
               <MappingFragment StoreEntitySet="S_CHINA_PATENT_BIOLOGICALSEQ">
@@ -3352,52 +3294,6 @@
                 <ScalarProperty Name="GAZETTE_NUM" ColumnName="GAZETTE_NUM" />
                 <ScalarProperty Name="GAZETTE_DATE" ColumnName="GAZETTE_DATE" />
                 <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="S_CHINA_PHARMACEUTICAL_PATENT">
-            <EntityTypeMapping TypeName="Model.S_CHINA_PHARMACEUTICAL_PATENT">
-              <MappingFragment StoreEntitySet="S_CHINA_PHARMACEUTICAL_PATENT">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="T1_TI" ColumnName="T1_TI" />
-                <ScalarProperty Name="T1_AP" ColumnName="T1_AP" />
-                <ScalarProperty Name="T1_AD" ColumnName="T1_AD" />
-                <ScalarProperty Name="T1_PN" ColumnName="T1_PN" />
-                <ScalarProperty Name="T1_PD" ColumnName="T1_PD" />
-                <ScalarProperty Name="T1_PA" ColumnName="T1_PA" />
-                <ScalarProperty Name="T1_PAC" ColumnName="T1_PAC" />
-                <ScalarProperty Name="T1_ADDR" ColumnName="T1_ADDR" />
-                <ScalarProperty Name="T1_INR" ColumnName="T1_INR" />
-                <ScalarProperty Name="T1_IC0" ColumnName="T1_IC0" />
-                <ScalarProperty Name="T1_IC1" ColumnName="T1_IC1" />
-                <ScalarProperty Name="T1_IC2" ColumnName="T1_IC2" />
-                <ScalarProperty Name="T1_AB" ColumnName="T1_AB" />
-                <ScalarProperty Name="T1_PHC" ColumnName="T1_PHC" />
-                <ScalarProperty Name="T1_ANA" ColumnName="T1_ANA" />
-                <ScalarProperty Name="T1_BIO" ColumnName="T1_BIO" />
-                <ScalarProperty Name="T1_EXT" ColumnName="T1_EXT" />
-                <ScalarProperty Name="T1_PHY" ColumnName="T1_PHY" />
-                <ScalarProperty Name="T1_GAL" ColumnName="T1_GAL" />
-                <ScalarProperty Name="T1_MIX" ColumnName="T1_MIX" />
-                <ScalarProperty Name="T1_CHE" ColumnName="T1_CHE" />
-                <ScalarProperty Name="T1_NUS" ColumnName="T1_NUS" />
-                <ScalarProperty Name="T1_ANEF" ColumnName="T1_ANEF" />
-                <ScalarProperty Name="T1_THEF" ColumnName="T1_THEF" />
-                <ScalarProperty Name="T1_DINT" ColumnName="T1_DINT" />
-                <ScalarProperty Name="T1_TOXI" ColumnName="T1_TOXI" />
-                <ScalarProperty Name="T1_DIAG" ColumnName="T1_DIAG" />
-                <ScalarProperty Name="T2_AP" ColumnName="T2_AP" />
-                <ScalarProperty Name="T2_FORMULA" ColumnName="T2_FORMULA" />
-                <ScalarProperty Name="T3_AP" ColumnName="T3_AP" />
-                <ScalarProperty Name="T3_CMNO" ColumnName="T3_CMNO" />
-                <ScalarProperty Name="T3_NOM1" ColumnName="T3_NOM1" />
-                <ScalarProperty Name="T3_NOM2" ColumnName="T3_NOM2" />
-                <ScalarProperty Name="T3_NOM3" ColumnName="T3_NOM3" />
-                <ScalarProperty Name="T3_CN" ColumnName="T3_CN" />
-                <ScalarProperty Name="T3_RN" ColumnName="T3_RN" />
-                <ScalarProperty Name="T3_ROLES" ColumnName="T3_ROLES" />
-                <ScalarProperty Name="T3_FS" ColumnName="T3_FS" />
-                <ScalarProperty Name="T3_NOTE" ColumnName="T3_NOTE" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -3954,6 +3850,146 @@
                 <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
                 <ScalarProperty Name="ZHUSHI" ColumnName="ZHUSHI" />
                 <ScalarProperty Name="CLNO" ColumnName="CLNO" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_CHINA_MEDICINE_PATENT_TRANS">
+            <EntityTypeMapping TypeName="Model.S_CHINA_MEDICINE_PATENT_TRANS">
+              <MappingFragment StoreEntitySet="S_CHINA_MEDICINE_PATENT_TRANS">
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="T2_EFORMULA" ColumnName="T2_EFORMULA" />
+                <ScalarProperty Name="T2_AP" ColumnName="T2_AP" />
+                <ScalarProperty Name="T1_EDIAG" ColumnName="T1_EDIAG" />
+                <ScalarProperty Name="T1_ETOXI" ColumnName="T1_ETOXI" />
+                <ScalarProperty Name="T1_EDINT" ColumnName="T1_EDINT" />
+                <ScalarProperty Name="T1_ETHEF" ColumnName="T1_ETHEF" />
+                <ScalarProperty Name="T1_EANEF" ColumnName="T1_EANEF" />
+                <ScalarProperty Name="T1_ENUS" ColumnName="T1_ENUS" />
+                <ScalarProperty Name="T1_ECHE" ColumnName="T1_ECHE" />
+                <ScalarProperty Name="T1_EMIX" ColumnName="T1_EMIX" />
+                <ScalarProperty Name="T1_EGAL" ColumnName="T1_EGAL" />
+                <ScalarProperty Name="T1_EPHY" ColumnName="T1_EPHY" />
+                <ScalarProperty Name="T1_EEXT" ColumnName="T1_EEXT" />
+                <ScalarProperty Name="T1_EBIO" ColumnName="T1_EBIO" />
+                <ScalarProperty Name="T1_EANA" ColumnName="T1_EANA" />
+                <ScalarProperty Name="T1_PHC" ColumnName="T1_PHC" />
+                <ScalarProperty Name="T1_EAB" ColumnName="T1_EAB" />
+                <ScalarProperty Name="T1_IC2" ColumnName="T1_IC2" />
+                <ScalarProperty Name="T1_IC1" ColumnName="T1_IC1" />
+                <ScalarProperty Name="T1_IC0" ColumnName="T1_IC0" />
+                <ScalarProperty Name="T1_EINR" ColumnName="T1_EINR" />
+                <ScalarProperty Name="T1_EADDR" ColumnName="T1_EADDR" />
+                <ScalarProperty Name="T1_EPAC" ColumnName="T1_EPAC" />
+                <ScalarProperty Name="T1_EPA" ColumnName="T1_EPA" />
+                <ScalarProperty Name="T1_PD" ColumnName="T1_PD" />
+                <ScalarProperty Name="T1_PN" ColumnName="T1_PN" />
+                <ScalarProperty Name="T1_AD" ColumnName="T1_AD" />
+                <ScalarProperty Name="T1_AP" ColumnName="T1_AP" />
+                <ScalarProperty Name="T1_ETI" ColumnName="T1_ETI" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_CHINA_PHARMACEUTICAL_PATENT">
+            <EntityTypeMapping TypeName="Model.S_CHINA_PHARMACEUTICAL_PATENT">
+              <MappingFragment StoreEntitySet="S_CHINA_PHARMACEUTICAL_PATENT">
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="T3_NOTE" ColumnName="T3_NOTE" />
+                <ScalarProperty Name="T3_FS" ColumnName="T3_FS" />
+                <ScalarProperty Name="T3_ROLES" ColumnName="T3_ROLES" />
+                <ScalarProperty Name="T3_RN" ColumnName="T3_RN" />
+                <ScalarProperty Name="T3_CN" ColumnName="T3_CN" />
+                <ScalarProperty Name="T3_NOM3" ColumnName="T3_NOM3" />
+                <ScalarProperty Name="T3_NOM2" ColumnName="T3_NOM2" />
+                <ScalarProperty Name="T3_NOM1" ColumnName="T3_NOM1" />
+                <ScalarProperty Name="T3_CMNO" ColumnName="T3_CMNO" />
+                <ScalarProperty Name="T3_AP" ColumnName="T3_AP" />
+                <ScalarProperty Name="T2_FORMULA" ColumnName="T2_FORMULA" />
+                <ScalarProperty Name="T2_AP" ColumnName="T2_AP" />
+                <ScalarProperty Name="T1_DIAG" ColumnName="T1_DIAG" />
+                <ScalarProperty Name="T1_TOXI" ColumnName="T1_TOXI" />
+                <ScalarProperty Name="T1_DINT" ColumnName="T1_DINT" />
+                <ScalarProperty Name="T1_THEF" ColumnName="T1_THEF" />
+                <ScalarProperty Name="T1_ANEF" ColumnName="T1_ANEF" />
+                <ScalarProperty Name="T1_NUS" ColumnName="T1_NUS" />
+                <ScalarProperty Name="T1_CHE" ColumnName="T1_CHE" />
+                <ScalarProperty Name="T1_MIX" ColumnName="T1_MIX" />
+                <ScalarProperty Name="T1_GAL" ColumnName="T1_GAL" />
+                <ScalarProperty Name="T1_PHY" ColumnName="T1_PHY" />
+                <ScalarProperty Name="T1_EXT" ColumnName="T1_EXT" />
+                <ScalarProperty Name="T1_BIO" ColumnName="T1_BIO" />
+                <ScalarProperty Name="T1_ANA" ColumnName="T1_ANA" />
+                <ScalarProperty Name="T1_PHC" ColumnName="T1_PHC" />
+                <ScalarProperty Name="T1_AB" ColumnName="T1_AB" />
+                <ScalarProperty Name="T1_IC2" ColumnName="T1_IC2" />
+                <ScalarProperty Name="T1_IC1" ColumnName="T1_IC1" />
+                <ScalarProperty Name="T1_IC0" ColumnName="T1_IC0" />
+                <ScalarProperty Name="T1_INR" ColumnName="T1_INR" />
+                <ScalarProperty Name="T1_ADDR" ColumnName="T1_ADDR" />
+                <ScalarProperty Name="T1_PAC" ColumnName="T1_PAC" />
+                <ScalarProperty Name="T1_PA" ColumnName="T1_PA" />
+                <ScalarProperty Name="T1_PD" ColumnName="T1_PD" />
+                <ScalarProperty Name="T1_PN" ColumnName="T1_PN" />
+                <ScalarProperty Name="T1_AD" ColumnName="T1_AD" />
+                <ScalarProperty Name="T1_AP" ColumnName="T1_AP" />
+                <ScalarProperty Name="T1_TI" ColumnName="T1_TI" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_CHINA_MEDICINE_PATENT_HANDLE">
+            <EntityTypeMapping TypeName="Model.S_CHINA_MEDICINE_PATENT_HANDLE">
+              <MappingFragment StoreEntitySet="S_CHINA_MEDICINE_PATENT_HANDLE">
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="T3_NOTE" ColumnName="T3_NOTE" />
+                <ScalarProperty Name="T3_FS" ColumnName="T3_FS" />
+                <ScalarProperty Name="T3_ROLES" ColumnName="T3_ROLES" />
+                <ScalarProperty Name="T3_RN" ColumnName="T3_RN" />
+                <ScalarProperty Name="T3_CN" ColumnName="T3_CN" />
+                <ScalarProperty Name="T3_NOM3" ColumnName="T3_NOM3" />
+                <ScalarProperty Name="T3_NOM2" ColumnName="T3_NOM2" />
+                <ScalarProperty Name="T3_NOM1" ColumnName="T3_NOM1" />
+                <ScalarProperty Name="T3_CMNO" ColumnName="T3_CMNO" />
+                <ScalarProperty Name="T3_AP" ColumnName="T3_AP" />
+                <ScalarProperty Name="T2_FORMULA" ColumnName="T2_FORMULA" />
+                <ScalarProperty Name="T2_AP" ColumnName="T2_AP" />
+                <ScalarProperty Name="T1_DIAG" ColumnName="T1_DIAG" />
+                <ScalarProperty Name="T1_TOXI" ColumnName="T1_TOXI" />
+                <ScalarProperty Name="T1_DINT" ColumnName="T1_DINT" />
+                <ScalarProperty Name="T1_THEF" ColumnName="T1_THEF" />
+                <ScalarProperty Name="T1_ANEF" ColumnName="T1_ANEF" />
+                <ScalarProperty Name="T1_NUS" ColumnName="T1_NUS" />
+                <ScalarProperty Name="T1_CHE" ColumnName="T1_CHE" />
+                <ScalarProperty Name="T1_MIX" ColumnName="T1_MIX" />
+                <ScalarProperty Name="T1_GAL" ColumnName="T1_GAL" />
+                <ScalarProperty Name="T1_PHY" ColumnName="T1_PHY" />
+                <ScalarProperty Name="T1_EXT" ColumnName="T1_EXT" />
+                <ScalarProperty Name="T1_BIO" ColumnName="T1_BIO" />
+                <ScalarProperty Name="T1_ANA" ColumnName="T1_ANA" />
+                <ScalarProperty Name="T1_PHC" ColumnName="T1_PHC" />
+                <ScalarProperty Name="T1_AB" ColumnName="T1_AB" />
+                <ScalarProperty Name="T1_IC2" ColumnName="T1_IC2" />
+                <ScalarProperty Name="T1_IC1" ColumnName="T1_IC1" />
+                <ScalarProperty Name="T1_IC0" ColumnName="T1_IC0" />
+                <ScalarProperty Name="T1_INR" ColumnName="T1_INR" />
+                <ScalarProperty Name="T1_ADDR" ColumnName="T1_ADDR" />
+                <ScalarProperty Name="T1_PAC" ColumnName="T1_PAC" />
+                <ScalarProperty Name="T1_PA" ColumnName="T1_PA" />
+                <ScalarProperty Name="T1_PD" ColumnName="T1_PD" />
+                <ScalarProperty Name="T1_PN" ColumnName="T1_PN" />
+                <ScalarProperty Name="T1_AD" ColumnName="T1_AD" />
+                <ScalarProperty Name="T1_AP" ColumnName="T1_AP" />
+                <ScalarProperty Name="T1_TI" ColumnName="T1_TI" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>

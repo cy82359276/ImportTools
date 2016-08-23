@@ -822,7 +822,7 @@ namespace TheDataResourceImporter
             }
             #endregion
 
-            #region 03 中国专利标准化全文文本数据 
+            #region 03 中国专利标准化全文文本数据 通用字段
             //有疑问: XML结构不同, 文件路径不确定
             else if (fileType == "中国专利标准化全文文本数据")
             {
@@ -1023,7 +1023,7 @@ namespace TheDataResourceImporter
 
             #endregion
 
-            #region 04 中国专利标准化全文图像数据
+            #region 04 中国专利标准化全文图像数据 未完成
 
             else if (fileType == "中国专利标准化全文图像数据")
             {
@@ -1086,7 +1086,7 @@ namespace TheDataResourceImporter
             }
 
             #endregion
-            #region 06 中国专利著录项目与文摘数据 通用字段
+            #region 06 中国专利著录项目与文摘数据 通用字段 未完成
             else if (fileType == "中国专利著录项目与文摘数据")
             {
 
@@ -1965,8 +1965,55 @@ namespace TheDataResourceImporter
 
             else if (fileType == "中国中药专利翻译数据")
             {
+                //SELECT 
+                //t1.ETI as T1_ETI, t1.AP as T1_AP,t2.AP as T2_AP,t2.EFORMULA as T2_EFORMULA, t1.AD as T1_AD, t1.PN as T1_PN, t1.PD as T1_PD, t1.EPA as T1_EPA, t1.EPAC as T1_EPAC, t1.EADDR as T1_EADDR, t1.EINR as T1_EINR, t1.IC0 as T1_IC0, t1.IC1 as T1_IC1, t1.IC2 as T1_IC2, t1.EAB as T1_EAB, t1.PHC as T1_PHC, t1.EANA as T1_EANA, t1.EBIO as T1_EBIO, t1.EEXT as T1_EEXT, t1.EPHY as T1_EPHY, t1.EGAL as T1_EGAL, t1.EMIX as T1_EMIX, t1.ECHE as T1_ECHE, t1.ENUS as T1_ENUS, t1.EANEF as T1_EANEF, t1.ETHEF as T1_ETHEF, t1.EDINT as T1_EDINT, t1.ETOXI as T1_ETOXI, t1.EDIAG as T1_EDIAG
+                //FROM[INDEX] as t1 left join FORMULA_INDEX as t2
+                //on t1.AP = t2.AP
+                //;
 
+                string sql = "select t1.ETI as T1_ETI, t1.AP as T1_AP,t2.AP as T2_AP,t2.EFORMULA as T2_EFORMULA, t1.AD as T1_AD, t1.PN as T1_PN, t1.PD as T1_PD, t1.EPA as T1_EPA, t1.EPAC as T1_EPAC, t1.EADDR as T1_EADDR, t1.EINR as T1_EINR, t1.IC0 as T1_IC0, t1.IC1 as T1_IC1, t1.IC2 as T1_IC2, t1.EAB as T1_EAB, t1.PHC as T1_PHC, t1.EANA as T1_EANA, t1.EBIO as T1_EBIO, t1.EEXT as T1_EEXT, t1.EPHY as T1_EPHY, t1.EGAL as T1_EGAL, t1.EMIX as T1_EMIX, t1.ECHE as T1_ECHE, t1.ENUS as T1_ENUS, t1.EANEF as T1_EANEF, t1.ETHEF as T1_ETHEF, t1.EDINT as T1_EDINT, t1.ETOXI as T1_ETOXI, t1.EDIAG as T1_EDIAG FROM[INDEX] as t1 left join FORMULA_INDEX as t2 on t1.AP = t2.AP";
+                AccessUtil accUtil = new AccessUtil(filePath);
+                DataTable allRecsDt = accUtil.SelectToDataTable(sql);
+                totalCount = allRecsDt.Rows.Count;
+                MessageUtil.DoAppendTBDetail($"发现{allRecsDt.Rows.Count}条记录");
 
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+                importSession.TOTAL_ITEM = totalCount;
+                importSession.TABLENAME = "S_CHINA_MEDICINE_PATENT_TRANS".ToUpper();
+                importSession.IS_ZIP = "N";
+                entiesContext.SaveChanges();
+
+                foreach (DataRow dr in allRecsDt.Rows)
+                {
+                    handledCount++;
+
+                    var entityObject = new S_CHINA_MEDICINE_PATENT_TRANS()
+                    {
+                        ID = System.Guid.NewGuid().ToString(),
+                        FILE_PATH = filePath,
+                        IMPORT_SESSION_ID = importSession.SESSION_ID,
+                        IMPORT_TIME = System.DateTime.Now,
+                    };
+
+                    entiesContext.S_CHINA_MEDICINE_PATENT_TRANS.Add(entityObject);
+
+                    if (0 == handledCount % 10)
+                    {
+
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                        if (0 == handledCount % 50) //每插入500条记录写库, 更新进度
+                        {
+                            entiesContext.SaveChanges();
+                        }
+                    }
+
+                }
+
+                entiesContext.SaveChanges();
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+
+                accUtil.Close();//关闭数据库                
             }
 
             #endregion
@@ -1974,7 +2021,99 @@ namespace TheDataResourceImporter
 
             else if (fileType == "中国化学药物专利深加工数据")
             {
+                string sql = @"SELECT t1.TI as T1_TI, t1.AP as T1_AP, t1.AD as T1_AD, t1.PN as T1_PN, t1.PD as T1_PD, t1.PA as T1_PA, t1.PAC as T1_PAC, t1.ADDR as T1_ADDR, t1.INR as T1_INR, t1.IC0 as T1_IC0, t1.IC1 as T1_IC1, t1.IC2 as T1_IC2, t1.AB as T1_AB, t1.PHC as T1_PHC, t1.ANA as T1_ANA, t1.BIO as T1_BIO, t1.EXT as T1_EXT, t1.PHY as T1_PHY, t1.GAL as T1_GAL, t1.MIX as T1_MIX, t1.CHE as T1_CHE, t1.NUS as T1_NUS, t1.ANEF as T1_ANEF, t1.THEF as T1_THEF, t1.DINT as T1_DINT, t1.TOXI as T1_TOXI, t1.DIAG as T1_DIAG, t2.AP as T2_AP, t2.FORMULA as T2_FORMULA, t3.AP as T3_AP, t3.CMNO as T3_CMNO, t3.NOM1 as T3_NOM1, t3.NOM2 as T3_NOM2, t3.NOM3 as T3_NOM3, t3.CN as T3_CN, t3.RN as T3_RN, t3.ROLES as T3_ROLES, t3.FS as T3_FS, t3.NOTE as T3_NOTE
+                            FROM  
+                            (
+                            [INDEX] as t1 left join FORMULA_INDEX as t2 
+                            on t1.AP = t2.AP
+                            )
+                            left join CHEMICAL_INDEX as t3
+                            on t1.AP = t3.AP;
+                            ";
 
+
+
+                AccessUtil accUtil = new AccessUtil(filePath);
+                DataTable allRecsDt = accUtil.SelectToDataTable(sql);
+                totalCount = allRecsDt.Rows.Count;
+                MessageUtil.DoAppendTBDetail($"发现{allRecsDt.Rows.Count}条记录");
+
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+                importSession.TOTAL_ITEM = totalCount;
+                importSession.TABLENAME = "S_CHINA_PHARMACEUTICAL_PATENT".ToUpper();
+                importSession.IS_ZIP = "N";
+                entiesContext.SaveChanges();
+
+                foreach (DataRow dr in allRecsDt.Rows)
+                {
+                    handledCount++;
+
+                    var entityObject = new S_CHINA_PHARMACEUTICAL_PATENT()
+                    {
+                        ID = System.Guid.NewGuid().ToString(),
+                        FILE_PATH = filePath,
+                        IMPORT_SESSION_ID = importSession.SESSION_ID,
+                        IMPORT_TIME = System.DateTime.Now,
+
+                        T1_TI = dr["T1_TI"] as string,
+                        T1_AP = dr["T1_AP"] as string,
+                        T1_AD = dr["T1_AD"] as DateTime?,
+                        T1_PN = dr["T1_PN"] as string,
+                        T1_PD = dr["T1_PD"] as DateTime?,
+                        T1_PA = dr["T1_PA"] as string,
+                        T1_PAC = dr["T1_PAC"] as string,
+                        T1_ADDR = dr["T1_ADDR"] as string,
+                        T1_INR = dr["T1_INR"] as string,
+                        T1_IC0 = dr["T1_IC0"] as string,
+                        T1_IC1 = dr["T1_IC1"] as string,
+                        T1_IC2 = dr["T1_IC2"] as string,
+                        T1_AB = dr["T1_AB"] as string,
+                        T1_PHC = dr["T1_PHC"] as string,
+                        T1_ANA = dr["T1_ANA"] as string,
+                        T1_BIO = dr["T1_BIO"] as string,
+                        T1_EXT = dr["T1_EXT"] as string,
+                        T1_PHY = dr["T1_PHY"] as string,
+                        T1_GAL = dr["T1_GAL"] as string,
+                        T1_MIX = dr["T1_MIX"] as string,
+                        T1_CHE = dr["T1_CHE"] as string,
+                        T1_NUS = dr["T1_NUS"] as string,
+                        T1_ANEF = dr["T1_ANEF"] as string,
+                        T1_THEF = dr["T1_THEF"] as string,
+                        T1_DINT = dr["T1_DINT"] as string,
+                        T1_TOXI = dr["T1_TOXI"] as string,
+                        T1_DIAG = dr["T1_DIAG"] as string,
+                        T2_AP = dr["T2_AP"] as string,
+                        T2_FORMULA = dr["T2_FORMULA"] as string,
+                        T3_AP = dr["T3_AP"] as string,
+                        T3_CMNO = dr["T3_CMNO"] as string,
+                        T3_NOM1 = dr["T3_NOM1"] as string,
+                        T3_NOM2 = dr["T3_NOM2"] as string,
+                        T3_NOM3 = dr["T3_NOM3"] as string,
+                        T3_CN = dr["T3_CN"] as string,
+                        T3_RN = dr["T3_RN"] as string,
+                        T3_ROLES = dr["T3_ROLES"] as string,
+                        T3_FS = dr["T3_FS"] as string,
+                        T3_NOTE = dr["T3_NOTE"] as string,
+                    };
+
+                    entiesContext.S_CHINA_PHARMACEUTICAL_PATENT.Add(entityObject);
+
+                    if (0 == handledCount % 10)
+                    {
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                        if (0 == handledCount % 50) //每插入500条记录写库, 更新进度
+                        {
+                            entiesContext.SaveChanges();
+                        }
+                    }
+
+                }
+
+                entiesContext.SaveChanges();
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+
+                accUtil.Close();//关闭数据库                
 
             }
 
@@ -1983,6 +2122,107 @@ namespace TheDataResourceImporter
 
             else if (fileType == "中国中药专利深加工数据")
             {
+
+                string sql = @"SELECT 
+                            t1.TI as T1_TI, t1.AP as T1_AP, t1.AD as T1_AD, t1.PN as T1_PN, t1.PD as T1_PD, t1.PA as T1_PA, t1.PAC as T1_PAC, t1.ADDR as T1_ADDR, t1.INR as T1_INR, t1.IC0 as T1_IC0, t1.IC1 as T1_IC1, t1.IC2 as T1_IC2, t1.AB as T1_AB, t1.PHC as T1_PHC, t1.ANA as T1_ANA, t1.BIO as T1_BIO, t1.EXT as T1_EXT, t1.PHY as T1_PHY, t1.GAL as T1_GAL, t1.MIX as T1_MIX, t1.CHE as T1_CHE, t1.NUS as T1_NUS, t1.ANEF as T1_ANEF, t1.THEF as T1_THEF, t1.DINT as T1_DINT, t1.TOXI as T1_TOXI, t1.DIAG as T1_DIAG, t2.AP as T2_AP, t2.FORMULA as T2_FORMULA, t3.AP as T3_AP, t3.CMNO as T3_CMNO, t3.NOM1 as T3_NOM1, t3.NOM2 as T3_NOM2, t3.NOM3 as T3_NOM3, t3.CN as T3_CN, t3.RN as T3_RN, t3.ROLES as T3_ROLES, t3.FS as T3_FS, t3.NOTE as T3_NOTE
+                            FROM  
+                            (
+                            [INDEX] as t1 left join FORMULA_INDEX as t2 
+                            on t1.AP = t2.AP
+                            )
+                            left join CHEMICAL_INDEX as t3
+                            on t2.AP = t3.AP
+                            ";
+
+
+
+                AccessUtil accUtil = new AccessUtil(filePath);
+                DataTable allRecsDt = accUtil.SelectToDataTable(sql);
+                totalCount = allRecsDt.Rows.Count;
+                MessageUtil.DoAppendTBDetail($"发现{allRecsDt.Rows.Count}条记录");
+
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+                importSession.TOTAL_ITEM = totalCount;
+                importSession.TABLENAME = "S_CHINA_MEDICINE_PATENT_HANDLE".ToUpper();
+                importSession.IS_ZIP = "N";
+                entiesContext.SaveChanges();
+
+                foreach (DataRow dr in allRecsDt.Rows)
+                {
+                    handledCount++;
+
+                    var entityObject = new S_CHINA_MEDICINE_PATENT_HANDLE()
+                    {
+                        ID = System.Guid.NewGuid().ToString(),
+                        FILE_PATH = filePath,
+                        IMPORT_SESSION_ID = importSession.SESSION_ID,
+                        IMPORT_TIME = System.DateTime.Now,
+
+                        T1_TI = dr["T1_TI"] as string,
+                        T1_AP = dr["T1_AP"] as string,
+                        T1_AD = dr["T1_AD"] as DateTime?,
+                        T1_PN = dr["T1_PN"] as string,
+                        T1_PD = dr["T1_PD"] as DateTime?,
+                        T1_PA = dr["T1_PA"] as string,
+                        T1_PAC = dr["T1_PAC"] as string,
+                        T1_ADDR = dr["T1_ADDR"] as string,
+                        T1_INR = dr["T1_INR"] as string,
+                        T1_IC0 = dr["T1_IC0"] as string,
+                        T1_IC1 = dr["T1_IC1"] as string,
+                        T1_IC2 = dr["T1_IC2"] as string,
+                        T1_AB = dr["T1_AB"] as string,
+                        T1_PHC = dr["T1_PHC"] as string,
+                        T1_ANA = dr["T1_ANA"] as string,
+                        T1_BIO = dr["T1_BIO"] as string,
+                        T1_EXT = dr["T1_EXT"] as string,
+                        T1_PHY = dr["T1_PHY"] as string,
+                        T1_GAL = dr["T1_GAL"] as string,
+                        T1_MIX = dr["T1_MIX"] as string,
+                        T1_CHE = dr["T1_CHE"] as string,
+                        T1_NUS = dr["T1_NUS"] as string,
+                        T1_ANEF = dr["T1_ANEF"] as string,
+                        T1_THEF = dr["T1_THEF"] as string,
+                        T1_DINT = dr["T1_DINT"] as string,
+                        T1_TOXI = dr["T1_TOXI"] as string,
+                        T1_DIAG = dr["T1_DIAG"] as string,
+                        T2_AP = dr["T2_AP"] as string,
+                        T2_FORMULA = dr["T2_FORMULA"] as string,
+                        T3_AP = dr["T3_AP"] as string,
+                        T3_CMNO = dr["T3_CMNO"] as string,
+                        T3_NOM1 = dr["T3_NOM1"] as string,
+                        T3_NOM2 = dr["T3_NOM2"] as string,
+                        T3_NOM3 = dr["T3_NOM3"] as string,
+                        T3_CN = dr["T3_CN"] as string,
+                        T3_RN = dr["T3_RN"] as string,
+                        T3_ROLES = dr["T3_ROLES"] as string,
+                        T3_FS = dr["T3_FS"] as string,
+                        T3_NOTE = dr["T3_NOTE"] as string,
+                    };
+
+                    entiesContext.S_CHINA_MEDICINE_PATENT_HANDLE.Add(entityObject);
+
+                    if (0 == handledCount % 10)
+                    {
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                        if (0 == handledCount % 50) //每插入500条记录写库, 更新进度
+                        {
+                            entiesContext.SaveChanges();
+                        }
+                    }
+
+                }
+
+                entiesContext.SaveChanges();
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+
+                accUtil.Close();//关闭数据库                
+
+
+
+
+
+
 
 
             }
