@@ -1737,7 +1737,7 @@ namespace TheDataResourceImporter
                 if (xlsDt == null)
                 {
                     MessageBox.Show("出现错误:" + msg);
-                    return false;
+                    //return false;
                 }
 
                 if (xlsDt.Rows.Count == 0)
@@ -1745,14 +1745,6 @@ namespace TheDataResourceImporter
                     MessageBox.Show("没有可用于更新的数据");
                     return false;
                 }
-
-
-
-
-
-
-
-
             }
             #endregion
             #region 169 美国商标图形分类数据 EXCEL
