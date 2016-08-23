@@ -29,12 +29,9 @@ namespace TheDataResourceImporter
         public DbSet<S_AMERICA_APPLY_BRAND> S_AMERICA_APPLY_BRAND { get; set; }
         public DbSet<S_AMERICA_TRANSFER_BRAND> S_AMERICA_TRANSFER_BRAND { get; set; }
         public DbSet<S_AMERICA_TRIAL_BRAND> S_AMERICA_TRIAL_BRAND { get; set; }
-        public DbSet<S_AMERICAN_BRAND_GRAPHCLASSIFY> S_AMERICAN_BRAND_GRAPHCLASSIFY { get; set; }
-        public DbSet<S_AMERICAN_BRAND_USCLASSIFY> S_AMERICAN_BRAND_USCLASSIFY { get; set; }
         public DbSet<S_CHINA_BIOLOGICAL_PROCESS> S_CHINA_BIOLOGICAL_PROCESS { get; set; }
         public DbSet<S_CHINA_BOOK> S_CHINA_BOOK { get; set; }
         public DbSet<S_CHINA_BRAND> S_CHINA_BRAND { get; set; }
-        public DbSet<S_CHINA_BRAND_CLASSIFICATION> S_CHINA_BRAND_CLASSIFICATION { get; set; }
         public DbSet<S_CHINA_BRAND_LICENSE> S_CHINA_BRAND_LICENSE { get; set; }
         public DbSet<S_CHINA_BRAND_TRANSFER> S_CHINA_BRAND_TRANSFER { get; set; }
         public DbSet<S_CHINA_CIRCUITLAYOUT> S_CHINA_CIRCUITLAYOUT { get; set; }
@@ -75,5 +72,8 @@ namespace TheDataResourceImporter
         public DbSet<S_CHINA_PATENT_LAWSTATE> S_CHINA_PATENT_LAWSTATE { get; set; }
         public DbSet<S_CHINA_PATENT_LAWSTATE_CHANGE> S_CHINA_PATENT_LAWSTATE_CHANGE { get; set; }
         public DbSet<S_PATENT_PAYMENT> S_PATENT_PAYMENT { get; set; }
+        public DbSet<S_CHINA_BRAND_CLASSIFICATION> S_CHINA_BRAND_CLASSIFICATION { get; set; }
+        public DbSet<S_AMERICAN_BRAND_GRAPHCLASSIFY> S_AMERICAN_BRAND_GRAPHCLASSIFY { get; set; }
+        public DbSet<S_AMERICAN_BRAND_USCLASSIFY> S_AMERICAN_BRAND_USCLASSIFY { get; set; }
     }
 }

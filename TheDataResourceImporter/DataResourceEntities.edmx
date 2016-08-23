@@ -125,18 +125,26 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="DESIGN_CODE" Type="varchar2" MaxLength="10" />
-          <Property Name="DESIGN_F_CODE" Type="varchar2" MaxLength="10" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="DESIGN_CODE" Type="varchar2" MaxLength="100" />
+          <Property Name="DESIGN_F_CODE" Type="varchar2" MaxLength="100" />
           <Property Name="DESIGN_CODE_NOTE" Type="clob" />
+          <Property Name="IMPORT_SESSION_ID" Type="varchar2" MaxLength="100" />
+          <Property Name="IMPORT_TIME" Type="date" />
+          <Property Name="FILE_PATH" Type="varchar2" MaxLength="1000" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
         </EntityType>
         <EntityType Name="S_AMERICAN_BRAND_USCLASSIFY">
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="CLNO" Type="varchar2" MaxLength="10" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="CLNO" Type="varchar2" MaxLength="100" />
           <Property Name="ZHUSHI" Type="clob" />
+          <Property Name="IMPORT_SESSION_ID" Type="varchar2" MaxLength="100" />
+          <Property Name="IMPORT_TIME" Type="date" />
+          <Property Name="FILE_PATH" Type="varchar2" MaxLength="1000" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
         </EntityType>
         <EntityType Name="S_CHINA_BIOLOGICAL_PROCESS">
           <Key>
@@ -247,13 +255,17 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="CLNO" Type="varchar2" MaxLength="10" />
-          <Property Name="F_CLNO" Type="varchar2" MaxLength="10" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="CLNO" Type="varchar2" MaxLength="100" />
+          <Property Name="F_CLNO" Type="varchar2" MaxLength="100" />
           <Property Name="GOODS_SERVICE_CN" Type="clob" />
           <Property Name="GOODS_SERVICE_EN" Type="clob" />
           <Property Name="ZHUSHI_CN" Type="clob" />
           <Property Name="ZHUSHI_EN" Type="clob" />
+          <Property Name="IMPORT_SESSION_ID" Type="varchar2" MaxLength="100" />
+          <Property Name="IMPORT_TIME" Type="date" />
+          <Property Name="FILE_PATH" Type="varchar2" MaxLength="1000" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
         </EntityType>
         <EntityType Name="S_CHINA_BRAND_LICENSE">
           <Key>
@@ -1412,23 +1424,6 @@
           <Property Name="PATH_XML" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="EXIST_XML" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
         </EntityType>
-        <EntityType Name="S_AMERICAN_BRAND_GRAPHCLASSIFY">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="DESIGN_CODE" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="DESIGN_F_CODE" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="DESIGN_CODE_NOTE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-        </EntityType>
-        <EntityType Name="S_AMERICAN_BRAND_USCLASSIFY">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CLNO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="ZHUSHI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-        </EntityType>
         <EntityType Name="S_CHINA_BIOLOGICAL_PROCESS">
           <Key>
             <PropertyRef Name="ID" />
@@ -1533,18 +1528,6 @@
           <Property Name="EXIST_JPG" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
           <Property Name="EXIST_JPG_SF" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
           <Property Name="EXIST_FILE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-        </EntityType>
-        <EntityType Name="S_CHINA_BRAND_CLASSIFICATION">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CLNO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="F_CLNO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="GOODS_SERVICE_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="GOODS_SERVICE_EN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="ZHUSHI_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="ZHUSHI_EN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="S_CHINA_BRAND_LICENSE">
           <Key>
@@ -2418,12 +2401,9 @@
           <EntitySet Name="S_AMERICA_APPLY_BRAND" EntityType="Self.S_AMERICA_APPLY_BRAND" />
           <EntitySet Name="S_AMERICA_TRANSFER_BRAND" EntityType="Self.S_AMERICA_TRANSFER_BRAND" />
           <EntitySet Name="S_AMERICA_TRIAL_BRAND" EntityType="Self.S_AMERICA_TRIAL_BRAND" />
-          <EntitySet Name="S_AMERICAN_BRAND_GRAPHCLASSIFY" EntityType="Self.S_AMERICAN_BRAND_GRAPHCLASSIFY" />
-          <EntitySet Name="S_AMERICAN_BRAND_USCLASSIFY" EntityType="Self.S_AMERICAN_BRAND_USCLASSIFY" />
           <EntitySet Name="S_CHINA_BIOLOGICAL_PROCESS" EntityType="Self.S_CHINA_BIOLOGICAL_PROCESS" />
           <EntitySet Name="S_CHINA_BOOK" EntityType="Self.S_CHINA_BOOK" />
           <EntitySet Name="S_CHINA_BRAND" EntityType="Self.S_CHINA_BRAND" />
-          <EntitySet Name="S_CHINA_BRAND_CLASSIFICATION" EntityType="Self.S_CHINA_BRAND_CLASSIFICATION" />
           <EntitySet Name="S_CHINA_BRAND_LICENSE" EntityType="Self.S_CHINA_BRAND_LICENSE" />
           <EntitySet Name="S_CHINA_BRAND_TRANSFER" EntityType="Self.S_CHINA_BRAND_TRANSFER" />
           <EntitySet Name="S_CHINA_CIRCUITLAYOUT" EntityType="Self.S_CHINA_CIRCUITLAYOUT" />
@@ -2464,6 +2444,9 @@
           <EntitySet Name="S_CHINA_PATENT_LAWSTATE" EntityType="Model.S_CHINA_PATENT_LAWSTATE" />
           <EntitySet Name="S_CHINA_PATENT_LAWSTATE_CHANGE" EntityType="Model.S_CHINA_PATENT_LAWSTATE_CHANGE" />
           <EntitySet Name="S_PATENT_PAYMENT" EntityType="Model.S_PATENT_PAYMENT" />
+          <EntitySet Name="S_CHINA_BRAND_CLASSIFICATION" EntityType="Model.S_CHINA_BRAND_CLASSIFICATION" />
+          <EntitySet Name="S_AMERICAN_BRAND_GRAPHCLASSIFY" EntityType="Model.S_AMERICAN_BRAND_GRAPHCLASSIFY" />
+          <EntitySet Name="S_AMERICAN_BRAND_USCLASSIFY" EntityType="Model.S_AMERICAN_BRAND_USCLASSIFY" />
         </EntityContainer>
         <EntityType Name="IMPORT_ERROR">
           <Key>
@@ -2615,6 +2598,47 @@
           <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
         </EntityType>
+        <EntityType Name="S_CHINA_BRAND_CLASSIFICATION">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="CLNO" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="F_CLNO" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="GOODS_SERVICE_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="GOODS_SERVICE_EN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ZHUSHI_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ZHUSHI_EN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="S_AMERICAN_BRAND_GRAPHCLASSIFY">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DESIGN_CODE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DESIGN_F_CODE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DESIGN_CODE_NOTE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="S_AMERICAN_BRAND_USCLASSIFY">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="CLNO" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="ZHUSHI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -2725,25 +2749,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="S_AMERICAN_BRAND_GRAPHCLASSIFY">
-            <EntityTypeMapping TypeName="Model.S_AMERICAN_BRAND_GRAPHCLASSIFY">
-              <MappingFragment StoreEntitySet="S_AMERICAN_BRAND_GRAPHCLASSIFY">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="DESIGN_CODE" ColumnName="DESIGN_CODE" />
-                <ScalarProperty Name="DESIGN_F_CODE" ColumnName="DESIGN_F_CODE" />
-                <ScalarProperty Name="DESIGN_CODE_NOTE" ColumnName="DESIGN_CODE_NOTE" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="S_AMERICAN_BRAND_USCLASSIFY">
-            <EntityTypeMapping TypeName="Model.S_AMERICAN_BRAND_USCLASSIFY">
-              <MappingFragment StoreEntitySet="S_AMERICAN_BRAND_USCLASSIFY">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="CLNO" ColumnName="CLNO" />
-                <ScalarProperty Name="ZHUSHI" ColumnName="ZHUSHI" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="S_CHINA_BIOLOGICAL_PROCESS">
             <EntityTypeMapping TypeName="Model.S_CHINA_BIOLOGICAL_PROCESS">
               <MappingFragment StoreEntitySet="S_CHINA_BIOLOGICAL_PROCESS">
@@ -2849,19 +2854,6 @@
                 <ScalarProperty Name="EXIST_JPG" ColumnName="EXIST_JPG" />
                 <ScalarProperty Name="EXIST_JPG_SF" ColumnName="EXIST_JPG_SF" />
                 <ScalarProperty Name="EXIST_FILE" ColumnName="EXIST_FILE" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="S_CHINA_BRAND_CLASSIFICATION">
-            <EntityTypeMapping TypeName="Model.S_CHINA_BRAND_CLASSIFICATION">
-              <MappingFragment StoreEntitySet="S_CHINA_BRAND_CLASSIFICATION">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="CLNO" ColumnName="CLNO" />
-                <ScalarProperty Name="F_CLNO" ColumnName="F_CLNO" />
-                <ScalarProperty Name="GOODS_SERVICE_CN" ColumnName="GOODS_SERVICE_CN" />
-                <ScalarProperty Name="GOODS_SERVICE_EN" ColumnName="GOODS_SERVICE_EN" />
-                <ScalarProperty Name="ZHUSHI_CN" ColumnName="ZHUSHI_CN" />
-                <ScalarProperty Name="ZHUSHI_EN" ColumnName="ZHUSHI_EN" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -3918,6 +3910,50 @@
                 <ScalarProperty Name="RECEIPTION" ColumnName="RECEIPTION" />
                 <ScalarProperty Name="FEETYPE" ColumnName="FEETYPE" />
                 <ScalarProperty Name="FEE" ColumnName="FEE" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_CHINA_BRAND_CLASSIFICATION">
+            <EntityTypeMapping TypeName="Model.S_CHINA_BRAND_CLASSIFICATION">
+              <MappingFragment StoreEntitySet="S_CHINA_BRAND_CLASSIFICATION">
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="ZHUSHI_EN" ColumnName="ZHUSHI_EN" />
+                <ScalarProperty Name="ZHUSHI_CN" ColumnName="ZHUSHI_CN" />
+                <ScalarProperty Name="GOODS_SERVICE_EN" ColumnName="GOODS_SERVICE_EN" />
+                <ScalarProperty Name="GOODS_SERVICE_CN" ColumnName="GOODS_SERVICE_CN" />
+                <ScalarProperty Name="F_CLNO" ColumnName="F_CLNO" />
+                <ScalarProperty Name="CLNO" ColumnName="CLNO" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_AMERICAN_BRAND_GRAPHCLASSIFY">
+            <EntityTypeMapping TypeName="Model.S_AMERICAN_BRAND_GRAPHCLASSIFY">
+              <MappingFragment StoreEntitySet="S_AMERICAN_BRAND_GRAPHCLASSIFY">
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="DESIGN_CODE_NOTE" ColumnName="DESIGN_CODE_NOTE" />
+                <ScalarProperty Name="DESIGN_F_CODE" ColumnName="DESIGN_F_CODE" />
+                <ScalarProperty Name="DESIGN_CODE" ColumnName="DESIGN_CODE" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_AMERICAN_BRAND_USCLASSIFY">
+            <EntityTypeMapping TypeName="Model.S_AMERICAN_BRAND_USCLASSIFY">
+              <MappingFragment StoreEntitySet="S_AMERICAN_BRAND_USCLASSIFY">
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="ZHUSHI" ColumnName="ZHUSHI" />
+                <ScalarProperty Name="CLNO" ColumnName="CLNO" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>

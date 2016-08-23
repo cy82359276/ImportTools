@@ -1729,27 +1729,113 @@ namespace TheDataResourceImporter
             #region 168 中国商标分类数据 EXCEL
             else if (fileType == "中国商标分类数据")
             {
-                string msg = "";
-                ExcelUtil excelUtil = new ExcelUtil();
-                DataTable xlsDt = excelUtil.ExcelToDataTable(filePath, out msg);
+                Dictionary<string, int> headers = new Dictionary<string, int>();
+                headers.Add("CLNO", 1);
+                headers.Add("F_CLNO", 2);
+                headers.Add("GOODS_SERVICE_CN", 3);
+                headers.Add("GOODS_SERVICE_EN", 4);
+                headers.Add("ZHUSHI_CN", 5);
+                headers.Add("ZHUSHI_EN", 6);
 
+                var result = ExcelUtil.parseExcelWithEEPlus(filePath, 4, 1, headers);
 
-                if (xlsDt == null)
+                MessageUtil.DoAppendTBDetail($"发现{result.Count}条记录");
+
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+                totalCount = result.Count();
+                importSession.TOTAL_ITEM = totalCount;
+                importSession.TABLENAME = "S_CHINA_BRAND_CLASSIFICATION".ToUpper();
+                importSession.IS_ZIP = "N";
+                entiesContext.SaveChanges();
+
+                var parsedEntites = from rec in result
+                                    select new S_CHINA_BRAND_CLASSIFICATION()
+                                    {
+                                        ID = System.Guid.NewGuid().ToString(),
+                                        CLNO = MiscUtil.getDictValueOrDefaultByKey(rec, "CLNO"),
+                                        F_CLNO = MiscUtil.getDictValueOrDefaultByKey(rec, "F_CLNO"),
+                                        GOODS_SERVICE_CN = MiscUtil.getDictValueOrDefaultByKey(rec, "GOODS_SERVICE_CN"),
+                                        GOODS_SERVICE_EN = MiscUtil.getDictValueOrDefaultByKey(rec, "GOODS_SERVICE_EN"),
+                                        ZHUSHI_CN = MiscUtil.getDictValueOrDefaultByKey(rec, "ZHUSHI_CN"),
+                                        ZHUSHI_EN = MiscUtil.getDictValueOrDefaultByKey(rec, "ZHUSHI_EN"),
+                                        FILE_PATH = filePath,
+                                        IMPORT_SESSION_ID = importSession.SESSION_ID,
+                                        IMPORT_TIME = System.DateTime.Now
+                                    };
+
+                foreach (var entityObject in parsedEntites)
                 {
-                    MessageBox.Show("出现错误:" + msg);
-                    //return false;
-                }
+                    handledCount++;
+                    entiesContext.S_CHINA_BRAND_CLASSIFICATION.Add(entityObject);
 
-                if (xlsDt.Rows.Count == 0)
-                {
-                    MessageBox.Show("没有可用于更新的数据");
-                    return false;
+                    if (handledCount % 100 == 0)
+                    {
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                        //每500条, 提交下
+                        if (handledCount % 500 == 0)
+                        {
+                            entiesContext.SaveChanges();
+                        }
+                    }
                 }
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                entiesContext.SaveChanges();
+
             }
             #endregion
             #region 169 美国商标图形分类数据 EXCEL
             else if (fileType == "美国商标图形分类数据")
             {
+                Dictionary<string, int> headers = new Dictionary<string, int>();
+                headers.Add("DESIGN_CODE", 1);
+                headers.Add("DESIGN_F_CODE", 2);
+                headers.Add("DESIGN_CODE_NOTE", 3);
+
+                var result = ExcelUtil.parseExcelWithEEPlus(filePath, 4, 1, headers);
+
+                MessageUtil.DoAppendTBDetail($"发现{result.Count}条记录");
+
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+                totalCount = result.Count();
+                importSession.TOTAL_ITEM = totalCount;
+                importSession.TABLENAME = "S_AMERICAN_BRAND_GRAPHCLASSIFY".ToUpper();
+                importSession.IS_ZIP = "N";
+                entiesContext.SaveChanges();
+
+                var parsedEntites = from rec in result
+                                    select new S_AMERICAN_BRAND_GRAPHCLASSIFY()
+                                    {
+                                        ID = System.Guid.NewGuid().ToString(),
+                                        DESIGN_CODE = MiscUtil.getDictValueOrDefaultByKey(rec, "DESIGN_CODE"),
+                                        DESIGN_F_CODE = MiscUtil.getDictValueOrDefaultByKey(rec, "DESIGN_F_CODE"),
+                                        DESIGN_CODE_NOTE = MiscUtil.getDictValueOrDefaultByKey(rec, "DESIGN_CODE_NOTE"),
+                                        FILE_PATH = filePath,
+                                        IMPORT_SESSION_ID = importSession.SESSION_ID,
+                                        IMPORT_TIME = System.DateTime.Now
+                                    };
+
+                foreach (var entityObject in parsedEntites)
+                {
+                    handledCount++;
+                    entiesContext.S_AMERICAN_BRAND_GRAPHCLASSIFY.Add(entityObject);
+
+                    if (handledCount % 100 == 0)
+                    {
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                        //每500条, 提交下
+                        if (handledCount % 500 == 0)
+                        {
+                            entiesContext.SaveChanges();
+                        }
+                    }
+                }
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                entiesContext.SaveChanges();
+
+
+
 
 
             }
@@ -1757,7 +1843,51 @@ namespace TheDataResourceImporter
             #region 170 美国商标美国分类数据 EXCEL
             else if (fileType == "美国商标美国分类数据")
             {
+                Dictionary<string, int> headers = new Dictionary<string, int>();
+                headers.Add("ID", 1);
+                headers.Add("CLNO", 2);
+                headers.Add("ZHUSHI", 3);
 
+                var result = ExcelUtil.parseExcelWithEEPlus(filePath, 3, 1, headers);
+
+                MessageUtil.DoAppendTBDetail($"发现{result.Count}条记录");
+
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+                totalCount = result.Count();
+                importSession.TOTAL_ITEM = totalCount;
+                importSession.TABLENAME = "S_AMERICAN_BRAND_USCLASSIFY".ToUpper();
+                importSession.IS_ZIP = "N";
+                entiesContext.SaveChanges();
+
+                var parsedEntites = from rec in result
+                                    select new S_AMERICAN_BRAND_USCLASSIFY()
+                                    {
+                                        ID = MiscUtil.getDictValueOrDefaultByKey(rec, "ID"),
+                                        CLNO = MiscUtil.getDictValueOrDefaultByKey(rec, "CLNO"),
+                                        ZHUSHI = MiscUtil.getDictValueOrDefaultByKey(rec, "ZHUSHI"),
+                                        FILE_PATH = filePath,
+                                        IMPORT_SESSION_ID = importSession.SESSION_ID,
+                                        IMPORT_TIME = System.DateTime.Now
+                                    };
+
+                foreach (var entityObject in parsedEntites)
+                {
+                    handledCount++;
+                    entiesContext.S_AMERICAN_BRAND_USCLASSIFY.Add(entityObject);
+
+                    if (handledCount % 100 == 0)
+                    {
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                        //每500条, 提交下
+                        if (handledCount % 500 == 0)
+                        {
+                            entiesContext.SaveChanges();
+                        }
+                    }
+                }
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                entiesContext.SaveChanges();
 
             }
             #endregion

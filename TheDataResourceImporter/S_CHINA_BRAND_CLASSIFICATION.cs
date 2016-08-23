@@ -21,5 +21,9 @@ namespace TheDataResourceImporter
         public string GOODS_SERVICE_EN { get; set; }
         public string ZHUSHI_CN { get; set; }
         public string ZHUSHI_EN { get; set; }
+        public string IMPORT_SESSION_ID { get; set; }
+        public Nullable<System.DateTime> IMPORT_TIME { get; set; }
+        public string FILE_PATH { get; set; }
+        public string ARCHIVE_INNER_PATH { get; set; }
     }
 }
