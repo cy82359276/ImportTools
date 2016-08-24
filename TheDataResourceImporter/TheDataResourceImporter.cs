@@ -100,18 +100,19 @@ namespace TheDataResourceImporter
 
         public static bool ImportByPath(string filePath, string fileType, DataSourceEntities entiesContext)
         {
+
+
+            #region 导入前准备 新建session对象
             currentFile = filePath;
-
             MessageUtil.DoAppendTBDetail("您选择的资源类型为：" + fileType);
-
             MessageUtil.DoAppendTBDetail("当前文件：" + filePath);
-
-
 
             //导入操作信息
             IMPORT_SESSION importSession = MiscUtil.getNewImportSession(fileType, filePath);
             entiesContext.IMPORT_SESSION.Add(importSession);
             entiesContext.SaveChanges();
+            #endregion
+
             //判断是否是
             #region 分文件类型进行处理
             #region 01 中国专利全文代码化数据
@@ -1027,13 +1028,8 @@ namespace TheDataResourceImporter
 
             else if (fileType == "中国专利标准化全文图像数据")
             {
-
-
-
-
-
-
-
+                
+                parseZip04(filePath, entiesContext, importSession);
             }
 
             #endregion
@@ -1090,7 +1086,198 @@ namespace TheDataResourceImporter
             else if (fileType == "中国专利著录项目与文摘数据")
             {
 
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
             }
             #endregion
             #region 10 中国专利数据法律状态数据 TRS
@@ -1202,7 +1389,198 @@ namespace TheDataResourceImporter
             else if (fileType == "中国标准化简单引文数据")
             {
 
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
             }
             #endregion
             #region 14 专利缴费数据 TRS
@@ -1288,42 +1666,1188 @@ namespace TheDataResourceImporter
             else if (fileType == "美国专利全文文本数据（标准化）")
             {
 
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
             }
             #endregion
             #region 51 欧专局专利全文文本数据（标准化） 通用
             else if (fileType == "欧专局专利全文文本数据（标准化）")
             {
 
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
             }
             #endregion
             #region  52 韩国专利全文代码化数据（标准化） 通用
             else if (fileType == "韩国专利全文代码化数据（标准化）")
             {
 
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
             }
             #endregion
             #region  53 瑞士专利全文代码化数据（标准化）通用
             else if (fileType == "瑞士专利全文代码化数据（标准化）")
             {
 
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
             }
             #endregion
             #region 54 英国专利全文代码化数据（标准化）通用
             else if (fileType == "英国专利全文代码化数据（标准化）")
             {
 
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
             }
             #endregion
             #region 55 日本专利全文代码化数据（标准化）通用
             else if (fileType == "日本专利全文代码化数据（标准化）")
             {
 
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
             }
             #endregion
             #region
@@ -1501,49 +3025,1195 @@ namespace TheDataResourceImporter
 
             }
             #endregion
-            #region
+            #region 103 比利时专利全文数据（BE）（标准化） 通用字段 未完成
             else if (fileType == "比利时专利全文数据（BE）（标准化）")
             {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
 
             }
-            #endregion
-            #region
+            #endregion 未完成
+            #region 104 奥地利专利全文数据（AT）（标准化） 通用字段 未完成
             else if (fileType == "奥地利专利全文数据（AT）（标准化）")
             {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
 
             }
             #endregion
-            #region
+            #region 105 西班牙专利全文数据（ES）（标准化） 通用字段 未完成
             else if (fileType == "西班牙专利全文数据（ES）（标准化）")
             {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
 
             }
             #endregion
-            #region
+            #region 106 波兰专利著录项及全文数据（PL）（标准化） 通用字段 未完成
             else if (fileType == "波兰专利著录项及全文数据（PL）（标准化）")
             {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
 
             }
             #endregion
-            #region
+            #region 107 以色列专利著录项及全文数据（IL）（标准化） 通用字段 未完成
             else if (fileType == "以色列专利著录项及全文数据（IL）（标准化）")
             {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
 
             }
             #endregion
-            #region
+            #region 108 新加坡专利著录项及全文数据（SG）（标准化） 通用字段 未完成
             else if (fileType == "新加坡专利著录项及全文数据（SG）（标准化）")
             {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
 
             }
             #endregion
-            #region
+            #region 
             else if (fileType == "台湾专利著录项及全文数据（TW）（DI）")
             {
 
@@ -1571,24 +4241,597 @@ namespace TheDataResourceImporter
 
             }
             #endregion
-            #region
+            #region 113 美国外观设计专利数据（DI）通用 未完成
             else if (fileType == "美国外观设计专利数据（DI）")
             {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
 
             }
             #endregion
-            #region
+            #region 日本外观设计专利数据（DI）通用 未完成
             else if (fileType == "日本外观设计专利数据（DI）")
             {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
 
             }
             #endregion
-            #region
+            #region 115 韩国外观设计专利数据（DI）通用 未完成
             else if (fileType == "韩国外观设计专利数据（DI）")
             {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
 
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
 
             }
             #endregion
@@ -1641,9 +4884,201 @@ namespace TheDataResourceImporter
 
             }
             #endregion
-            #region
+            #region 127 俄罗斯专利文摘英文翻译数据（DI） 通用字段 未完成
             else if (fileType == "俄罗斯专利文摘英文翻译数据（DI）")
             {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
 
 
             }
@@ -2227,6 +5662,3587 @@ namespace TheDataResourceImporter
 
             }
             #endregion
+            #region 213 中国专利摘要英文翻译数据（标准化） XML 通用字段 未完成
+            else if (fileType == "中国专利摘要英文翻译数据（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 214 DOCDB数据（标准化） XML
+            else if (fileType == "DOCDB数据（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 215 国际知识产权组织专利著录项及全文数据（WIPO)（标准化） XML  通用字段 未完成
+            else if (fileType == "国际知识产权组织专利著录项及全文数据（WIPO)（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 216 加拿大专利著录项及全文数据（CA）（标准化） XML  通用字段 未完成
+            else if (fileType == "加拿大专利著录项及全文数据（CA）（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 217 俄罗斯专利著录项及全文数据（RU）（标准化） XML  通用字段 未完成
+            else if (fileType == "俄罗斯专利著录项及全文数据（RU）（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 218 澳大利亚专利全文文本数据（AU）（标准化） XML  通用字段 未完成
+            else if (fileType == "澳大利亚专利全文文本数据（AU）（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 219 德国专利著录项及全文数据（DE）（标准化） XML  通用字段 未完成
+            else if (fileType == "德国专利著录项及全文数据（DE）（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 220 法国专利著录项及全文数据（FR）（标准化） XML  通用字段 未完成
+            else if (fileType == "法国专利著录项及全文数据（FR）（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 221 台湾专利著录项及全文数据（TW）（标准化） XML  通用字段 未完成
+            else if (fileType == "台湾专利著录项及全文数据（TW）（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 222 香港专利著录项数据（HK）（标准化） XML  通用字段 未完成
+            else if (fileType == "香港专利著录项数据（HK）（标准化）")
+            {
+
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+            }
+            #endregion
+            #region 223 澳门专利著录项数据（MO）（标准化） XML  通用字段 未完成
+            else if (fileType == "澳门专利著录项数据（MO）（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 224 欧亚组织专利著录项及全文数据（EA）（标准化） XML  通用字段 未完成
+            else if (fileType == "欧亚组织专利著录项及全文数据（EA）（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 225 日本外观设计专利数据（标准化） XML  通用字段 未完成
+            else if (fileType == "日本外观设计专利数据（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 226 德国外观设计专利数据（标准化） XML  通用字段 未完成
+            else if (fileType == "德国外观设计专利数据（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 227 法国外观设计专利数据（标准化） XML  通用字段 未完成
+            else if (fileType == "法国外观设计专利数据（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 228 俄罗斯外观设计专利数据（标准化） XML  通用字段 未完成
+            else if (fileType == "俄罗斯外观设计专利数据（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 229 日本专利文摘英文翻译数据（PAJ)（标准化） XML  通用字段 未完成
+            else if (fileType == "日本专利文摘英文翻译数据（PAJ)（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
+            #endregion
+            #region 230 韩国专利文摘英文翻译数据(KPA)（标准化） XML  通用字段 未完成
+            else if (fileType == "韩国专利文摘英文翻译数据(KPA)（标准化）")
+            {
+                handledCount = 0;
+                importStartTime = importSession.START_TIME.Value;
+
+                importSession.TABLENAME = "S_China_Patent_StandardFullTxt".ToUpper();
+                entiesContext.SaveChanges();
+
+                SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+                IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+                //总条目数
+                importSession.IS_ZIP = "Y";
+                totalCount = archive.Entries.Count();
+                importSession.ZIP_ENTRIES_COUNT = totalCount;
+                entiesContext.SaveChanges();
+
+                #region 检查目录内无XML的情况
+                var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                         where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                         select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+                //排除压缩包中无关XML
+                var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                                select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+                var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+                //发现存在XML不存在的情况
+                if (dirEntriesWithoutXML.Count() > 0)
+                {
+                    string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                    msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                    MessageUtil.DoAppendTBDetail(msg);
+                    LogHelper.WriteErrorLog(msg);
+
+                    foreach (string entryKey in dirEntriesWithoutXML)
+                    {
+                        importSession.HAS_ERROR = "Y";
+                        IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                        importSession.FAILED_COUNT++;
+                        entiesContext.IMPORT_ERROR.Add(importError);
+                        entiesContext.SaveChanges();
+                    }
+                }
+                #endregion
+
+
+                MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+                var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                    where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                    select entry;
+
+                totalCount = allXMLEntires.Count();
+
+                MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+                //已处理计数清零
+                handledCount = 0;
+                if (0 == allXMLEntires.Count())
+                {
+                    MessageUtil.DoAppendTBDetail("没有找到XML");
+                    importSession.NOTE = "没有找到XML";
+                    //添加错误信息
+                    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                    entiesContext.SaveChanges();
+                }
+                #region 循环入库
+                foreach (IArchiveEntry entry in allXMLEntires)
+                {
+                    //计数变量
+                    handledCount++;
+
+                    if (forcedStop)
+                    {
+                        MessageUtil.DoAppendTBDetail("强制终止了插入");
+                        importSession.NOTE = "用户强制终止了本次插入";
+                        entiesContext.SaveChanges();
+                        break;
+                    }
+
+                    var keyTemp = entry.Key;
+
+                    //解压当前的XML文件
+                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                    if ("" == entryFullPath.Trim())
+                    {
+                        MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                        LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                        importSession.FAILED_COUNT++;
+                        IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                        entiesContext.IMPORT_ERROR.Add(errorTemp);
+                        entiesContext.SaveChanges();
+                        continue;
+                    }
+
+                    S_CHINA_PATENT_STANDARDFULLTXT entityObject = new S_CHINA_PATENT_STANDARDFULLTXT() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                    entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                    entityObject.FILE_PATH = filePath;
+                    //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                    entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
+                    //entiesContext.SaveChanges();
+
+                    XDocument doc = XDocument.Load(entryFullPath);
+
+                    #region 具体的入库操作,EF
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                    var rootElement = doc.Root;
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+
+
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+
+                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+
+
+                    entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
+
+                    entityObject.EXIST_STA_FULLTEXT = "1";
+
+                    //entityObject.PATH_DI_ABS_BIB = null;
+
+                    //entityObject.PATH_DI_CLA_DES_DRA = null;
+
+                    //entityObject.PATH_DI_BRI_DBI = null;
+
+                    //entityObject.EXIST_DI_ABS_BIB = "0";
+
+                    //entityObject.EXIST_DI_CLA_DES_DRA = "0";
+
+                    //entityObject.EXIST_DI_BRI_DBI = "0";
+
+                    //entityObject.PATH_FULLTEXT = null;
+
+                    //entityObject.EXIST_FULLTEXT = "0";
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                    entiesContext.SaveChanges();
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                    #endregion
+
+                    //更新进度信息
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                }
+                #endregion 循环入库
+
+
+            }
             #endregion
 
 
@@ -2236,6 +9252,17 @@ namespace TheDataResourceImporter
 
 
 
+
+
+
+
+
+
+
+            #endregion
+
+
+            #region 导入后处理 写入导入session信息
             importSession.LAST_TIME = new Decimal(importSession.START_TIME != null ? DateTime.Now.Subtract(importSession.START_TIME.Value).TotalSeconds : 0);
             //是否发生错误
             importSession.HAS_ERROR = importSession.FAILED_COUNT > 0 ? "Y" : "N";
@@ -2244,8 +9271,227 @@ namespace TheDataResourceImporter
             importSession.ITEMS_POINT = handledCount;
             importSession.TOTAL_ITEM = totalCount;
             entiesContext.SaveChanges();
-
+            #endregion
             return true;
+        }
+
+
+
+
+
+        private static void parseZip04(string zipFilePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession)
+        {
+            handledCount = 0;
+            importStartTime = importSession.START_TIME.Value;
+
+            importSession.TABLENAME = "S_CHINA_PATENT_STAND_TEXTIMAGE".ToUpper();
+            entiesContext.SaveChanges();
+
+            //获取索引信息
+            FileInfo zipFileInfo = new FileInfo(zipFilePath);
+            //需找指定的XML
+            var indexXMLList = zipFileInfo.Directory.GetFiles("*INDEX*.XML");
+
+
+            List<Dictionary<string, string>> docList = new List<Dictionary<string, string>>();
+            //XMLFile
+            foreach (var xmlFile in indexXMLList)
+            {
+                XDocument indexTemp = XDocument.Load(xmlFile.FullName);
+                var docListParition = indexTemp.Root.XPathSelectElements("//DocList").Select(currentNode =>
+                {
+                    Dictionary<string, string> indexInfo = new Dictionary<string, string>();
+                    indexInfo.Add("ApplicationNum", currentNode.Attribute("ApplicationNum").Value);
+                    indexInfo.Add("ApplicationDate", currentNode.Attribute("ApplicationDate").Value);
+                    indexInfo.Add("PublicationNum", currentNode.Attribute("PublicationNum").Value);
+                    indexInfo.Add("PublicationDate", currentNode.Attribute("PublicationDate").Value);
+                    return indexInfo;
+                }).ToList();
+
+                docList.AddRange(docListParition);
+            }
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+            IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(zipFilePath);
+
+            //总条目数
+            importSession.IS_ZIP = "Y";
+            totalCount = archive.Entries.Count();
+            importSession.ZIP_ENTRIES_COUNT = totalCount;
+            entiesContext.SaveChanges();
+
+            #region 检查目录内无XML的情况
+            var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                     where entry.IsDirectory && CompressUtil.getDirEntryDepth(entry.Key) == 2
+                                     select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+            //排除压缩包中无关XML
+            var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                            where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                            select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+            var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+            //发现存在XML不存在的情况
+            if (dirEntriesWithoutXML.Count() > 0)
+            {
+                string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                MessageUtil.DoAppendTBDetail(msg);
+                LogHelper.WriteErrorLog(msg);
+
+                foreach (string entryKey in dirEntriesWithoutXML)
+                {
+                    importSession.HAS_ERROR = "Y";
+                    IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = zipFilePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                    importSession.FAILED_COUNT++;
+                    entiesContext.IMPORT_ERROR.Add(importError);
+                    entiesContext.SaveChanges();
+                }
+            }
+            #endregion
+
+
+            MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
+
+            var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getDirEntryDepth(entry.Key) == 3
+                                select entry;
+
+            totalCount = allXMLEntires.Count();
+
+            MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+            //已处理计数清零
+            handledCount = 0;
+            if (0 == allXMLEntires.Count())
+            {
+                MessageUtil.DoAppendTBDetail("没有找到XML");
+                importSession.NOTE = "没有找到XML";
+                //添加错误信息
+                entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", zipFilePath, "", ""));
+                entiesContext.SaveChanges();
+            }
+
+
+
+
+
+
+
+
+            #region 循环入库
+            foreach (IArchiveEntry entry in allXMLEntires)
+            {
+                //计数变量
+                handledCount++;
+
+                if (forcedStop)
+                {
+                    MessageUtil.DoAppendTBDetail("强制终止了插入");
+                    importSession.NOTE = "用户强制终止了本次插入";
+                    entiesContext.SaveChanges();
+                    break;
+                }
+
+                var keyTemp = entry.Key;
+
+                #region 解压当前的XML文件
+                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                if ("" == entryFullPath.Trim())
+                {
+                    MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                    LogHelper.WriteErrorLog($"----------当前条目:{zipFilePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                    importSession.FAILED_COUNT++;
+                    IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", zipFilePath, entry.Key, "解压失败!");
+                    entiesContext.IMPORT_ERROR.Add(errorTemp);
+                    entiesContext.SaveChanges();
+                    continue;
+                }
+                #endregion 
+
+
+                //初始化Entity, 添加控制信息
+                S_CHINA_PATENT_STAND_TEXTIMAGE entityObject = new S_CHINA_PATENT_STAND_TEXTIMAGE() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                entityObject.FILE_PATH = zipFilePath;
+                //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                entiesContext.S_CHINA_PATENT_STAND_TEXTIMAGE.Add(entityObject);
+                //entiesContext.SaveChanges();
+
+
+
+
+
+                XDocument doc = XDocument.Load(entryFullPath);
+
+                #region 具体的入库操作,EF
+                //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                //定义命名空间
+                //XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                //namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                //namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                var rootElement = doc.Root;
+
+                //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "");
+                entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "");
+                entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "");
+                entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", ""));
+
+
+                entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", ""); ;
+                entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "");
+                entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", ""));
+
+                entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                entiesContext.SaveChanges();
+
+
+                //输出插入记录
+                var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+                #endregion
+
+
+                #region 寻找压缩包同级的索引XML, 并根据XML解析申请号信息
+
+
+
+
+
+
+
+
+                #endregion
+
+                //更新进度信息
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, zipFilePath);
+            }
+            #endregion 循环入库
         }
     }
 }
