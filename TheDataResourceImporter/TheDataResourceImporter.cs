@@ -1024,16 +1024,16 @@ namespace TheDataResourceImporter
 
             #endregion
 
-            #region 04 中国专利标准化全文图像数据 未完成
+            #region 04 中国专利标准化全文图像数据 XML
 
             else if (fileType == "中国专利标准化全文图像数据")
             {
-                
+                //未根据Index文件进行完整性校验
                 parseZip04(filePath, entiesContext, importSession);
             }
 
             #endregion
-            #region 05 中国专利公报数据
+            #region 05 中国专利公报数据 TRS
             else if (fileType == "中国专利公报数据")
             {
 
@@ -1317,7 +1317,7 @@ namespace TheDataResourceImporter
 
                     if (handledCount % 100 == 0)
                     {
-                         MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
                         //每500条, 提交下
                         if (handledCount % 500 == 0)
                         {
@@ -1366,7 +1366,7 @@ namespace TheDataResourceImporter
 
                     entiesContext.S_CHINA_PATENT_LAWSTATE_CHANGE.Add(entityObject);
 
-                    if(0 == handledCount % 100)
+                    if (0 == handledCount % 100)
                     {
 
                         MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
@@ -1648,21 +1648,21 @@ namespace TheDataResourceImporter
 
             }
             #endregion
-            #region 16  公司代码库 待确定
+            #region 16  公司代码库 未完成 无样例
             else if (fileType == "公司代码库")
             {
 
 
             }
             #endregion
-            #region 17 区域代码库 待确定
+            #region 17 区域代码库 未完成 无样例
             else if (fileType == "区域代码库")
             {
 
 
             }
             #endregion
-            #region 50 美国专利全文文本数据（标准化） 通用
+            #region 50 美国专利全文文本数据（标准化） 通用 未完成 未建库
             else if (fileType == "美国专利全文文本数据（标准化）")
             {
 
@@ -1860,7 +1860,7 @@ namespace TheDataResourceImporter
                 #endregion 循环入库
             }
             #endregion
-            #region 51 欧专局专利全文文本数据（标准化） 通用
+            #region 51 欧专局专利全文文本数据（标准化） 通用 未完成 未建库
             else if (fileType == "欧专局专利全文文本数据（标准化）")
             {
 
@@ -2058,7 +2058,7 @@ namespace TheDataResourceImporter
                 #endregion 循环入库
             }
             #endregion
-            #region  52 韩国专利全文代码化数据（标准化） 通用
+            #region  52 韩国专利全文代码化数据（标准化） 通用 未完成 未建库 
             else if (fileType == "韩国专利全文代码化数据（标准化）")
             {
 
@@ -2256,7 +2256,7 @@ namespace TheDataResourceImporter
                 #endregion 循环入库
             }
             #endregion
-            #region  53 瑞士专利全文代码化数据（标准化）通用
+            #region  53 瑞士专利全文代码化数据（标准化）通用 未完成 未建库
             else if (fileType == "瑞士专利全文代码化数据（标准化）")
             {
 
@@ -2454,7 +2454,7 @@ namespace TheDataResourceImporter
                 #endregion 循环入库
             }
             #endregion
-            #region 54 英国专利全文代码化数据（标准化）通用
+            #region 54 英国专利全文代码化数据（标准化）通用 未完成 未建库
             else if (fileType == "英国专利全文代码化数据（标准化）")
             {
 
@@ -2652,7 +2652,7 @@ namespace TheDataResourceImporter
                 #endregion 循环入库
             }
             #endregion
-            #region 55 日本专利全文代码化数据（标准化）通用
+            #region 55 日本专利全文代码化数据（标准化）通用 未完成 未建库
             else if (fileType == "日本专利全文代码化数据（标准化）")
             {
 
@@ -9275,10 +9275,6 @@ namespace TheDataResourceImporter
             return true;
         }
 
-
-
-
-
         private static void parseZip04(string zipFilePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession)
         {
             handledCount = 0;
@@ -9307,22 +9303,8 @@ namespace TheDataResourceImporter
                     indexInfo.Add("PublicationDate", currentNode.Attribute("PublicationDate").Value);
                     return indexInfo;
                 }).ToList();
-
                 docList.AddRange(docListParition);
             }
-            
-
-
-
-
-
-
-
-
-
-
-
-
 
 
             SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
@@ -9445,29 +9427,58 @@ namespace TheDataResourceImporter
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
 
                 //定义命名空间
-                //XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
                 //namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
-                //namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
                 //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
                 //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
 
                 var rootElement = doc.Root;
 
-                //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
-                entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "");
-                entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "");
-                entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "");
-                entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", ""));
+                //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type", namespaceManager);
+
+                entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated", "country", namespaceManager);
+                entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated", "docNumber", namespaceManager);
+                //公告类型
+                entityObject.STA_PUB_KIND = string.IsNullOrEmpty(entityObject.STA_PUB_NUMBER) ? "" : entityObject.STA_PUB_NUMBER.Last().ToString();
+
+                var pubDateStr = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated", "datePublication", namespaceManager);
+
+                entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(pubDateStr);
 
 
-                entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", ""); ;
-                entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "");
-                entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", ""));
+                entityObject.STA_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage", "numberOfFigures", namespaceManager);
+                entityObject.STA_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage", "type", namespaceManager);
+
+
+                var correspondDocInfo = (from docInfo in docList
+                                         where !string.IsNullOrEmpty(entityObject.STA_PUB_NUMBER) && MiscUtil.getDictValueOrDefaultByKey(docInfo, "PublicationNum") == entityObject.STA_PUB_NUMBER && MiscUtil.getDictValueOrDefaultByKey(docInfo, "PublicationDate") == pubDateStr
+                                         select docInfo).FirstOrDefault();
+
+                if (null != correspondDocInfo)
+                {
+                    //entityObject.STA_APP_COUNTRY = MiscUtil.getDictValueOrDefaultByKey(correspondDocInfo, "") ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getDictValueOrDefaultByKey(correspondDocInfo, "ApplicationNum");
+                    if(!string.IsNullOrEmpty(entityObject.STA_APP_NUMBER))
+                    {
+                        try
+                        {
+                            entityObject.STA_APP_COUNTRY = entityObject.STA_APP_NUMBER.Substring(0, 2);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getDictValueOrDefaultByKey(correspondDocInfo, "ApplicationDate"));
+                }
+
+                entityObject.EXIST_XML = "1";
+
+                entityObject.PATH_XML = MiscUtil.getRelativeFilePathInclude(zipFilePath, 2) + Path.DirectorySeparatorChar + CompressUtil.removeDirEntrySlash(entry.Key);
 
                 entityObject.IMPORT_TIME = System.DateTime.Now;
 
                 entiesContext.SaveChanges();
-
 
                 //输出插入记录
                 var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
@@ -9476,17 +9487,6 @@ namespace TheDataResourceImporter
 
                 #endregion
 
-
-                #region 寻找压缩包同级的索引XML, 并根据XML解析申请号信息
-
-
-
-
-
-
-
-
-                #endregion
 
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, zipFilePath);
