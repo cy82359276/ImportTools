@@ -25,7 +25,6 @@ namespace TheDataResourceImporter.Utils
 
         public static void DoSetTBDetail(string msg)
         {
-
             //添加时间标识
             DateTime now = System.DateTime.Now;
             string timeStamp = now.ToLocalTime().ToString() + " " + now.Millisecond;

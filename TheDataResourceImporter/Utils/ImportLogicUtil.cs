@@ -25,7 +25,6 @@ namespace TheDataResourceImporter.Utils
 
                 //ex.;
             }
-
             return MiscUtil.jsonSerilizeObject(sCNPatTxtImg);
             //sCNPatTxtImg.APPL_TYPE = app_type;
             //sCNPatTxtImg.APP_NUMBER = CompressUtil.getEntryShortName(entryKey);
