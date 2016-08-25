@@ -89,6 +89,18 @@
         <EntityTypeShape EntityType="Model.S_WIPO_PATENT_DESCRIPTION" Width="1.5" PointX="34.75" PointY="27.75" />
         <EntityTypeShape EntityType="Model.S_WORLD_LEGAL_STATUS" Width="1.5" PointX="6.75" PointY="35.75" />
         <EntityTypeShape EntityType="Model.S_ZONE_CODE_BASE" Width="1.5" PointX="36.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Model.W_CATALOG" Width="1.5" PointX="36.75" PointY="3.75" />
+        <EntityTypeShape EntityType="Model.W_CUSTOMFIELDS" Width="1.5" PointX="36.75" PointY="7.75" />
+        <EntityTypeShape EntityType="Model.W_ERRORFLOW" Width="1.5" PointX="8.75" PointY="36.75" />
+        <EntityTypeShape EntityType="Model.W_PCGXSJXX" Width="1.5" PointX="36.75" PointY="10.75" />
+        <EntityTypeShape EntityType="Model.W_REMIND" Width="1.5" PointX="36.75" PointY="16.75" />
+        <EntityTypeShape EntityType="Model.W_RKCD" Width="1.5" PointX="36.75" PointY="20.75" />
+        <EntityTypeShape EntityType="Model.W_RKCXKF" Width="1.5" PointX="26.75" PointY="36.75" />
+        <EntityTypeShape EntityType="Model.W_SJSJ" Width="1.5" PointX="36.75" PointY="28.75" />
+        <EntityTypeShape EntityType="Model.W_SJZYZTSXXX" Width="1.5" PointX="28.75" PointY="36.75" />
+        <EntityTypeShape EntityType="Model.W_STSJFFGZLC" Width="1.5" PointX="30.75" PointY="36.75" />
+        <EntityTypeShape EntityType="Model.W_STSJFFPC" Width="1.5" PointX="32.75" PointY="36.75" />
+        <EntityTypeShape EntityType="Model.W_ZGZLDMHSJ" Width="1.5" PointX="16.75" PointY="37.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

@@ -2581,13 +2581,24 @@ namespace TheDataResourceImporter
 
                 entityObject.IMPORT_TIME = System.DateTime.Now;
 
-                entiesContext.SaveChanges();
+                var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+                try
+                {
+                    entiesContext.SaveChanges();
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+                }
+                catch (Exception ex)
+                {
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入失败!!!");
+                    throw ex;
+                }
+               
+
+                
 
 
                 //输出插入记录
-                var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
 
-                MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
 
                 #endregion
 

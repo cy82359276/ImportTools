@@ -397,6 +397,42 @@
     <Compile Include="Utils\MiscUtil.cs" />
     <Compile Include="Utils\OracleDb.cs" />
     <Compile Include="Utils\TRSUtil.cs" />
+    <Compile Include="W_CATALOG.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="W_CUSTOMFIELDS.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="W_ERRORFLOW.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="W_PCGXSJXX.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="W_REMIND.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="W_RKCD.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="W_RKCXKF.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="W_SJSJ.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="W_SJZYZTSXXX.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="W_STSJFFGZLC.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="W_STSJFFPC.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="W_ZGZLDMHSJ.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="AboutBoxUS.resx">
       <DependentUpon>AboutBoxUS.cs</DependentUpon>
     </EmbeddedResource>
