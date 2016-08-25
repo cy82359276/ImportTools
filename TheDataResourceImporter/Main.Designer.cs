@@ -60,6 +60,7 @@ namespace TheDataResourceImporter
             this.menuCheckHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.checkBoxClearExistData = new System.Windows.Forms.CheckBox();
+            this.checkBoxIsDir = new System.Windows.Forms.CheckBox();
             this.mainMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -67,7 +68,7 @@ namespace TheDataResourceImporter
             // 
             this.importProgressBar.Location = new System.Drawing.Point(114, 564);
             this.importProgressBar.Name = "importProgressBar";
-            this.importProgressBar.Size = new System.Drawing.Size(394, 19);
+            this.importProgressBar.Size = new System.Drawing.Size(499, 19);
             this.importProgressBar.Step = 1;
             this.importProgressBar.TabIndex = 0;
             // 
@@ -86,7 +87,7 @@ namespace TheDataResourceImporter
             this.textBoxDetail.Multiline = true;
             this.textBoxDetail.Name = "textBoxDetail";
             this.textBoxDetail.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxDetail.Size = new System.Drawing.Size(455, 287);
+            this.textBoxDetail.Size = new System.Drawing.Size(558, 306);
             this.textBoxDetail.TabIndex = 2;
             // 
             // statusLabel
@@ -119,10 +120,6 @@ namespace TheDataResourceImporter
             // cbFileType
             // 
             this.cbFileType.FormattingEnabled = true;
-
-            
-
-
             this.cbFileType.Items.AddRange(new object[] {
             "中国专利全文代码化数据",
             "中国专利全文图像数据",
@@ -219,6 +216,7 @@ namespace TheDataResourceImporter
             this.cbFileType.Name = "cbFileType";
             this.cbFileType.Size = new System.Drawing.Size(327, 20);
             this.cbFileType.TabIndex = 6;
+            this.cbFileType.SelectedIndexChanged += new System.EventHandler(this.cbFileType_SelectedIndexChanged);
             // 
             // btnStart
             // 
@@ -279,7 +277,7 @@ namespace TheDataResourceImporter
             // labelStatus
             // 
             this.labelStatus.AutoSize = true;
-            this.labelStatus.Location = new System.Drawing.Point(536, 571);
+            this.labelStatus.Location = new System.Drawing.Point(659, 571);
             this.labelStatus.Name = "labelStatus";
             this.labelStatus.Size = new System.Drawing.Size(23, 12);
             this.labelStatus.TabIndex = 22;
@@ -370,7 +368,7 @@ namespace TheDataResourceImporter
             this.menuHelp});
             this.mainMenu.Location = new System.Drawing.Point(0, 0);
             this.mainMenu.Name = "mainMenu";
-            this.mainMenu.Size = new System.Drawing.Size(625, 25);
+            this.mainMenu.Size = new System.Drawing.Size(722, 25);
             this.mainMenu.TabIndex = 32;
             this.mainMenu.Text = "menuStrip1";
             // 
@@ -415,11 +413,24 @@ namespace TheDataResourceImporter
             this.checkBoxClearExistData.Text = "清空现有数据";
             this.checkBoxClearExistData.UseVisualStyleBackColor = true;
             // 
+            // checkBoxIsDir
+            // 
+            this.checkBoxIsDir.AutoSize = true;
+            this.checkBoxIsDir.Enabled = false;
+            this.checkBoxIsDir.Location = new System.Drawing.Point(572, 96);
+            this.checkBoxIsDir.Name = "checkBoxIsDir";
+            this.checkBoxIsDir.Size = new System.Drawing.Size(60, 16);
+            this.checkBoxIsDir.TabIndex = 34;
+            this.checkBoxIsDir.Text = "文件夹";
+            this.checkBoxIsDir.UseVisualStyleBackColor = true;
+            this.checkBoxIsDir.CheckedChanged += new System.EventHandler(this.checkBoxIsDir_CheckedChanged);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(625, 699);
+            this.ClientSize = new System.Drawing.Size(722, 706);
+            this.Controls.Add(this.checkBoxIsDir);
             this.Controls.Add(this.checkBoxClearExistData);
             this.Controls.Add(this.labelImportCountPerSec);
             this.Controls.Add(this.label5);
@@ -488,6 +499,7 @@ namespace TheDataResourceImporter
         private System.Windows.Forms.ToolStripMenuItem menuCheckHelp;
         private System.Windows.Forms.ToolStripMenuItem menuAbout;
         private System.Windows.Forms.CheckBox checkBoxClearExistData;
+        private CheckBox checkBoxIsDir;
     }
 }
 

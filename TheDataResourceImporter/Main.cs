@@ -14,10 +14,12 @@ namespace TheDataResourceImporter
 {
     public partial class Main : Form
     {
+
+        public static bool showFileDialog = true;
+
         public Main()
         {
             InitializeComponent();
-
 
             DataSourceEntities entitiesDataSource = new DataSourceEntities();
             //绑定数据类型 下拉列表
@@ -46,19 +48,36 @@ namespace TheDataResourceImporter
         string[] filePaths = null;
         private void btn_Choose_Click(object sender, EventArgs e)
         {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "任意文件(*.*)或目录|*";
-            dialog.Multiselect = true;
-
-            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if(showFileDialog) //展示文件选择器
             {
-                filePaths = null;
-                tb_FilePath.Text = string.Empty;
+                OpenFileDialog dialog = new OpenFileDialog();
+                dialog.Filter = "任意文件(*.*)或目录|*";
+                dialog.Multiselect = true;
 
-                filePaths = dialog.FileNames;
-                foreach (string filePath in filePaths)
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    tb_FilePath.Text += (filePath + ";");
+                    filePaths = null;
+                    tb_FilePath.Text = string.Empty;
+
+                    filePaths = dialog.FileNames;
+                    foreach (string filePath in filePaths)
+                    {
+                        tb_FilePath.Text += (filePath + ";");
+                    }
+                }
+            }
+            else
+            {
+                FolderBrowserDialog dialog = new FolderBrowserDialog();
+                dialog.ShowNewFolderButton = false;
+                dialog.Description = "请选择文件路径";
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    string foldPath = dialog.SelectedPath;
+
+                    tb_FilePath.Text = foldPath;
+
+                    filePaths = new string[] { foldPath};
                 }
             }
         }
@@ -268,6 +287,52 @@ namespace TheDataResourceImporter
         private void menuShowImportHistory_Click(object sender, EventArgs e)
         {
             new ImportHistoryForm().Show();
+        }
+
+        private void cbFileType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var fileType = cbFileType.SelectedValue;
+
+            if (
+                "中国商标".Equals(fileType)
+                ||
+                "中国商标许可数据".Equals(fileType)
+                || 
+                "中国商标转让数据".Equals(fileType) 
+                || 
+                "马德里商标进入中国".Equals(fileType) 
+                || 
+                "中国驰名商标数据".Equals(fileType) 
+                || 
+                "美国申请商标".Equals(fileType) 
+                || 
+                "美国转让商标".Equals(fileType) 
+                || 
+                "美国审判商标".Equals(fileType)
+              )
+            {
+                showFileDialog = false;
+                checkBoxIsDir.Checked = true;
+                checkBoxIsDir.Enabled = false;
+            }
+            else
+            {
+                showFileDialog = true;
+                checkBoxIsDir.Checked = false;
+                checkBoxIsDir.Enabled = true;
+            }
+        }
+
+        private void checkBoxIsDir_CheckedChanged(object sender, EventArgs e)
+        {
+            if(checkBoxIsDir.Checked)
+            {
+                showFileDialog = false;//展示文件夹
+            }
+            else
+            {
+                showFileDialog = true;//展示文件夹
+            }
         }
     }
 }
