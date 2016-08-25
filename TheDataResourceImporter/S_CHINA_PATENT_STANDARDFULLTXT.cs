@@ -33,8 +33,6 @@ namespace TheDataResourceImporter
         public string CLASSIFICATIONIPCR { get; set; }
         public string CLASSIFICATIONLOCARNO { get; set; }
         public string INVENTIONTITLE { get; set; }
-        public string ABSTRACT { get; set; }
-        public string DESIGNBRIEFEXPLANATION { get; set; }
         public string FULLDOCIMAGE_NUMBEROFFIGURES { get; set; }
         public string FULLDOCIMAGE_TYPE { get; set; }
         public string PATH_STA_FULLTEXT { get; set; }
@@ -52,5 +50,7 @@ namespace TheDataResourceImporter
         public string ARCHIVE_INNER_PATH { get; set; }
         public string FILE_PATH { get; set; }
         public Nullable<decimal> SESSION_INDEX { get; set; }
+        public string ABSTRACT { get; set; }
+        public string DESIGNBRIEFEXPLANATION { get; set; }
     }
 }
