@@ -109,17 +109,5 @@ namespace TheDataResourceImporter
         public DbSet<S_WIPO_PATENT_DESCRIPTION> S_WIPO_PATENT_DESCRIPTION { get; set; }
         public DbSet<S_WORLD_LEGAL_STATUS> S_WORLD_LEGAL_STATUS { get; set; }
         public DbSet<S_ZONE_CODE_BASE> S_ZONE_CODE_BASE { get; set; }
-        public DbSet<W_CATALOG> W_CATALOG { get; set; }
-        public DbSet<W_CUSTOMFIELDS> W_CUSTOMFIELDS { get; set; }
-        public DbSet<W_ERRORFLOW> W_ERRORFLOW { get; set; }
-        public DbSet<W_PCGXSJXX> W_PCGXSJXX { get; set; }
-        public DbSet<W_REMIND> W_REMIND { get; set; }
-        public DbSet<W_RKCD> W_RKCD { get; set; }
-        public DbSet<W_RKCXKF> W_RKCXKF { get; set; }
-        public DbSet<W_SJSJ> W_SJSJ { get; set; }
-        public DbSet<W_SJZYZTSXXX> W_SJZYZTSXXX { get; set; }
-        public DbSet<W_STSJFFGZLC> W_STSJFFGZLC { get; set; }
-        public DbSet<W_STSJFFPC> W_STSJFFPC { get; set; }
-        public DbSet<W_ZGZLDMHSJ> W_ZGZLDMHSJ { get; set; }
     }
 }
