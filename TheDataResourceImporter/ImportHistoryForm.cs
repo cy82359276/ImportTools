@@ -17,10 +17,23 @@ namespace TheDataResourceImporter
         int pageCount = 0;    //页数＝总记录数/每页显示行数
         int pageCurrent = 0;   //当前页号
         int nCurrent = 0;      //当前记录行
+        string bathId = "";//批次编号
         DataSourceEntities entitiesDataSource = new DataSourceEntities();
 
         public ImportHistoryForm()
         {
+            InitializeComponent();
+            DataSourceEntities entitiesDataSource = new DataSourceEntities();
+            //var importSessions = from session in entitiesDataSource.IMPORT_SESSION.ToList()
+            //                     orderby session.START_TIME descending
+            //                     select session;
+            dataGridViewImportHistory.AutoGenerateColumns = false;
+            showPage(1, entitiesDataSource);
+        }
+
+        public ImportHistoryForm(string bathID)
+        {
+            bathId = bathID;
             InitializeComponent();
             DataSourceEntities entitiesDataSource = new DataSourceEntities();
             //var importSessions = from session in entitiesDataSource.IMPORT_SESSION.ToList()
@@ -35,7 +48,15 @@ namespace TheDataResourceImporter
 
             dataGridViewImportHistory.Columns.Clear();
 
+            
             var sessionArray = entitiesDataSource.IMPORT_SESSION.OrderByDescending(r => r.START_TIME);
+            
+            //存在批次编号
+            if(!string.IsNullOrEmpty(bathId))
+            {
+                sessionArray = entitiesDataSource.IMPORT_SESSION.Where(r => r.BATCH_ID==bathId).OrderByDescending(r => r.START_TIME);
+            }
+
 
             //总记录数
             nMax = sessionArray.Count();
@@ -298,6 +319,10 @@ namespace TheDataResourceImporter
                 var errorList = new ErrorListForm(session_Id);
                 errorList.Show();
             }
+            else
+            {
+                MessageBox.Show("本次导入没有错误");
+            }
         }
 
         private void dataGridViewImportHistory_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -347,6 +372,10 @@ namespace TheDataResourceImporter
                 {
                     var errorList = new ErrorListForm(session_Id);
                     errorList.Show();
+                }
+                else
+                {
+                    MessageBox.Show("本次导入没有错误");
                 }
             }
         }

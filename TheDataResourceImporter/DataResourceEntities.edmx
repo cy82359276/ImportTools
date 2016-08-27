@@ -42,6 +42,7 @@
           <Property Name="ZIP_ENTRY_PATH" Type="varchar2" MaxLength="1000" />
           <Property Name="NOTE" Type="varchar2" MaxLength="1000" />
           <Property Name="TABLENAME" Type="varchar2" MaxLength="500" />
+          <Property Name="BATCH_ID" Type="varchar2" MaxLength="100" />
         </EntityType>
         <EntityType Name="S_AMERICA_APPLY_BRAND">
           <Key>
@@ -1817,6 +1818,20 @@
           <Property Name="ABSTRACT" Type="clob" />
           <Property Name="DESIGNBRIEFEXPLANATION" Type="clob" />
         </EntityType>
+        <EntityType Name="S_IMPORT_BATH">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="nvarchar2" MaxLength="100" Nullable="false" />
+          <Property Name="START_TIME" Type="date" />
+          <Property Name="ISCOMPLETED" Type="nvarchar2" MaxLength="20" />
+          <Property Name="FILECOUNT" Type="number" Precision="38" Scale="0" />
+          <Property Name="IS_DIR_MODE" Type="nvarchar2" MaxLength="20" />
+          <Property Name="DIR_PATH" Type="nvarchar2" MaxLength="1000" />
+          <Property Name="RES_TYPE" Type="nvarchar2" MaxLength="100" />
+          <Property Name="LAST_TIME" Type="number" Precision="38" Scale="0" />
+          <Property Name="HANDLED_ITEM_COUNT" Type="number" Precision="38" Scale="0" />
+        </EntityType>
         <EntityType Name="S_ISRAEL_PATENT_DESCRIPTION">
           <Key>
             <PropertyRef Name="ID" />
@@ -2808,6 +2823,7 @@
           <EntitySet Name="S_GERMAN_PATENT_DESCRIPTION" EntityType="Self.S_GERMAN_PATENT_DESCRIPTION" Schema="DRMSTEST" store:Type="Tables" />
           <EntitySet Name="S_GLOBAL_PATENT_CITATION" EntityType="Self.S_GLOBAL_PATENT_CITATION" Schema="DRMSTEST" store:Type="Tables" />
           <EntitySet Name="S_HONGKONG_PATENT_DESCRIPTION" EntityType="Self.S_HONGKONG_PATENT_DESCRIPTION" Schema="DRMSTEST" store:Type="Tables" />
+          <EntitySet Name="S_IMPORT_BATH" EntityType="Self.S_IMPORT_BATH" Schema="DRMSTEST" store:Type="Tables" />
           <EntitySet Name="S_ISRAEL_PATENT_DESCRIPTION" EntityType="Self.S_ISRAEL_PATENT_DESCRIPTION" Schema="DRMSTEST" store:Type="Tables" />
           <EntitySet Name="S_JAPAN_DESIGN_PATENT" EntityType="Self.S_JAPAN_DESIGN_PATENT" Schema="DRMSTEST" store:Type="Tables" />
           <EntitySet Name="S_JAPAN_PATENT_ABSTRACTS" EntityType="Self.S_JAPAN_PATENT_ABSTRACTS" Schema="DRMSTEST" store:Type="Tables" />
@@ -2922,6 +2938,7 @@
           <EntitySet Name="S_WIPO_PATENT_DESCRIPTION" EntityType="Model.S_WIPO_PATENT_DESCRIPTION" />
           <EntitySet Name="S_WORLD_LEGAL_STATUS" EntityType="Model.S_WORLD_LEGAL_STATUS" />
           <EntitySet Name="S_ZONE_CODE_BASE" EntityType="Model.S_ZONE_CODE_BASE" />
+          <EntitySet Name="S_IMPORT_BATH" EntityType="Model.S_IMPORT_BATH" />
         </EntityContainer>
         <EntityType Name="IMPORT_ERROR">
           <Key>
@@ -2960,6 +2977,7 @@
           <Property Name="ZIP_ENTRY_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="NOTE" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="TABLENAME" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="BATCH_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="S_AMERICA_APPLY_BRAND">
           <Key>
@@ -5665,6 +5683,20 @@
           <Property Name="ZONEADDRESS" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="ZONECODE" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
         </EntityType>
+        <EntityType Name="S_IMPORT_BATH">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="START_TIME" Type="DateTime" />
+          <Property Name="ISCOMPLETED" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="FILECOUNT" Type="Decimal" Precision="38" Scale="0" />
+          <Property Name="IS_DIR_MODE" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="DIR_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="RES_TYPE" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="LAST_TIME" Type="Decimal" Precision="38" Scale="0" />
+          <Property Name="HANDLED_ITEM_COUNT" Type="Decimal" Precision="38" Scale="0" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -5691,6 +5723,7 @@
           <EntitySetMapping Name="IMPORT_SESSION">
             <EntityTypeMapping TypeName="Model.IMPORT_SESSION">
               <MappingFragment StoreEntitySet="IMPORT_SESSION">
+                <ScalarProperty Name="BATCH_ID" ColumnName="BATCH_ID" />
                 <ScalarProperty Name="TABLENAME" ColumnName="TABLENAME" />
                 <ScalarProperty Name="NOTE" ColumnName="NOTE" />
                 <ScalarProperty Name="ZIP_ENTRY_PATH" ColumnName="ZIP_ENTRY_PATH" />
@@ -8493,6 +8526,21 @@
               <MappingFragment StoreEntitySet="S_ZONE_CODE_BASE">
                 <ScalarProperty Name="ZONECODE" ColumnName="ZONECODE" />
                 <ScalarProperty Name="ZONEADDRESS" ColumnName="ZONEADDRESS" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_IMPORT_BATH">
+            <EntityTypeMapping TypeName="Model.S_IMPORT_BATH">
+              <MappingFragment StoreEntitySet="S_IMPORT_BATH">
+                <ScalarProperty Name="HANDLED_ITEM_COUNT" ColumnName="HANDLED_ITEM_COUNT" />
+                <ScalarProperty Name="LAST_TIME" ColumnName="LAST_TIME" />
+                <ScalarProperty Name="RES_TYPE" ColumnName="RES_TYPE" />
+                <ScalarProperty Name="DIR_PATH" ColumnName="DIR_PATH" />
+                <ScalarProperty Name="IS_DIR_MODE" ColumnName="IS_DIR_MODE" />
+                <ScalarProperty Name="FILECOUNT" ColumnName="FILECOUNT" />
+                <ScalarProperty Name="ISCOMPLETED" ColumnName="ISCOMPLETED" />
+                <ScalarProperty Name="START_TIME" ColumnName="START_TIME" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>

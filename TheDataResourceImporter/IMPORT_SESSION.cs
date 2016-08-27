@@ -31,5 +31,6 @@ namespace TheDataResourceImporter
         public string ZIP_ENTRY_PATH { get; set; }
         public string NOTE { get; set; }
         public string TABLENAME { get; set; }
+        public string BATCH_ID { get; set; }
     }
 }

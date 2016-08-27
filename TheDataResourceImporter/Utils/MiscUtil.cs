@@ -20,9 +20,15 @@ namespace TheDataResourceImporter.Utils
             return innerImpError;
         }
 
-        public static IMPORT_SESSION getNewImportSession(string fileType, string filePath, string IS_ZIP = "Y")
+
+        public static S_IMPORT_BATH getNewImportBathObject(string fileType)
         {
-            return new IMPORT_SESSION() { SESSION_ID = System.Guid.NewGuid().ToString(), ROLLED_BACK = "N", DATA_RES_TYPE = fileType, START_TIME = System.DateTime.Now, ZIP_OR_DIR_PATH = filePath, HAS_ERROR = "N", FAILED_COUNT = 0, COMPLETED = "N", LAST_TIME = 0, ZIP_ENTRIES_COUNT = 0, ZIP_ENTRY_POINTOR = 0, IS_ZIP = IS_ZIP};
+            return new S_IMPORT_BATH() { ID = System.Guid.NewGuid().ToString(), HANDLED_ITEM_COUNT = 0, ISCOMPLETED = "N", IS_DIR_MODE = "N",  RES_TYPE = fileType, START_TIME = System.DateTime.Now};
+        }
+
+        public static IMPORT_SESSION getNewImportSession(string fileType, string filePath, S_IMPORT_BATH bath, string IS_ZIP = "Y")
+        {
+            return new IMPORT_SESSION() { SESSION_ID = System.Guid.NewGuid().ToString(), ROLLED_BACK = "N",BATCH_ID = bath.ID, DATA_RES_TYPE = fileType, START_TIME = System.DateTime.Now, ZIP_OR_DIR_PATH = filePath, HAS_ERROR = "N", FAILED_COUNT = 0, COMPLETED = "N", LAST_TIME = 0, ZIP_ENTRIES_COUNT = 0, ZIP_ENTRY_POINTOR = 0, IS_ZIP = IS_ZIP};
         }
 
 
@@ -159,6 +165,46 @@ namespace TheDataResourceImporter.Utils
             dict.TryGetValue(key, out value);
 
             return value;
+        }
+
+        /// <summary>
+        /// 嵌套的获取指定目录内符合条件的文件 只有一个搜索条件
+        /// </summary>
+        /// <param name="dirPath"></param>
+        /// <param name="searchPattern"></param>
+        /// <returns></returns>
+        public static List<FileInfo> getFileInfosByDirPathRecuriouslyWithSingleSearchPattern(string dirPath, string searchPattern)
+        {
+            List<FileInfo> fileInfos = new List<FileInfo>();
+            DirectoryInfo dirInfo = new DirectoryInfo(dirPath);
+
+            var directChildFiles = dirInfo.GetFiles(searchPattern);
+            fileInfos.AddRange(directChildFiles);
+
+            var directChildDirs = dirInfo.GetDirectories();
+            foreach(var dirChild in directChildDirs)
+            {
+                var descentants = getFileInfosByDirPathRecuriouslyWithSingleSearchPattern(dirChild.FullName, searchPattern);
+                fileInfos.AddRange(descentants);
+            }
+            return fileInfos;
+        }
+
+        /// <summary>
+        /// 嵌套的获取指定目录内符合条件的文件 多个搜索条件
+        /// </summary>
+        /// <param name="dirPath"></param>
+        /// <param name="searchPatterns"></param>
+        /// <returns></returns>
+        public static List<FileInfo> getFileInfosByDirPathRecuriouslyWithMultiSearchPattern(string dirPath, string[] searchPatterns)
+        {
+            List<FileInfo> fileInfos = new List<FileInfo>();
+
+            foreach(var searchPattern in searchPatterns)
+            {
+                fileInfos.AddRange(getFileInfosByDirPathRecuriouslyWithSingleSearchPattern(dirPath, searchPattern));
+            }
+            return fileInfos;
         }
     }
 }

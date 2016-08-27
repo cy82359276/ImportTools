@@ -105,7 +105,7 @@ namespace TheDataResourceImporter
 
             MessageUtil.appendTbDetail("开始导入：");
 
-            if (string.IsNullOrEmpty(tb_FilePath.Text))
+            if (string.IsNullOrEmpty(tb_FilePath.Text) || null == filePaths || filePaths.Length == 0)
             {
                 MessageBox.Show("请选择至少选择一个文件！");
                 return;
@@ -133,7 +133,7 @@ namespace TheDataResourceImporter
             ImportManger.importStartTime = System.DateTime.Now;
 
 
-            func.BeginInvoke(filePaths,fileType, 
+            func.BeginInvoke(filePaths,fileType.Trim(), 
                 delegate(IAsyncResult ia)
                 {
                     bool result = func.EndInvoke(ia);
@@ -286,13 +286,17 @@ namespace TheDataResourceImporter
 
         private void menuShowImportHistory_Click(object sender, EventArgs e)
         {
-            new ImportHistoryForm().Show();
+            var sessionHistoryForm = new ImportHistoryForm();
+            sessionHistoryForm.WindowState = FormWindowState.Maximized;
+            sessionHistoryForm.Show();
         }
 
         private void cbFileType_SelectedIndexChanged(object sender, EventArgs e)
         {
             var fileType = cbFileType.SelectedValue;
 
+
+            //必须为文件夹模式 不可选文件模式
             if (
                 "中国商标".Equals(fileType)
                 ||
@@ -317,21 +321,24 @@ namespace TheDataResourceImporter
             }
             else
             {
-                showFileDialog = true;
-                checkBoxIsDir.Checked = false;
+                //showFileDialog = true;
+                checkBoxIsDir.Checked = !showFileDialog;
                 checkBoxIsDir.Enabled = true;
             }
+            //清空文件路径
+            filePaths = null;
+            tb_FilePath.Text = "";
         }
 
         private void checkBoxIsDir_CheckedChanged(object sender, EventArgs e)
         {
             if(checkBoxIsDir.Checked)
             {
-                showFileDialog = false;//展示文件夹
+                showFileDialog = false;//文件夹模式
             }
             else
             {
-                showFileDialog = true;//展示文件夹
+                showFileDialog = true;//文件模式
             }
         }
     }

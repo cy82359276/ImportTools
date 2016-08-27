@@ -306,6 +306,9 @@
     <Compile Include="S_HONGKONG_PATENT_DESCRIPTION.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="S_IMPORT_BATH.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="S_ISRAEL_PATENT_DESCRIPTION.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>

@@ -109,5 +109,6 @@ namespace TheDataResourceImporter
         public DbSet<S_WIPO_PATENT_DESCRIPTION> S_WIPO_PATENT_DESCRIPTION { get; set; }
         public DbSet<S_WORLD_LEGAL_STATUS> S_WORLD_LEGAL_STATUS { get; set; }
         public DbSet<S_ZONE_CODE_BASE> S_ZONE_CODE_BASE { get; set; }
+        public DbSet<S_IMPORT_BATH> S_IMPORT_BATH { get; set; }
     }
 }

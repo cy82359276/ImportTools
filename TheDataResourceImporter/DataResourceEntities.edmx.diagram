@@ -89,6 +89,7 @@
         <EntityTypeShape EntityType="Model.S_WIPO_PATENT_DESCRIPTION" Width="1.5" PointX="34.75" PointY="27.75" />
         <EntityTypeShape EntityType="Model.S_WORLD_LEGAL_STATUS" Width="1.5" PointX="6.75" PointY="35.75" />
         <EntityTypeShape EntityType="Model.S_ZONE_CODE_BASE" Width="1.5" PointX="36.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Model.S_IMPORT_BATH" Width="1.5" PointX="9.375" PointY="36.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

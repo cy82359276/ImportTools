@@ -56,7 +56,109 @@ namespace TheDataResourceImporter
             fileCount = AllFilePaths.Length;
             using (DataSourceEntities dataSourceEntites = new DataSourceEntities())
             {
-                foreach (string path in AllFilePaths)
+
+                var bath = MiscUtil.getNewImportBathObject(fileType);
+
+                #region 文件夹模式 解析符合条件的文件
+
+                if (!Main.showFileDialog)//文件夹模式
+                {
+                    if (AllFilePaths.Length != 1) //文件夹模式只有一个文件夹路径
+                    {
+                        var message = $"{MiscUtil.jsonSerilizeObject(AllFilePaths)}文件夹路径不正确";
+                        MessageUtil.DoAppendTBDetail(message);
+                        LogHelper.WriteErrorLog(message);
+                        return true;
+                    }
+
+                    string dirPath = AllFilePaths[0];
+
+                    if (string.IsNullOrEmpty(dirPath) || !Directory.Exists(dirPath))//路径为空, 路径对应的文件夹不存在
+                    {
+                        var message = $"文件夹路径{dirPath}不正确";
+                        MessageUtil.DoAppendTBDetail(message);
+                        LogHelper.WriteErrorLog(message);
+                        return true;
+                    }
+
+                    string suffixFilter = "";
+
+                    if (
+                        "中国专利法律状态变更翻译数据".Equals(fileType) ||
+                        "中国中药专利翻译数据".Equals(fileType) ||
+                        "中国化学药物专利深加工数据".Equals(fileType) ||
+                        "中国中药专利深加工数据".Equals(fileType)
+                        )
+                    {
+                        //MDB
+                        suffixFilter = "*.mdb";
+
+
+
+                    }
+                    else if ("中国专利公报数据".Equals(fileType) || "专利缴费数据".Equals(fileType))
+                    {
+                        //TRS
+                        suffixFilter = "*.trs";
+
+
+                    }
+                    else if ("中国专利法律状态数据".Equals(fileType))
+                    {
+                        //TXT
+                        suffixFilter = "*.txt";
+
+
+                    }
+                    else if ("中国商标分类数据".Equals(fileType) || "美国商标图形分类数据".Equals(fileType) || "美国商标美国分类数据".Equals(fileType))
+                    {
+                        //EXCEL
+                        suffixFilter = "*.xlsx";
+
+
+                    }
+                    else //默认是zip包
+                    {
+                        //Zip XML
+                        suffixFilter = "*.zip";
+                    }
+
+
+                    // List<FileInfo> fileInfos = MiscUtil.getFileInfosByDirPathRecuriouslyWithMultiSearchPattern(dirPath, new string[] { suffixFilter.ToLower(), suffixFilter.ToUpper()});
+                    List<FileInfo> fileInfos = MiscUtil.getFileInfosByDirPathRecuriouslyWithSingleSearchPattern(dirPath, suffixFilter);
+
+
+
+                    var allFoundFilePaths = (from fileTemp in fileInfos
+                                             select fileTemp.FullName).Distinct().ToArray();
+
+                    if (allFoundFilePaths.Count() == 0)
+                    {
+                        MessageBox.Show("没有找到指定的文件，请选择正确的路径！");
+                        LogHelper.WriteErrorLog("没有找到指定的文件");
+                        return true;
+                    }
+                    else
+                    {
+                        MessageUtil.DoAppendTBDetail($"发现{allFoundFilePaths.Count()}个符合条件的文件,他们是{MiscUtil.jsonSerilizeObject(allFoundFilePaths)}");
+                        AllFilePaths = allFoundFilePaths;
+                        bath.IS_DIR_MODE = "Y";
+                        bath.DIR_PATH = dirPath;
+                    }
+                }
+
+                #endregion
+
+
+                bath.FILECOUNT = AllFilePaths.Count();
+                dataSourceEntites.S_IMPORT_BATH.Add(bath);
+                dataSourceEntites.SaveChanges();
+
+
+
+                #region 对指定的或发现的路径进行处理
+
+                foreach (string path in AllFilePaths)//遍历处理需要处理的路径
                 {
                     //强制终止
                     if (forcedStop)
@@ -71,7 +173,7 @@ namespace TheDataResourceImporter
                     {
                         if (File.Exists(path))
                         {
-                            ImportByPath(path, fileType, dataSourceEntites);
+                            ImportByPath(path, fileType, dataSourceEntites, bath);
                             System.GC.Collect();
                         }
                     }
@@ -84,18 +186,29 @@ namespace TheDataResourceImporter
                         }
 
                         //LogHelper.WriteLog("", "error", currentFile + ":" + ex.Message);
-                        LogHelper.WriteErrorLog($"导入文件{currentFile}时发生错误,错误消息:{ex.Message}");
+                        LogHelper.WriteErrorLog($"导入文件{currentFile}时发生错误,错误消息:{ex.Message}详细信息{ex.StackTrace}");
                         continue;
                     }
                 }
+                #endregion
+
+
+                var lastTime = DateTime.Now.Subtract(bath.START_TIME.Value).TotalSeconds;
+                bath.LAST_TIME = new decimal(lastTime);
+                bath.ISCOMPLETED = "Y";
+
+                MessageUtil.DoAppendTBDetail($"当前批次运行完毕，处理了{bath.FILECOUNT}个文件，入库了{bath.HANDLED_ITEM_COUNT}条目，总耗时{bath.LAST_TIME}秒");
+
+                dataSourceEntites.SaveChanges();
             }
 
             return true;
         }
 
-        public static bool ImportByPath(string filePath, string fileType, DataSourceEntities entiesContext)
+        public static bool ImportByPath(string filePath, string fileType, DataSourceEntities entiesContext, S_IMPORT_BATH bath)
         {
 
+            //fileType = fileType.Trim();
 
             #region 导入前准备 新建session对象
             currentFile = filePath;
@@ -104,10 +217,12 @@ namespace TheDataResourceImporter
 
 
             //导入操作信息
-            IMPORT_SESSION importSession = MiscUtil.getNewImportSession(fileType, filePath);
+            IMPORT_SESSION importSession = MiscUtil.getNewImportSession(fileType, filePath, bath);
             entiesContext.IMPORT_SESSION.Add(importSession);
             entiesContext.SaveChanges();
             #endregion
+
+
 
             //判断是否是
             #region 分文件类型进行处理
@@ -210,7 +325,7 @@ namespace TheDataResourceImporter
             #region 51 欧专局专利全文文本数据（标准化） 通用 未完成 未建库
             else if (fileType == "欧专局专利全文文本数据（标准化）")
             {
-               parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_EUROPEAN_PATENT_FULLTEXT, typeof(S_EUROPEAN_PATENT_FULLTEXT));
+                parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_EUROPEAN_PATENT_FULLTEXT, typeof(S_EUROPEAN_PATENT_FULLTEXT));
             }
             #endregion
             #region  52 韩国专利全文代码化数据（标准化） 通用 未完成 未建库 
@@ -1969,6 +2084,7 @@ namespace TheDataResourceImporter
             importSession.COMPLETED = totalCount == handledCount ? "Y" : "N";
             importSession.ITEMS_POINT = handledCount;
             importSession.TOTAL_ITEM = totalCount;
+            bath.HANDLED_ITEM_COUNT = bath.HANDLED_ITEM_COUNT + totalCount;
             entiesContext.SaveChanges();
             #endregion
             return true;
@@ -2592,9 +2708,9 @@ namespace TheDataResourceImporter
                     MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入失败!!!");
                     throw ex;
                 }
-               
 
-                
+
+
 
 
                 //输出插入记录
@@ -3034,7 +3150,7 @@ namespace TheDataResourceImporter
                 {
                     //entityObject.STA_APP_COUNTRY = MiscUtil.getDictValueOrDefaultByKey(correspondDocInfo, "") ;
                     entityObject.STA_APP_NUMBER = MiscUtil.getDictValueOrDefaultByKey(correspondDocInfo, "ApplicationNum");
-                    if(!string.IsNullOrEmpty(entityObject.STA_APP_NUMBER))
+                    if (!string.IsNullOrEmpty(entityObject.STA_APP_NUMBER))
                     {
                         try
                         {

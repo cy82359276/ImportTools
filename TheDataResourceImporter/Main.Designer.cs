@@ -61,6 +61,8 @@ namespace TheDataResourceImporter
             this.menuAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.checkBoxClearExistData = new System.Windows.Forms.CheckBox();
             this.checkBoxIsDir = new System.Windows.Forms.CheckBox();
+            this.BathHistoryMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.SessionHistoryMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -374,11 +376,13 @@ namespace TheDataResourceImporter
             // 
             // menuShowImportHistory
             // 
+            this.menuShowImportHistory.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.BathHistoryMenu,
+            this.SessionHistoryMenuItem});
             this.menuShowImportHistory.Name = "menuShowImportHistory";
             this.menuShowImportHistory.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.H)));
             this.menuShowImportHistory.Size = new System.Drawing.Size(68, 21);
             this.menuShowImportHistory.Text = "导入历史";
-            this.menuShowImportHistory.Click += new System.EventHandler(this.menuShowImportHistory_Click);
             // 
             // menuHelp
             // 
@@ -424,6 +428,19 @@ namespace TheDataResourceImporter
             this.checkBoxIsDir.Text = "文件夹模式";
             this.checkBoxIsDir.UseVisualStyleBackColor = true;
             this.checkBoxIsDir.CheckedChanged += new System.EventHandler(this.checkBoxIsDir_CheckedChanged);
+            // 
+            // BathHistoryMenu
+            // 
+            this.BathHistoryMenu.Name = "BathHistoryMenu";
+            this.BathHistoryMenu.Size = new System.Drawing.Size(152, 22);
+            this.BathHistoryMenu.Text = "按批次";
+            // 
+            // SessionHistoryMenuItem
+            // 
+            this.SessionHistoryMenuItem.Name = "SessionHistoryMenuItem";
+            this.SessionHistoryMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.SessionHistoryMenuItem.Text = "按文件";
+            this.SessionHistoryMenuItem.Click += new System.EventHandler(this.menuShowImportHistory_Click);
             // 
             // Main
             // 
@@ -500,6 +517,8 @@ namespace TheDataResourceImporter
         private System.Windows.Forms.ToolStripMenuItem menuAbout;
         private System.Windows.Forms.CheckBox checkBoxClearExistData;
         private CheckBox checkBoxIsDir;
+        private ToolStripMenuItem BathHistoryMenu;
+        private ToolStripMenuItem SessionHistoryMenuItem;
     }
 }
 
