@@ -341,5 +341,12 @@ namespace TheDataResourceImporter
                 showFileDialog = true;//文件模式
             }
         }
+
+        private void BathHistoryMenu_Click(object sender, EventArgs e)
+        {
+            var bathHistoryForm = new ImportBatchHistoryForm();
+            bathHistoryForm.WindowState = FormWindowState.Maximized;
+            bathHistoryForm.Show();
+        }
     }
 }

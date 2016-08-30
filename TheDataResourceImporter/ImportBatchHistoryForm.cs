@@ -5,11 +5,12 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace TheDataResourceImporter
 {
-    public partial class ImportHistoryForm : Form
+    public partial class ImportBatchHistoryForm : Form
     {
 
         int pageSize = 15;     //每页显示行数
@@ -17,45 +18,26 @@ namespace TheDataResourceImporter
         int pageCount = 0;    //页数＝总记录数/每页显示行数
         int pageCurrent = 0;   //当前页号
         int nCurrent = 0;      //当前记录行
-        string bathId = "";//批次编号
         DataSourceEntities entitiesDataSource = new DataSourceEntities();
 
-        public ImportHistoryForm()
+
+        public ImportBatchHistoryForm()
         {
             InitializeComponent();
-            DataSourceEntities entitiesDataSource = new DataSourceEntities();
-            //var importSessions = from session in entitiesDataSource.IMPORT_SESSION.ToList()
-            //                     orderby session.START_TIME descending
-            //                     select session;
             dataGridViewImportHistory.AutoGenerateColumns = false;
             showPage(1, entitiesDataSource);
         }
 
-        public ImportHistoryForm(string bathID)
-        {
-            bathId = bathID;
-            InitializeComponent();
-            DataSourceEntities entitiesDataSource = new DataSourceEntities();
-            //var importSessions = from session in entitiesDataSource.IMPORT_SESSION.ToList()
-            //                     orderby session.START_TIME descending
-            //                     select session;
-            dataGridViewImportHistory.AutoGenerateColumns = false;
-            showPage(1, entitiesDataSource);
-        }
+        //页面加载
+
+
 
         public void showPage(int pageNum, DataSourceEntities entitiesDataSource)
         {
 
             dataGridViewImportHistory.Columns.Clear();
 
-
-            var sessionArray = entitiesDataSource.IMPORT_SESSION.OrderByDescending(r => r.START_TIME);
-
-            //存在批次编号
-            if (!string.IsNullOrEmpty(bathId))
-            {
-                sessionArray = entitiesDataSource.IMPORT_SESSION.Where(r => r.BATCH_ID == bathId).OrderByDescending(r => r.START_TIME);
-            }
+            var sessionArray = entitiesDataSource.S_IMPORT_BATH.OrderByDescending(r => r.START_TIME);
 
 
             //总记录数
@@ -82,9 +64,9 @@ namespace TheDataResourceImporter
             dataGridViewImportHistory.AllowUserToResizeRows = true;
 
             DataGridViewTextBoxColumn dGVResType = new DataGridViewTextBoxColumn();
-            dGVResType.Name = "DATA_RES_TYPE";
+            dGVResType.Name = "RES_TYPE";
             dGVResType.ReadOnly = true;
-            dGVResType.DataPropertyName = "DATA_RES_TYPE";
+            dGVResType.DataPropertyName = "RES_TYPE";
             dGVResType.DisplayIndex = 0;
             dGVResType.HeaderText = "资源类型";
             dGVResType.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
@@ -95,11 +77,11 @@ namespace TheDataResourceImporter
             //dataGridViewImportHistory.Columns["DATA_RES_TYPE"].HeaderText = "资源类型";
 
             DataGridViewTextBoxColumn dGVDirPath = new DataGridViewTextBoxColumn();
-            dGVDirPath.Name = "ZIP_OR_DIR_PATH";
+            dGVDirPath.Name = "DIR_PATH";
             dGVDirPath.ReadOnly = true;
-            dGVDirPath.DataPropertyName = "ZIP_OR_DIR_PATH";
-            dGVDirPath.DisplayIndex = 1;
-            dGVDirPath.HeaderText = "文件路径";
+            dGVDirPath.DataPropertyName = "DIR_PATH";
+            dGVDirPath.DisplayIndex = 2;
+            dGVDirPath.HeaderText = "路径";
             //dGVDirPath.AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
             dGVDirPath.Resizable = DataGridViewTriState.True;
             dataGridViewImportHistory.Columns.Add(dGVDirPath);
@@ -108,11 +90,11 @@ namespace TheDataResourceImporter
             //dataGridViewImportHistory.Columns["ZIP_OR_DIR_PATH"].HeaderText = "文件路径";
 
             DataGridViewTextBoxColumn dGVIsZip = new DataGridViewTextBoxColumn();
-            dGVIsZip.Name = "IS_ZIP";
+            dGVIsZip.Name = "IS_DIR_MODE";
             dGVIsZip.ReadOnly = true;
-            dGVIsZip.DataPropertyName = "IS_ZIP";
-            dGVIsZip.DisplayIndex = 2;
-            dGVIsZip.HeaderText = "是否是压缩包";
+            dGVIsZip.DataPropertyName = "IS_DIR_MODE";
+            dGVIsZip.DisplayIndex = 1;
+            dGVIsZip.HeaderText = "是否是文件夹模式";
             //dGVIsZip.AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
             dGVIsZip.Resizable = DataGridViewTriState.True;
             dataGridViewImportHistory.Columns.Add(dGVIsZip);
@@ -147,9 +129,9 @@ namespace TheDataResourceImporter
             //dataGridViewImportHistory.Columns["LAST_TIME"].HeaderText = "持续时间";
 
             DataGridViewTextBoxColumn dGVCompleted = new DataGridViewTextBoxColumn();
-            dGVCompleted.Name = "COMPLETED";
+            dGVCompleted.Name = "ISCOMPLETED";
             dGVCompleted.ReadOnly = true;
-            dGVCompleted.DataPropertyName = "COMPLETED";
+            dGVCompleted.DataPropertyName = "ISCOMPLETED";
             dGVCompleted.DisplayIndex = 5;
             dGVCompleted.HeaderText = "是否完成";
             //dGVCompleted.AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
@@ -160,11 +142,11 @@ namespace TheDataResourceImporter
             //dataGridViewImportHistory.Columns["COMPLETED"].HeaderText = "是否完成";
 
             DataGridViewTextBoxColumn dGVTotalItem = new DataGridViewTextBoxColumn();
-            dGVTotalItem.Name = "TOTAL_ITEM";
+            dGVTotalItem.Name = "FILECOUNT";
             dGVTotalItem.ReadOnly = true;
-            dGVTotalItem.DataPropertyName = "TOTAL_ITEM";
+            dGVTotalItem.DataPropertyName = "FILECOUNT";
             dGVTotalItem.DisplayIndex = 6;
-            dGVTotalItem.HeaderText = "导入条数";
+            dGVTotalItem.HeaderText = "文件数";
             //dGVTotalItem.AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
             dGVTotalItem.Resizable = DataGridViewTriState.True;
             dataGridViewImportHistory.Columns.Add(dGVTotalItem);
@@ -208,11 +190,11 @@ namespace TheDataResourceImporter
             dataGridViewImportHistory.Columns.Add(dGVNote);
 
             DataGridViewTextBoxColumn dGVSessionId = new DataGridViewTextBoxColumn();
-            dGVSessionId.Name = "SESSION_ID";
+            dGVSessionId.Name = "batch_ID";
             dGVSessionId.ReadOnly = true;
-            dGVSessionId.DataPropertyName = "SESSION_ID";
+            dGVSessionId.DataPropertyName = "ID";
             dGVSessionId.DisplayIndex = 12;
-            dGVSessionId.HeaderText = "SESSION_ID";
+            dGVSessionId.HeaderText = "BATCH_ID";
             dGVSessionId.Visible = false;
             //dGVSessionId.AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
             dGVSessionId.Resizable = DataGridViewTriState.True;
@@ -238,17 +220,11 @@ namespace TheDataResourceImporter
 
             DataGridViewButtonColumn checkErrorButton = new DataGridViewButtonColumn();
             checkErrorButton.DisplayIndex = 11;
-            checkErrorButton.Text = "错误详情";
-            checkErrorButton.Name = "checkErrorButton";
+            checkErrorButton.Text = "详情";
+            checkErrorButton.Name = "checkDetailButton";
             checkErrorButton.HeaderText = "";
             checkErrorButton.UseColumnTextForButtonValue = true;
             dataGridViewImportHistory.Columns.Add(checkErrorButton);
-        }
-
-        //页面加载
-        private void ImportHistory_Load(object sender, EventArgs e)
-        {
-
         }
 
         private void bindingNavigatorMoveFirstItem_Click(object sender, EventArgs e)
@@ -329,33 +305,52 @@ namespace TheDataResourceImporter
         {
             //选中的列的 名称
             var targetColName = dataGridViewImportHistory.Columns[e.ColumnIndex].Name;
-            var session_Id = dataGridViewImportHistory.Rows[e.RowIndex].Cells["SESSION_ID"].Value.ToString();
-            var hasError = dataGridViewImportHistory.Rows[e.RowIndex].Cells["HAS_ERROR"].Value.ToString();
-            var selectedSession = entitiesDataSource.IMPORT_SESSION.Find(session_Id);
-            string tableName = selectedSession.TABLENAME;
+            var batchId = dataGridViewImportHistory.Rows[e.RowIndex].Cells["batch_ID"].Value.ToString();
+            var selectedSessions = entitiesDataSource.IMPORT_SESSION.Where(s => s.BATCH_ID == batchId); //本次批次导入包含的session
             if ("rollBackButton".Equals(targetColName))//回滚
             {
-                var messageBoxResult = MessageBox.Show("确定回滚本次导入的全部记录么?", "是否回滚", MessageBoxButtons.YesNo);
+                var messageBoxResult = MessageBox.Show("确定回滚本批次的全部记录么?", "是否回滚", MessageBoxButtons.YesNo);
 
                 if (messageBoxResult == System.Windows.Forms.DialogResult.Yes)
                 {
-                    var sqlCommand = "";
+
                     try
                     {
-                        if (!string.IsNullOrEmpty(tableName))
+                        var sqlCommand = "";
+                        foreach (var session in selectedSessions)
                         {
-                            tableName = tableName.Trim();
-                            sqlCommand = $"delete from {tableName} where import_session_id='{session_Id}'";
-                            //删除本session的记录
+                            var tableName = session.TABLENAME;
+
+                            var session_Id = session.SESSION_ID;
+
+                            sqlCommand = $"delete from import_error where session_id ='{session_Id}'";
+
+                            //删除错误记录
                             entitiesDataSource.Database.ExecuteSqlCommand(sqlCommand);
+
+                            if (!string.IsNullOrEmpty(tableName))
+                            {
+                                tableName = tableName.Trim();
+
+                                sqlCommand = $"delete from {tableName} where import_session_id='{session_Id}'";
+
+                                //删除本session的记录
+                                entitiesDataSource.Database.ExecuteSqlCommand(sqlCommand);
+
+                                //sqlCommand = $"delete from S_IMPORT_BATH t where t.ID ='{batchId}'";
+                                ////删除本批次数据
+                                //entitiesDataSource.Database.ExecuteSqlCommand(sqlCommand);
+                            }
                         }
-                        sqlCommand = $"delete from import_error where session_id ='{session_Id}'";
-                        //删除错误记录
+
+                        sqlCommand = $"delete from IMPORT_SESSION t where t.BATCH_ID ='{batchId}'";
+                        //删除包历史记录
                         entitiesDataSource.Database.ExecuteSqlCommand(sqlCommand);
 
-                        sqlCommand = $"delete from IMPORT_SESSION t where t.session_id ='{session_Id}'";
-                        //删除错误记录
+                        sqlCommand = $"delete from S_IMPORT_BATH t where t.ID ='{batchId}'";
+                        //删除本批次数据
                         entitiesDataSource.Database.ExecuteSqlCommand(sqlCommand);
+
                     }
                     catch (Exception ex)
                     {
@@ -366,18 +361,24 @@ namespace TheDataResourceImporter
                     refreshDataGrid();
                 }
             }
-            else if ("checkErrorButton".Equals(targetColName))//查看详情
+            else if ("checkDetailButton".Equals(targetColName))//查看详情
             {
-                //有错 弹出错误详情
-                if ("Y".Equals(hasError))
-                {
-                    var errorList = new ErrorListForm(session_Id);
-                    errorList.Show();
-                }
-                else
-                {
-                    MessageBox.Show("本次导入没有错误");
-                }
+
+                var sessionHistoryForm = new ImportHistoryForm(batchId);
+                sessionHistoryForm.WindowState = FormWindowState.Maximized;
+                sessionHistoryForm.Show();
+                ////有错 弹出错误详情
+                //if ("Y".Equals(hasError))
+                //{
+                //    var errorList = new ErrorListForm(session_Id);
+                //    errorList.Show();
+                //}
+                //else
+                //{
+                //    MessageBox.Show("本次导入没有错误");
+                //}
+
+                //弹出 本批次session 列表
             }
         }
     }
