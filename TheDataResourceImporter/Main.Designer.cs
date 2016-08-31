@@ -387,14 +387,14 @@ namespace TheDataResourceImporter
             // BathHistoryMenu
             // 
             this.BathHistoryMenu.Name = "BathHistoryMenu";
-            this.BathHistoryMenu.Size = new System.Drawing.Size(152, 22);
+            this.BathHistoryMenu.Size = new System.Drawing.Size(112, 22);
             this.BathHistoryMenu.Text = "按批次";
             this.BathHistoryMenu.Click += new System.EventHandler(this.BathHistoryMenu_Click);
             // 
             // SessionHistoryMenuItem
             // 
             this.SessionHistoryMenuItem.Name = "SessionHistoryMenuItem";
-            this.SessionHistoryMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.SessionHistoryMenuItem.Size = new System.Drawing.Size(112, 22);
             this.SessionHistoryMenuItem.Text = "按文件";
             this.SessionHistoryMenuItem.Click += new System.EventHandler(this.menuShowImportHistory_Click);
             // 
@@ -424,6 +424,7 @@ namespace TheDataResourceImporter
             // checkBoxClearExistData
             // 
             this.checkBoxClearExistData.AutoSize = true;
+            this.checkBoxClearExistData.Enabled = false;
             this.checkBoxClearExistData.Location = new System.Drawing.Point(586, 35);
             this.checkBoxClearExistData.Name = "checkBoxClearExistData";
             this.checkBoxClearExistData.Size = new System.Drawing.Size(96, 16);
