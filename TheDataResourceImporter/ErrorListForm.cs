@@ -209,6 +209,13 @@ namespace TheDataResourceImporter
 
         private void dataGridViewErrorList_CellClick(object sender, DataGridViewCellEventArgs e)
         {
+
+            if (e.RowIndex < 0)
+            {
+                return;
+            }
+
+
             //选中的列的 名称
             var targetColName = dataGridViewErrorList.Columns[e.ColumnIndex].Name;
             var id = dataGridViewErrorList.Rows[e.RowIndex].Cells["ID"].Value.ToString();

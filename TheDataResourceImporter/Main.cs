@@ -19,36 +19,47 @@ namespace TheDataResourceImporter
 
         public Main()
         {
-            InitializeComponent();
+            try
+            {
 
-            DataSourceEntities entitiesDataSource = new DataSourceEntities();
-            //绑定数据类型 下拉列表
-            var availableDataTypes = from dataType in entitiesDataSource.S_DATA_RESOURCE_TYPES_DETAIL.Where(dataType => "Y".Equals(dataType.IMPLEMENTED_IMPORT_LOGIC)).ToList()
-                                     orderby dataType.ID ascending
-                                     select new {diplayName = dataType.ID + "-" + dataType.CHINESE_NAME + ("Y".Equals(dataType.IN_PROCESS)?"--建设中,勿选!!!":""), selectedValue = dataType.CHINESE_NAME };
-            cbFileType.DisplayMember = "diplayName";
-            cbFileType.ValueMember = "selectedValue";
+                InitializeComponent();
 
-            cbFileType.DataSource = availableDataTypes.ToList();
+                DataSourceEntities entitiesDataSource = new DataSourceEntities();
+                //绑定数据类型 下拉列表
+                var availableDataTypes = from dataType in entitiesDataSource.S_DATA_RESOURCE_TYPES_DETAIL.Where(dataType => "Y".Equals(dataType.IMPLEMENTED_IMPORT_LOGIC)).ToList()
+                                         orderby dataType.ID ascending
+                                         select new { diplayName = dataType.ID + "-" + dataType.CHINESE_NAME + ("Y".Equals(dataType.IN_PROCESS) ? "--建设中,勿选!!!" : ""), selectedValue = dataType.CHINESE_NAME };
+                cbFileType.DisplayMember = "diplayName";
+                cbFileType.ValueMember = "selectedValue";
+
+                cbFileType.DataSource = availableDataTypes.ToList();
 
 
-            //MessageUtil.SetMessage = SetLabelMsg;
-            MessageUtil.setTbDetail = SetTextBoxDetail;
-            MessageUtil.appendTbDetail = appendTextBoxDetail;
-            //添加日志输出
-            //MessageUtil.appendTbDetail += LogHelper.WriteLog;
+                //MessageUtil.SetMessage = SetLabelMsg;
+                MessageUtil.setTbDetail = SetTextBoxDetail;
+                MessageUtil.appendTbDetail = appendTextBoxDetail;
+                //添加日志输出
+                //MessageUtil.appendTbDetail += LogHelper.WriteLog;
 
-            MessageUtil.updateProgressIndicator = updateProgressIndicator;
-            //cbFileType.SelectedIndex = 0;
-            SetStyle(ControlStyles.UserPaint, true);
-            SetStyle(ControlStyles.AllPaintingInWmPaint, true); // 禁止擦除背景.  
-            SetStyle(ControlStyles.DoubleBuffer, true); // 双缓冲  
+                MessageUtil.updateProgressIndicator = updateProgressIndicator;
+                //cbFileType.SelectedIndex = 0;
+                SetStyle(ControlStyles.UserPaint, true);
+                SetStyle(ControlStyles.AllPaintingInWmPaint, true); // 禁止擦除背景.  
+                SetStyle(ControlStyles.DoubleBuffer, true); // 双缓冲  
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "  " + ex.StackTrace);
+                throw;
+            }
+
 
         }
         string[] filePaths = null;
         private void btn_Choose_Click(object sender, EventArgs e)
         {
-            if(showFileDialog) //展示文件选择器
+            if (showFileDialog) //展示文件选择器
             {
                 OpenFileDialog dialog = new OpenFileDialog();
                 dialog.Filter = "任意文件(*.*)或目录|*";
@@ -77,7 +88,7 @@ namespace TheDataResourceImporter
 
                     tb_FilePath.Text = foldPath;
 
-                    filePaths = new string[] { foldPath};
+                    filePaths = new string[] { foldPath };
                 }
             }
         }
@@ -128,13 +139,13 @@ namespace TheDataResourceImporter
 
 
 
-            Func<string[],string, bool> func = TheDataResourceImporter.ImportManger.BeginImport;
+            Func<string[], string, bool> func = TheDataResourceImporter.ImportManger.BeginImport;
 
             ImportManger.importStartTime = System.DateTime.Now;
 
 
-            func.BeginInvoke(filePaths,fileType.Trim(), 
-                delegate(IAsyncResult ia)
+            func.BeginInvoke(filePaths, fileType.Trim(),
+                delegate (IAsyncResult ia)
                 {
                     bool result = func.EndInvoke(ia);
                     if (result)
@@ -146,7 +157,7 @@ namespace TheDataResourceImporter
 
                     SetEnabled(btn_Choose, true);
                     SetEnabled(btnStart, true);
-                }, null); 
+                }, null);
         }
 
 
@@ -160,7 +171,7 @@ namespace TheDataResourceImporter
             }
             else
             {
-               //lock (textBoxDetail)
+                //lock (textBoxDetail)
                 {
                     textBoxDetail.Text = msg;
                 }
@@ -194,7 +205,7 @@ namespace TheDataResourceImporter
                     if (totalCount > 0)
                     {
                         //计算百分比
-                        currentPercentage =  (Int32)Math.Floor((double)handledCount * 100 / totalCount);
+                        currentPercentage = (Int32)Math.Floor((double)handledCount * 100 / totalCount);
                     }
 
                     //当前进度百分比
@@ -301,17 +312,17 @@ namespace TheDataResourceImporter
                 "中国商标".Equals(fileType)
                 ||
                 "中国商标许可数据".Equals(fileType)
-                || 
-                "中国商标转让数据".Equals(fileType) 
-                || 
-                "马德里商标进入中国".Equals(fileType) 
-                || 
-                "中国驰名商标数据".Equals(fileType) 
-                || 
-                "美国申请商标".Equals(fileType) 
-                || 
-                "美国转让商标".Equals(fileType) 
-                || 
+                ||
+                "中国商标转让数据".Equals(fileType)
+                ||
+                "马德里商标进入中国".Equals(fileType)
+                ||
+                "中国驰名商标数据".Equals(fileType)
+                ||
+                "美国申请商标".Equals(fileType)
+                ||
+                "美国转让商标".Equals(fileType)
+                ||
                 "美国审判商标".Equals(fileType)
               )
             {
@@ -332,7 +343,7 @@ namespace TheDataResourceImporter
 
         private void checkBoxIsDir_CheckedChanged(object sender, EventArgs e)
         {
-            if(checkBoxIsDir.Checked)
+            if (checkBoxIsDir.Checked)
             {
                 showFileDialog = false;//文件夹模式
             }

@@ -303,6 +303,12 @@ namespace TheDataResourceImporter
 
         private void dataGridViewImportHistory_CellClick(object sender, DataGridViewCellEventArgs e)
         {
+            if (e.RowIndex < 0)
+            {
+                return;
+            }
+
+
             //选中的列的 名称
             var targetColName = dataGridViewImportHistory.Columns[e.ColumnIndex].Name;
             var batchId = dataGridViewImportHistory.Rows[e.RowIndex].Cells["batch_ID"].Value.ToString();

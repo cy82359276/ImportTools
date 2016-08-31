@@ -131,7 +131,7 @@
             this.Controls.Add(this.buttonFirst);
             this.Controls.Add(this.dataGridViewImportHistory);
             this.Name = "ImportBatchHistoryForm";
-            this.Text = "ImportBatchHistoryForm";
+            this.Text = "批次历史";
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewImportHistory)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

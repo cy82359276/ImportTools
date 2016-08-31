@@ -327,6 +327,11 @@ namespace TheDataResourceImporter
 
         private void dataGridViewImportHistory_CellClick(object sender, DataGridViewCellEventArgs e)
         {
+            if(e.RowIndex < 0)
+            {
+                return;
+            }
+
             //选中的列的 名称
             var targetColName = dataGridViewImportHistory.Columns[e.ColumnIndex].Name;
             var session_Id = dataGridViewImportHistory.Rows[e.RowIndex].Cells["SESSION_ID"].Value.ToString();

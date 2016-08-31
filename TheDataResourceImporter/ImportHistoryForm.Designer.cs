@@ -118,7 +118,7 @@
             this.labelTotal.TabIndex = 7;
             this.labelTotal.Text = "    ";
             // 
-            // ImportHistory
+            // ImportHistoryForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -131,8 +131,8 @@
             this.Controls.Add(this.buttonPrevious);
             this.Controls.Add(this.buttonFirst);
             this.Controls.Add(this.dataGridViewImportHistory);
-            this.Name = "ImportHistory";
-            this.Text = "导入历史";
+            this.Name = "ImportHistoryForm";
+            this.Text = "包导入历史";
             this.Load += new System.EventHandler(this.ImportHistory_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewImportHistory)).EndInit();
             this.ResumeLayout(false);
