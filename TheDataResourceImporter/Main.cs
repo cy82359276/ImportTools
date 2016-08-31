@@ -308,6 +308,8 @@ namespace TheDataResourceImporter
 
 
             //必须为文件夹模式 不可选文件模式
+
+            /*
             if (
                 "中国商标".Equals(fileType)
                 ||
@@ -324,6 +326,8 @@ namespace TheDataResourceImporter
                 "美国转让商标".Equals(fileType)
                 ||
                 "美国审判商标".Equals(fileType)
+                                ||
+                "美国审判商标".Equals(fileType)
               )
             {
                 showFileDialog = false;
@@ -336,6 +340,7 @@ namespace TheDataResourceImporter
                 checkBoxIsDir.Checked = !showFileDialog;
                 checkBoxIsDir.Enabled = true;
             }
+            */
             //清空文件路径
             filePaths = null;
             tb_FilePath.Text = "";
