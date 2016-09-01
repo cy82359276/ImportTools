@@ -73,6 +73,7 @@ namespace TheDataResourceImporter.Utils
         {
             return Path.Combine(tempDir, entry.Key);
         }
+
         /**
          * 删除指定Entry对象的临时文件 只删除文件, 不操作目录
          * */
@@ -94,6 +95,7 @@ namespace TheDataResourceImporter.Utils
             }
             return deleted;
         }
+
         public static bool isSupportedArchive(string filePath)
         {
             FileInfo fileInfo = new FileInfo(filePath);
@@ -142,7 +144,6 @@ namespace TheDataResourceImporter.Utils
 
         }
 
-
         //压缩包内目录类型 移除多余的/, 统一使用\\做分隔符
         public static string removeDirEntrySlash(string entryKey)
         {
@@ -157,13 +158,12 @@ namespace TheDataResourceImporter.Utils
             return entryKey;
         }
 
-        //获取目录类条目的深度
-        public static int getDirEntryDepth(string originalEntryKey)
+        //获取条目的深度
+        public static int getEntryDepth(string originalEntryKey)
         {
             string neatedPath = removeDirEntrySlash(originalEntryKey);
             return neatedPath.Split('\\').Length;
         }
-
 
         //获取文件类条目的父目录
         public static string getFileEntryParentPath(string fileEntryKey)
@@ -185,6 +185,67 @@ namespace TheDataResourceImporter.Utils
         {
             entryKey = removeDirEntrySlash(entryKey);
             return entryKey.Split('\\').LastOrDefault();
+        }
+
+        /// <summary>
+        /// 返回符合条件的同目录的entry
+        /// </summary>
+        /// <param name="achive"></param>
+        /// <param name="entry"></param>
+        /// <param name="suffix">查询条件, 以suffix结尾，大小写不敏感</param>
+        /// <returns></returns>
+        public static IArchiveEntry getSpecifiedSiblingEntry(IArchive achive, string entryKey, string suffix)
+        {
+            var currentEntryDepth = getEntryDepth(entryKey);
+            var target = (from entryTemp in achive.Entries
+                         where (!entryTemp.Key.Equals(entryKey)) && (getFileEntryParentPath(entryTemp.Key).Equals(getFileEntryParentPath(entryKey))) && entryKey.ToUpper().EndsWith(suffix.ToUpper())
+                         select entryTemp).FirstOrDefault();
+            return target;
+        }
+
+
+        /// <summary>
+        /// 通过key查找entry
+        /// </summary>
+        /// <param name="achive"></param>
+        /// <param name="entryKey"></param>
+        /// <returns></returns>
+        public static IArchiveEntry getEntryByKey(IArchive achive, string entryKey)
+        {
+            var target = (from entryTemp in achive.Entries
+                          where entryTemp.Key.Equals(entryKey)
+                          select entryTemp).FirstOrDefault();
+            return target;
+        }
+
+        /// <summary>
+        /// 查找符合条件的子entry
+        /// </summary>
+        /// <param name="achive"></param>
+        /// <param name="entryKey"></param>
+        /// <param name="suffix"></param>
+        /// <returns></returns>
+        public static IArchiveEntry getChildEntryWhithSuffix(IArchive achive, string entryKey, string suffix)
+        {
+            var target = (from entryTemp in achive.Entries
+                          where removeDirEntrySlash(entryTemp.Key).Contains(removeDirEntrySlash(entryKey)) && getEntryDepth(entryTemp.Key) == (getEntryDepth(entryKey) + 1) /*确保是子目录*/ && entryTemp.Key.ToUpper().EndsWith(suffix.ToUpper())
+                          select entryTemp).FirstOrDefault();
+            return target;
+        }
+
+        /// <summary>
+        /// 查找符合条件的所有后代条目
+        /// </summary>
+        /// <param name="achive"></param>
+        /// <param name="entryKey"></param>
+        /// <param name="suffix"></param>
+        /// <returns></returns>
+        public static IArchiveEntry getDescendantEntryWhithSuffix(IArchive achive, string entryKey, string suffix)
+        {
+            var target = (from entryTemp in achive.Entries
+                          where removeDirEntrySlash(entryTemp.Key).Contains(removeDirEntrySlash(entryKey))  &&  entryTemp.Key.ToUpper().EndsWith(suffix.ToUpper())
+                          select entryTemp).FirstOrDefault();
+            return target;
         }
     }
 }

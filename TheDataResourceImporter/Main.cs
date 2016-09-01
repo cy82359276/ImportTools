@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using TheDataResourceImporter.Utils;
 
@@ -62,34 +58,73 @@ namespace TheDataResourceImporter
             if (showFileDialog) //展示文件选择器
             {
                 OpenFileDialog dialog = new OpenFileDialog();
-                dialog.Filter = "任意文件(*.*)或目录|*";
-                dialog.Multiselect = true;
+                dialog.Filter = "任意文件(*.*)|*.*";
+                dialog.Multiselect = false;
+
+
 
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     filePaths = null;
                     tb_FilePath.Text = string.Empty;
 
-                    filePaths = dialog.FileNames;
-                    foreach (string filePath in filePaths)
-                    {
-                        tb_FilePath.Text += (filePath + ";");
-                    }
+                    
+                    filePaths =new string[] { dialog.FileName};
+
+                    tb_FilePath.Text = dialog.FileName;
+                    //foreach (string filePath in filePaths)
+                    //{
+                    //    tb_FilePath.Text += (filePath + ";");
+                    //}
                 }
             }
-            else
+            else //文件夹模式
             {
-                FolderBrowserDialog dialog = new FolderBrowserDialog();
-                dialog.ShowNewFolderButton = false;
-                dialog.Description = "请选择文件路径";
-                if (dialog.ShowDialog() == DialogResult.OK)
+                //FolderBrowserDialog dialog = new FolderBrowserDialog();
+                //dialog.ShowNewFolderButton = false;
+                //dialog.Description = "请选择文件路径";
+                //dialog.RootFolder = Environment.SpecialFolder.MyComputer;//打开我的电脑
+                //var dataRootDirStr = System.Configuration.ConfigurationManager.AppSettings["dataRootDir"];
+
+                ////获取数据资源默认路径
+                //if (Directory.Exists(dataRootDirStr))
+                //{
+                //    dialog.SelectedPath = dataRootDirStr;
+                //}
+
+                //if (dialog.ShowDialog() == DialogResult.OK)
+                //{
+                //    string foldPath = dialog.SelectedPath;
+
+                //    tb_FilePath.Text = foldPath;
+
+                //    filePaths = new string[] { foldPath };
+                //}
+
+                FolderBrowserDialogEx folderDialogEx = new FolderBrowserDialogEx();
+
+                folderDialogEx.ShowNewFolderButton = false;
+                folderDialogEx.Description = "请选择文件路径";
+                folderDialogEx.RootFolder = Environment.SpecialFolder.MyComputer;//打开我的电脑
+                var dataRootDirStr = System.Configuration.ConfigurationManager.AppSettings["dataRootDir"];
+
+                //获取数据资源默认路径
+                if (Directory.Exists(dataRootDirStr))
                 {
-                    string foldPath = dialog.SelectedPath;
+                    folderDialogEx.SelectedPath = dataRootDirStr;
+                }
+
+                if (folderDialogEx.ShowDialog() == DialogResult.OK)
+                {
+                    string foldPath = folderDialogEx.SelectedPath;
 
                     tb_FilePath.Text = foldPath;
 
                     filePaths = new string[] { foldPath };
                 }
+
+
+
             }
         }
 
@@ -363,6 +398,12 @@ namespace TheDataResourceImporter
             var bathHistoryForm = new ImportBatchHistoryForm();
             bathHistoryForm.WindowState = FormWindowState.Maximized;
             bathHistoryForm.Show();
+        }
+
+        private void tb_FilePath_TextChanged(object sender, EventArgs e)
+        {
+            var inputedpath = tb_FilePath.Text;
+            filePaths = new string[] { inputedpath };
         }
     }
 }

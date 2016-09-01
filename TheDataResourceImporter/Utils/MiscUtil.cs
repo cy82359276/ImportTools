@@ -20,7 +20,6 @@ namespace TheDataResourceImporter.Utils
             return innerImpError;
         }
 
-
         public static S_IMPORT_BATH getNewImportBathObject(string fileType)
         {
             return new S_IMPORT_BATH() { ID = System.Guid.NewGuid().ToString(), HANDLED_ITEM_COUNT = 0, ISCOMPLETED = "N", IS_DIR_MODE = "N",  RES_TYPE = fileType, START_TIME = System.DateTime.Now};
@@ -31,13 +30,10 @@ namespace TheDataResourceImporter.Utils
             return new IMPORT_SESSION() { SESSION_ID = System.Guid.NewGuid().ToString(), ROLLED_BACK = "N",BATCH_ID = bath.ID, DATA_RES_TYPE = fileType, START_TIME = System.DateTime.Now, ZIP_OR_DIR_PATH = filePath, HAS_ERROR = "N", FAILED_COUNT = 0, COMPLETED = "N", LAST_TIME = 0, ZIP_ENTRIES_COUNT = 0, ZIP_ENTRY_POINTOR = 0, IS_ZIP = IS_ZIP};
         }
 
-
         public static Type getTypeByFullName(string typeFullName)
         {
             return  Type.GetType(typeFullName, true);
         }
-
-
 
         public static void setProperityByName(Type type,string propName, Object obj, Object value)
         {
@@ -141,6 +137,12 @@ namespace TheDataResourceImporter.Utils
             return resultDate;
         }
 
+        /// <summary>
+        /// 获取祖先目录的路径信息
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="depth">从当前路径网上数的层数</param>
+        /// <returns></returns>
         public static  string getRelativeFilePathInclude(string path, int depth)
         {
             string relativeFilePath = "";

@@ -12,24 +12,36 @@ namespace TheDataResourceImporter.Utils
     public class LogHelper
     {
 
+        /// <summary>
+        /// 改成一批次一日志文件
+        /// </summary>
+        /// <param name="dest"></param>
+        /// <param name="txtName"></param>
+        /// <param name="text"></param>
         public static void WriteLog(string dest, string txtName, string text)
         {
+            if (string.IsNullOrEmpty(ImportManger.bathId))
+            {
+                ImportManger.bathId = "";
+            }
+
+
             if (!Directory.Exists(dest))
             {
                 Directory.CreateDirectory(dest);
             }
-                try
+            try
+            {
+                dest = dest + "\\" + txtName + ImportManger.bathId + ".log";
+                using (StreamWriter sw = new StreamWriter(dest, true, Encoding.Default))
                 {
-                    dest = dest + "\\" + txtName + ".log";
-                    using (StreamWriter sw = new StreamWriter(dest, true, Encoding.Default))
-                    {
-                        sw.WriteLine(text);
-                    }
+                    sw.WriteLine(text);
                 }
-                catch (Exception ec)
-                {
-                    MessageBox.Show("写记录出错！" + ec.Message);
-                }
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show("写记录出错！" + ec.Message);
+            }
         }
 
         public static void WriteLog(string msg)

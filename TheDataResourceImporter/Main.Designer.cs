@@ -255,9 +255,9 @@ namespace TheDataResourceImporter
             this.tb_FilePath.BackColor = System.Drawing.SystemColors.Window;
             this.tb_FilePath.Location = new System.Drawing.Point(124, 92);
             this.tb_FilePath.Name = "tb_FilePath";
-            this.tb_FilePath.ReadOnly = true;
             this.tb_FilePath.Size = new System.Drawing.Size(393, 21);
             this.tb_FilePath.TabIndex = 9;
+            this.tb_FilePath.TextChanged += new System.EventHandler(this.tb_FilePath_TextChanged);
             // 
             // labelProgressMsg
             // 
@@ -435,7 +435,6 @@ namespace TheDataResourceImporter
             // checkBoxIsDir
             // 
             this.checkBoxIsDir.AutoSize = true;
-            this.checkBoxIsDir.Enabled = false;
             this.checkBoxIsDir.Location = new System.Drawing.Point(622, 95);
             this.checkBoxIsDir.Name = "checkBoxIsDir";
             this.checkBoxIsDir.Size = new System.Drawing.Size(84, 16);

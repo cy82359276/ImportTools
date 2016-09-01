@@ -400,6 +400,9 @@
     <Compile Include="Utils\AccessUtil.cs" />
     <Compile Include="Utils\CompressUtil.cs" />
     <Compile Include="Utils\ExcelUtil.cs" />
+    <Compile Include="Utils\FolderBrowserDialogEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Utils\ImportLogicUtil.cs" />
     <Compile Include="Utils\LogHelper.cs" />
     <Compile Include="Utils\MessageUtil.cs" />
