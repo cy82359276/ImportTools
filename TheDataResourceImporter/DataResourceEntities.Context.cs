@@ -46,7 +46,6 @@ namespace TheDataResourceImporter
         public DbSet<S_CHINA_BRAND_LICENSE> S_CHINA_BRAND_LICENSE { get; set; }
         public DbSet<S_CHINA_BRAND_TRANSFER> S_CHINA_BRAND_TRANSFER { get; set; }
         public DbSet<S_CHINA_CIRCUITLAYOUT> S_CHINA_CIRCUITLAYOUT { get; set; }
-        public DbSet<S_CHINA_COURTCASE_PROCESS> S_CHINA_COURTCASE_PROCESS { get; set; }
         public DbSet<S_CHINA_CUSTOMS_RECORD> S_CHINA_CUSTOMS_RECORD { get; set; }
         public DbSet<S_CHINA_LAWSTATE_INDEXINGLIB> S_CHINA_LAWSTATE_INDEXINGLIB { get; set; }
         public DbSet<S_CHINA_MEDICINE_PATENT_HANDLE> S_CHINA_MEDICINE_PATENT_HANDLE { get; set; }
@@ -110,5 +109,6 @@ namespace TheDataResourceImporter
         public DbSet<S_WORLD_LEGAL_STATUS> S_WORLD_LEGAL_STATUS { get; set; }
         public DbSet<S_ZONE_CODE_BASE> S_ZONE_CODE_BASE { get; set; }
         public DbSet<S_IMPORT_BATH> S_IMPORT_BATH { get; set; }
+        public DbSet<S_CHINA_COURTCASE_PROCESS> S_CHINA_COURTCASE_PROCESS { get; set; }
     }
 }

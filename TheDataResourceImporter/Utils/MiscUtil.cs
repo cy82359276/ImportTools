@@ -48,9 +48,9 @@ namespace TheDataResourceImporter.Utils
         }
 
         /***
-         *获取指定XPath的值 
+         *获取指定XPath的单值 
          ***/
-        public static string getXElementValueByXPath(XElement currentNode, string xPath, string attribute = "", IXmlNamespaceResolver resolver = null)
+        public static string getXElementSingleValueByXPath(XElement currentNode, string xPath, string attribute = "", IXmlNamespaceResolver resolver = null)
         {
             string value = "";
 
@@ -81,6 +81,48 @@ namespace TheDataResourceImporter.Utils
             }
             return value;
         }
+
+
+
+
+        public static string getXElementMultiValueByXPathSepratedByDoubleColon(XElement currentNode, string xPath, IXmlNamespaceResolver resolver = null)
+        {
+            string value = "";
+
+            var  targets = currentNode.XPathSelectElements(xPath);
+
+            var targetValues = from ele in targets
+                               select ele.Value;
+
+            value = string.Join(";;", targetValues);
+
+            return value;
+        }
+
+
+        public static string getXElementInnerXMLByXPath(XElement currentNode, string xPath, IXmlNamespaceResolver resolver = null)
+        {
+            string value = "";
+
+            XElement target = null;
+            if (null != resolver)
+            {
+                target = currentNode.XPathSelectElement(xPath, resolver);
+            }
+            else
+            {
+                target = currentNode.XPathSelectElement(xPath);
+            }
+
+            if (null != target)
+            {
+                value = target.ToString();
+            }
+
+            return value;
+        }
+
+
 
         /***
          *在currentNode中搜索tagName的元素, 可以指定tagName的直接子元素标签, 子元素标签可选

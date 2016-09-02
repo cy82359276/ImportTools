@@ -23,5 +23,6 @@ namespace TheDataResourceImporter
         public string RES_TYPE { get; set; }
         public Nullable<decimal> LAST_TIME { get; set; }
         public Nullable<decimal> HANDLED_ITEM_COUNT { get; set; }
+        public string NOTE { get; set; }
     }
 }

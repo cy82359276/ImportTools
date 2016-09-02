@@ -175,7 +175,14 @@ namespace TheDataResourceImporter
                     {
                         if (File.Exists(path))
                         {
-                            ImportByPath(path, fileType, dataSourceEntites, bath);
+                            try
+                            {
+                                ImportByPath(path, fileType, dataSourceEntites, bath);
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
                             System.GC.Collect();
                         }
                         else
@@ -718,41 +725,41 @@ namespace TheDataResourceImporter
 
                     var rootElement = doc.Root;
                     //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
-                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
-                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
-                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
-                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
 
-                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
 
-                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
 
-                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
 
-                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+                    entityObject.ABSTRACT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
 
-                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
-                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
-                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
 
 
                     entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
@@ -916,41 +923,41 @@ namespace TheDataResourceImporter
 
                     var rootElement = doc.Root;
                     //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
-                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
-                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
-                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
-                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
 
-                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
 
-                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
 
-                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
 
-                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+                    entityObject.ABSTRACT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
 
-                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
-                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
-                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
 
 
                     entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
@@ -1114,41 +1121,41 @@ namespace TheDataResourceImporter
 
                     var rootElement = doc.Root;
                     //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
-                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
-                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
-                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
-                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
 
-                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
 
-                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
 
-                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
 
-                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+                    entityObject.ABSTRACT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
 
-                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
-                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
-                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
 
 
                     entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
@@ -1361,41 +1368,41 @@ namespace TheDataResourceImporter
 
                     var rootElement = doc.Root;
                     //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
-                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
-                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
-                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
-                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
 
-                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
 
-                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
 
-                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
 
-                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+                    entityObject.ABSTRACT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
 
-                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
-                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
-                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
 
 
                     entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
@@ -1512,8 +1519,7 @@ namespace TheDataResourceImporter
             #region 162 中国法院判例初加工数据 XML
             else if (fileType == "中国法院判例初加工数据")
             {
-
-
+                parseZip162(filePath, entiesContext, importSession);
             }
             #endregion
             #region 168 中国商标分类数据 EXCEL
@@ -1904,41 +1910,41 @@ namespace TheDataResourceImporter
 
                     var rootElement = doc.Root;
                     //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
-                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
-                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.STA_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
-                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                    entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
-                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.STA_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                    entityObject.STA_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                    entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                    entityObject.ORI_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                    entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+                    entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
 
-                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+                    entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
 
-                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+                    entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
 
-                    entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
 
-                    entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+                    entityObject.ABSTRACT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
 
-                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
-                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
-                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+                    entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                    entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
 
 
                     entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
@@ -2344,6 +2350,306 @@ namespace TheDataResourceImporter
             accUtil.Close();//关闭数据库                
         }
 
+        private static void parseZip162(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession)
+        {
+            //entiesContext.S_CHINA_COURTCASE_PROCESS
+            handledCount = 0;
+            importStartTime = importSession.START_TIME.Value;
+
+            importSession.TABLENAME = "S_CHINA_COURTCASE_PROCESS".ToUpper();
+            entiesContext.SaveChanges();
+
+            SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+            IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+            //总条目数
+            importSession.IS_ZIP = "Y";
+            //totalCount = archive.Entries.Count();
+            importSession.ZIP_ENTRIES_COUNT = archive.Entries.Count(); ;
+            entiesContext.SaveChanges();
+
+            
+            #region 检查目录内无XML的情况 并入库
+            var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                     where entry.IsDirectory && CompressUtil.getEntryDepth(entry.Key) == 2
+                                     select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+            //总文件数实际为包内文件夹数
+            totalCount = dirNameSetEntires.Count();
+
+            //排除压缩包中无关XML
+            var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                            where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getEntryDepth(entry.Key) == 3
+                                            select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+            var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+            /***
+             * 入库逻辑:
+             * 1. 入没有XML的数据
+             *        判断有无PDF文件
+             * 2. 入有XML的数据
+             *       解析XML信息 入库
+             *       判断有无PDF       
+             * **/
+
+            MessageUtil.DoAppendTBDetail("开始解析'中国法院判例初加工数据：");
+
+            //发现存在XML不存在的情况
+            if (dirEntriesWithoutXML.Count() > 0)
+            {
+                //string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                //msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                //MessageUtil.DoAppendTBDetail(msg);
+                //LogHelper.WriteErrorLog(msg);
+
+
+                foreach (string entryKey in dirEntriesWithoutXML)
+                {
+                    handledCount++;
+                    S_CHINA_COURTCASE_PROCESS entityObject = new S_CHINA_COURTCASE_PROCESS();
+
+                    entityObject.ID = System.Guid.NewGuid().ToString();
+
+                    var pn = CompressUtil.getEntryShortName(entryKey);
+
+                    var childPdfEntry = CompressUtil.getChildEntryWhithSuffix(archive, entryKey, ".PDF");
+
+                    entityObject.EXIST_XML = "0";
+
+
+                    //是否存在PDF文件
+                    if(null == childPdfEntry)
+                    {
+                        entityObject.EXIST_PDF = "0";
+                    }
+                    else
+                    {
+                        entityObject.EXIST_PDF = "1";
+                        entityObject.PATH_PDF = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + childPdfEntry.Key;
+                    }
+
+
+                    entityObject.IMPORT_SESSION_ID = importSession.SESSION_ID;
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
+                    entityObject.ARCHIVE_INNER_PATH = entryKey;
+                    entityObject.FILE_PATH = filePath;
+                    entiesContext.S_CHINA_COURTCASE_PROCESS.Add(entityObject);
+                    entiesContext.SaveChanges();
+
+                    //importSession.HAS_ERROR = "Y";
+                    //IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                    //importSession.FAILED_COUNT++;
+                    //entiesContext.IMPORT_ERROR.Add(importError);
+                    //entiesContext.SaveChanges();
+                }
+            }
+            #endregion
+
+
+            //MessageUtil.DoAppendTBDetail("开始寻找'中国法院判例初加工数据：");
+
+            var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getEntryDepth(entry.Key) == 3
+                                select entry;
+
+            totalCount = allXMLEntires.Count();
+
+            MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+            //已处理计数清零
+            //handledCount = 0;
+            //if (0 == allXMLEntires.Count())
+            //{
+            //    MessageUtil.DoAppendTBDetail("没有找到XML");
+            //    importSession.NOTE = "没有找到XML";
+            //    //添加错误信息
+            //    entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+            //    entiesContext.SaveChanges();
+            //}
+            #region 循环入库
+            foreach (IArchiveEntry entry in allXMLEntires)
+            {
+                //计数变量
+                handledCount++;
+
+                if (forcedStop)
+                {
+                    MessageUtil.DoAppendTBDetail("强制终止了插入");
+                    importSession.NOTE = "用户强制终止了本次插入";
+                    entiesContext.SaveChanges();
+                    break;
+                }
+
+                var keyTemp = entry.Key;
+
+                //解压当前的XML文件
+                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                if ("" == entryFullPath.Trim())
+                {
+                    MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                    LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                    importSession.FAILED_COUNT++;
+                    IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                    entiesContext.IMPORT_ERROR.Add(errorTemp);
+                    entiesContext.SaveChanges();
+                    continue;
+                }
+
+                S_CHINA_COURTCASE_PROCESS entityObject = new S_CHINA_COURTCASE_PROCESS() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                entityObject.FILE_PATH = filePath;
+                //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                entiesContext.S_CHINA_COURTCASE_PROCESS.Add(entityObject);
+                //entiesContext.SaveChanges();
+                try
+                {
+                    XmlReaderSettings xmlReaderSettings = new XmlReaderSettings { CheckCharacters = false };
+                    XmlReader xmlReader = XmlReader.Create(entryFullPath, xmlReaderSettings);
+                    xmlReader.MoveToContent();
+                    XDocument doc = XDocument.Load(xmlReader);
+
+                    #region 具体的入库操作,EF
+                //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                //定义命名空间
+                XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                var rootElement = doc.Root;
+
+                //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                entityObject.PN = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/PN");
+
+                entityObject.C_ID = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_ID");
+
+                entityObject.C_LEGAL_NUM = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_LEGAL_NUM");
+                entityObject.C_YEAR = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_YEAR");
+                entityObject.C_VERDICTTYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_VERDICTTYPE");
+                entityObject.C_TITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_TITLE");
+                entityObject.C_NAME = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_NAME");
+                entityObject.C_ORIGIN_PASS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_ORIGIN_PASS");
+
+
+                entityObject.C_IP_TYPES = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/CASE/C_IP_TYPES/C_IP_TYPE");
+
+
+                entityObject.C_COURT_NAME = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_NAME");
+                entityObject.C_COURT_PROVINCE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_PROVINCE");
+                entityObject.C_COURT_CITY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_CITY");
+                entityObject.C_COURT_CODE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_CODE");
+                entityObject.C_COURT_LEVEL = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_LEVEL");
+                entityObject.C_COURT_NUM = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_NUM");
+                entityObject.C_CASETYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_CASETYPE");
+                entityObject.C_SUBBRANCH = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_SUBBRANCH");
+                entityObject.C_VERDICTRESULT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_VERDICTRESULT");
+                entityObject.C_APPELLENTINFOS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_APPELLENTINFOS");
+                entityObject.C_PLAINTIFF_PRES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PLAINTIFF_PRES");
+                entityObject.C_PLAINTIFF_AGENT_NAMES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PLAINTIFF_AGENT_NAMES");
+                entityObject.C_PLAINTIFF_AGENT_ORGS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PLAINTIFF_AGENT_ORGS");
+                entityObject.C_APPELLEEINFOS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_APPELLEEINFOS");
+                entityObject.C_DEFENDENT_PRES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_DEFENDENT_PRES");
+                entityObject.C_DEFENDENT_AGENT_NAMES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_DEFENDENT_AGENT_NAMES");
+                entityObject.C_DEFENDENT_AGENT_ORGS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_DEFENDENT_AGENT_ORGS");
+                entityObject.C_THIRD_PERSONINFOS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_THIRD_PERSONINFOS");
+                entityObject.C_THIRD_PERSON_PRES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_THIRD_PERSON_PRES");
+                entityObject.C_THIRD_PERSON_AGENT_NAMES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_THIRD_PERSON_AGENT_NAMES");
+                entityObject.C_THIRD_PERSON_AGENT_ORGS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_THIRD_PERSON_AGENT_ORGS");
+                entityObject.C_LEGALNUMBER_SUPERIORS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_LEGALNUMBER_SUPERIORS");
+
+
+                entityObject.C_STARTDATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_STARTDATE"));
+
+
+                entityObject.C_APPLYCOST = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_APPLYCOST");
+                entityObject.C_JUDGECOST = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_JUDGECOST");
+
+
+                entityObject.C_PT_NS = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/CASE/C_PT_NS");
+                entityObject.C_PL_NS = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/CASE/C_PL_NS");
+                entityObject.C_TR_NS = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/CASE/C_TR_NS/C_TR_N");
+
+
+                entityObject.C_VD_IVFO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_VD_IVFO");
+                entityObject.C_PRE_JUDGE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PRE_JUDGE");
+                entityObject.C_PROXY_PRE_JUDGE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PROXY_PRE_JUDGE");
+                entityObject.C_JUDGE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_JUDGE");
+                entityObject.C_PROXY_JUDGE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PROXY_JUDGE");
+                entityObject.C_JURY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_JURY");
+                entityObject.C_CLERK = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_CLERK");
+
+
+                entityObject.C_VERDICTDATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_VERDICTDATE"));
+
+
+                entityObject.S_YEAR = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/S_YEAR");
+                entityObject.HOLDINGTYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/HOLDINGTYPE");
+                entityObject.LAWREFERENCES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/LAWREFERENCES");
+                entityObject.EVIDENCES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/EVIDENCES");
+                entityObject.C_PL_N_KEY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PL_N_KEY");
+                entityObject.C_PL_N_KEY_STANDARD = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PL_N_KEY_STANDARD");
+                entityObject.ALLTEXT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/ALLTEXT");
+                entityObject.CASEFAMILY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/CASEFAMILYS");
+
+                entityObject.EXIST_XML = "1";
+
+                var childPdfEntry = CompressUtil.getChildEntryWhithSuffix(archive, CompressUtil.getFileEntryParentPath(entry.Key), ".PDF");
+
+                //是否存在PDF文件
+                if (null == childPdfEntry)
+                {
+                    entityObject.EXIST_PDF = "0";
+                }
+                else
+                {
+                    entityObject.EXIST_PDF = "1";
+                    entityObject.PATH_PDF = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + childPdfEntry.Key;
+                }
+
+                entityObject.IMPORT_TIME = System.DateTime.Now;
+
+
+                
+
+                entiesContext.SaveChanges();
+
+
+
+
+                //输出插入记录
+                var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+
+
+
+                    #endregion
+
+                    xmlReader.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    var message = $"发生错误{ex.Message}，错误详情{ex.StackTrace}";
+                    MessageUtil.DoAppendTBDetail(message);
+                    LogHelper.WriteErrorLog(message);
+
+                    var importError = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, ex.Message, ex.StackTrace);
+                    importSession.HAS_ERROR = "Y";
+                    entiesContext.IMPORT_ERROR.Add(importError);
+                    entiesContext.SaveChanges();
+                }
+
+                //更新进度信息
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+            }
+            #endregion 循环入库
+        }
+
         private static void parseTRS14(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession)
         {
             MessageUtil.DoAppendTBDetail($"正在解析TRS文件");
@@ -2643,41 +2949,41 @@ namespace TheDataResourceImporter
 
                 var rootElement = doc.Root;
                 //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
-                entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
-                entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                entityObject.STA_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                entityObject.STA_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
-                entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                entityObject.ORI_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
-                entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                entityObject.STA_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                entityObject.STA_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                entityObject.ORI_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+                entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
 
-                entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+                entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
 
-                entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+                entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
 
-                entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+                entityObject.INVENTIONTITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
 
-                entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+                entityObject.ABSTRACT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
 
-                entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
-                entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
-                entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+                entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
 
 
                 entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
@@ -2729,245 +3035,6 @@ namespace TheDataResourceImporter
             #endregion 循环入库
         }
 
-        private static void parseZip162(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession)
-        {
-            //entiesContext.S_CHINA_COURTCASE_PROCESS
-            handledCount = 0;
-            importStartTime = importSession.START_TIME.Value;
-
-            importSession.TABLENAME = "S_CHINA_COURTCASE_PROCESS".ToUpper();
-            entiesContext.SaveChanges();
-
-            SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
-            IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
-
-            //总条目数
-            importSession.IS_ZIP = "Y";
-            //totalCount = archive.Entries.Count();
-            importSession.ZIP_ENTRIES_COUNT = archive.Entries.Count(); ;
-            entiesContext.SaveChanges();
-
-            #region 检查目录内无XML的情况
-            var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
-                                     where entry.IsDirectory && CompressUtil.getEntryDepth(entry.Key) == 2
-                                     select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
-
-            totalCount = dirNameSetEntires.Count();
-
-            //排除压缩包中无关XML
-            var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
-                                            where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getEntryDepth(entry.Key) == 3
-                                            select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
-
-            var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
-
-
-            /***
-             * 入库逻辑:
-             * 1. 入没有XML的数据
-             *        判断有无PDF文件
-             * 2. 入有XML的数据
-             *       解析XML信息 入库
-             *       判断有无PDF       
-             * **/
-    
-
-
-            //发现存在XML不存在的情况
-            if (dirEntriesWithoutXML.Count() > 0)
-            {
-                //string msg = "如下压缩包中的文件夹内未发现XML文件：";
-                //msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
-                //MessageUtil.DoAppendTBDetail(msg);
-                //LogHelper.WriteErrorLog(msg);
-
-
-                foreach (string entryKey in dirEntriesWithoutXML)
-                {
-                    S_CHINA_COURTCASE_PROCESS entityObject = new S_CHINA_COURTCASE_PROCESS();
-
-
-                
-
-
-
-
-
-                    entityObject.ID = System.Guid.NewGuid().ToString();
-
-                    var pn = CompressUtil.getEntryShortName(entryKey);
-
-                    var childPdfEntry = CompressUtil.getChildEntryWhithSuffix(archive, entryKey, ".PDF");
-
-                    entityObject.EXIST_XML = "0";
-                    //是否存在PDF文件
-                    if(null == childPdfEntry)
-                    {
-                        entityObject.EXIST_PDF = "0";
-                    }
-                    else
-                    {
-                        entityObject.EXIST_PDF = "1";
-                        entityObject.PATH_PDF = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + entryKey;
-                    }
-
-                    
-                                        
-                    //importSession.HAS_ERROR = "Y";
-                    //IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
-                    //importSession.FAILED_COUNT++;
-                    //entiesContext.IMPORT_ERROR.Add(importError);
-                    //entiesContext.SaveChanges();
-                }
-            }
-            #endregion
-
-
-            MessageUtil.DoAppendTBDetail("开始寻找'中国专利标准化全文文本数据'XML文件：");
-
-            var allXMLEntires = from entry in archive.Entries.AsParallel()
-                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getEntryDepth(entry.Key) == 3
-                                select entry;
-
-            totalCount = allXMLEntires.Count();
-
-            MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
-
-            //已处理计数清零
-            handledCount = 0;
-            if (0 == allXMLEntires.Count())
-            {
-                MessageUtil.DoAppendTBDetail("没有找到XML");
-                importSession.NOTE = "没有找到XML";
-                //添加错误信息
-                entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
-                entiesContext.SaveChanges();
-            }
-            #region 循环入库
-            foreach (IArchiveEntry entry in allXMLEntires)
-            {
-                //计数变量
-                handledCount++;
-
-                if (forcedStop)
-                {
-                    MessageUtil.DoAppendTBDetail("强制终止了插入");
-                    importSession.NOTE = "用户强制终止了本次插入";
-                    entiesContext.SaveChanges();
-                    break;
-                }
-
-                var keyTemp = entry.Key;
-
-                //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
-
-                if ("" == entryFullPath.Trim())
-                {
-                    MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
-                    LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
-                    importSession.FAILED_COUNT++;
-                    IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
-                    entiesContext.IMPORT_ERROR.Add(errorTemp);
-                    entiesContext.SaveChanges();
-                    continue;
-                }
-
-                S_CHINA_PATENT_BIBLIOGRAPHIC entityObject = new S_CHINA_PATENT_BIBLIOGRAPHIC() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
-                entityObject.ARCHIVE_INNER_PATH = entry.Key;
-                entityObject.FILE_PATH = filePath;
-                //sCNPatentTextCode.SESSION_INDEX = handledCount;
-                entiesContext.S_CHINA_PATENT_BIBLIOGRAPHIC.Add(entityObject);
-                //entiesContext.SaveChanges();
-
-                XDocument doc = XDocument.Load(entryFullPath);
-
-                #region 具体的入库操作,EF
-                //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
-
-                //定义命名空间
-                XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
-                namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
-                namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
-                //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
-                //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
-
-                var rootElement = doc.Root;
-                //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
-                entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
-                entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
-
-
-                entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
-                entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
-
-
-                entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
-                entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
-
-
-                entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
-
-
-                entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
-
-                entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
-
-                entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
-
-                entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
-
-                entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
-
-                entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
-                entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
-                entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
-
-
-                entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
-
-                entityObject.EXIST_STA_FULLTEXT = "1";
-
-                //entityObject.PATH_DI_ABS_BIB = null;
-
-                //entityObject.PATH_DI_CLA_DES_DRA = null;
-
-                //entityObject.PATH_DI_BRI_DBI = null;
-
-                //entityObject.EXIST_DI_ABS_BIB = "0";
-
-                //entityObject.EXIST_DI_CLA_DES_DRA = "0";
-
-                //entityObject.EXIST_DI_BRI_DBI = "0";
-
-                //entityObject.PATH_FULLTEXT = null;
-
-                //entityObject.EXIST_FULLTEXT = "0";
-
-                entityObject.IMPORT_TIME = System.DateTime.Now;
-
-                entiesContext.SaveChanges();
-
-
-                //输出插入记录
-                var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
-
-                MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
-
-                #endregion
-
-                //更新进度信息
-                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
-            }
-            #endregion 循环入库
-        }
 
         private static void parseZip06(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession)
         {
@@ -3090,41 +3157,41 @@ namespace TheDataResourceImporter
 
                 var rootElement = doc.Root;
                 //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
-                entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
-                entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                entityObject.STA_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                entityObject.STA_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
-                entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                entityObject.ORI_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
-                entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                entityObject.STA_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                entityObject.STA_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                entityObject.ORI_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+                entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
 
-                entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+                entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
 
-                entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+                entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
 
-                entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+                entityObject.INVENTIONTITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
 
-                entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+                entityObject.ABSTRACT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
 
-                entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
-                entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
-                entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+                entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
 
 
                 entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
@@ -3373,18 +3440,18 @@ namespace TheDataResourceImporter
 
                 //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type", namespaceManager);
 
-                entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated", "country", namespaceManager);
-                entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated", "docNumber", namespaceManager);
+                entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated", "country", namespaceManager);
+                entityObject.STA_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated", "docNumber", namespaceManager);
                 //公告类型
                 entityObject.STA_PUB_KIND = string.IsNullOrEmpty(entityObject.STA_PUB_NUMBER) ? "" : entityObject.STA_PUB_NUMBER.Last().ToString();
 
-                var pubDateStr = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated", "datePublication", namespaceManager);
+                var pubDateStr = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated", "datePublication", namespaceManager);
 
                 entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(pubDateStr);
 
 
-                entityObject.STA_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage", "numberOfFigures", namespaceManager);
-                entityObject.STA_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage", "type", namespaceManager);
+                entityObject.STA_NUMBEROFFIGURES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage", "numberOfFigures", namespaceManager);
+                entityObject.STA_TYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage", "type", namespaceManager);
 
 
                 var correspondDocInfo = (from docInfo in docList
@@ -3551,41 +3618,41 @@ namespace TheDataResourceImporter
 
                 var rootElement = doc.Root;
                 //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
-                entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                entityObject.STA_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.STA_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
-                entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                entityObject.STA_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                entityObject.STA_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.ORI_PUB_KIND = MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
-                entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                entityObject.ORI_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                entityObject.ORI_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                entityObject.ORI_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Kind", "", namespaceManager);
+                entityObject.ORI_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                entityObject.STA_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
-                entityObject.STA_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
+                entityObject.STA_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager); ;
+                entityObject.STA_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                entityObject.STA_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
-                entityObject.ORI_APP_NUMBER = MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
+                entityObject.ORI_APP_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
+                entityObject.ORI_APP_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:DocNumber", "", namespaceManager);
+                entityObject.ORI_APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ApplicationReference[@dataFormat='original']/base:DocumentID/base:Date", "", namespaceManager));
 
 
-                entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
+                entityObject.DESIGN_PATENTNUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:PatentNumber", "", namespaceManager);
 
-                entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
+                entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
 
-                entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+                entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
 
-                entityObject.INVENTIONTITLE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+                entityObject.INVENTIONTITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
 
-                entityObject.ABSTRACT = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
+                entityObject.ABSTRACT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
 
-                entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
-                entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
-                entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
+                entityObject.DESIGNBRIEFEXPLANATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBriefExplanation", "", namespaceManager);
+                entityObject.FULLDOCIMAGE_NUMBEROFFIGURES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImagenumberOfFigures", "", namespaceManager);
+                entityObject.FULLDOCIMAGE_TYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:FullDocImage/type", "", namespaceManager);
 
 
                 entityObject.PATH_STA_FULLTEXT = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + CompressUtil.getFileEntryParentPath(entry.Key);
@@ -3887,17 +3954,17 @@ namespace TheDataResourceImporter
                 //appl-type
                 var rootElement = doc.Root;
 
-                var appl_type = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/application-reference", "appl-type");
+                var appl_type = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/application-reference", "appl-type");
                 sCNPatentTextCode.APPL_TYPE = appl_type;
                 entiesContext.SaveChanges();
 
-                var pub_country = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/country");
+                var pub_country = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/country");
                 sCNPatentTextCode.PUB_COUNTRY = pub_country;
 
-                var pub_number = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/doc-number");
+                var pub_number = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/doc-number");
                 sCNPatentTextCode.PUB_NUMBER = pub_number;
 
-                var pub_date = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/date");
+                var pub_date = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/date");
 
                 try
                 {
@@ -3908,13 +3975,13 @@ namespace TheDataResourceImporter
                 }
 
 
-                var pub_kind = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/kind");
+                var pub_kind = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/kind");
                 sCNPatentTextCode.PUB_KIND = pub_kind;
 
-                var gazette_num = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/gazette-num");
+                var gazette_num = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/gazette-num");
                 sCNPatentTextCode.GAZETTE_NUM = gazette_num;
 
-                var gazette_date = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/date");
+                var gazette_date = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/date");
 
                 try
                 {
@@ -3924,14 +3991,14 @@ namespace TheDataResourceImporter
                 {
                 }
 
-                var app_country = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/application-reference/document-id/country");
+                var app_country = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/application-reference/document-id/country");
                 sCNPatentTextCode.APP_COUNTRY = app_country;
 
-                var app_number = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/application-reference/document-id/doc-number");
+                var app_number = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/application-reference/document-id/doc-number");
                 sCNPatentTextCode.APP_NUMBER = app_number;
 
 
-                var app_date = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/application-reference/document-id/date");
+                var app_date = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/application-reference/document-id/date");
                 try
                 {
                     sCNPatentTextCode.APP_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(app_date);
@@ -3945,15 +4012,15 @@ namespace TheDataResourceImporter
 
                 if (String.IsNullOrEmpty(classification_ipcr))
                 {
-                    classification_ipcr = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/classifications-ipcr/classification-ipcr/text");
+                    classification_ipcr = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/classifications-ipcr/classification-ipcr/text");
                 }
 
                 sCNPatentTextCode.CLASSIFICATION_IPCR = classification_ipcr;
 
-                var invention_title = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/invention-title");
+                var invention_title = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/invention-title");
                 sCNPatentTextCode.INVENTION_TITLE = invention_title;
 
-                var abstractEle = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/abstract");
+                var abstractEle = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/abstract");
                 sCNPatentTextCode.ABSTRACT = abstractEle;
 
                 sCNPatentTextCode.PATH_XML = entry.Key;

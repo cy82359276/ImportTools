@@ -634,25 +634,24 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="PN" Type="varchar2" MaxLength="50" />
-          <Property Name="C_ID" Type="number" Precision="20" Scale="0" />
-          <Property Name="C_LEGAL_NUM" Type="varchar2" MaxLength="200" />
-          <Property Name="C_YEAR" Type="varchar2" MaxLength="10" />
-          <Property Name="C_VERDICTTYPE" Type="varchar2" MaxLength="50" />
-          <Property Name="C_TITLE" Type="varchar2" MaxLength="800" />
-          <Property Name="C_NAME" Type="varchar2" MaxLength="150" />
-          <Property Name="C_ORIGIN_PASS" Type="varchar2" MaxLength="1000" />
-          <Property Name="C_IP_TYPES" Type="varchar2" MaxLength="30" />
-          <Property Name="C_COURT_NAME" Type="varchar2" MaxLength="150" />
-          <Property Name="C_COURT_PROVINCE" Type="varchar2" MaxLength="30" />
-          <Property Name="C_COURT_CITY" Type="varchar2" MaxLength="50" />
-          <Property Name="C_COURT_CODE" Type="varchar2" MaxLength="50" />
-          <Property Name="C_COURT_LEVEL" Type="varchar2" MaxLength="30" />
-          <Property Name="C_COURT_NUM" Type="varchar2" MaxLength="30" />
-          <Property Name="C_CASETYPE" Type="varchar2" MaxLength="30" />
-          <Property Name="C_SUBBRANCH" Type="varchar2" MaxLength="30" />
-          <Property Name="C_VERDICTRESULT" Type="varchar2" MaxLength="30" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="PN" Type="varchar2" MaxLength="200" />
+          <Property Name="C_LEGAL_NUM" Type="varchar2" MaxLength="500" />
+          <Property Name="C_YEAR" Type="varchar2" MaxLength="50" />
+          <Property Name="C_VERDICTTYPE" Type="varchar2" MaxLength="200" />
+          <Property Name="C_TITLE" Type="varchar2" MaxLength="2000" />
+          <Property Name="C_NAME" Type="varchar2" MaxLength="500" />
+          <Property Name="C_ORIGIN_PASS" Type="varchar2" MaxLength="3000" />
+          <Property Name="C_IP_TYPES" Type="varchar2" MaxLength="1000" />
+          <Property Name="C_COURT_NAME" Type="varchar2" MaxLength="500" />
+          <Property Name="C_COURT_PROVINCE" Type="varchar2" MaxLength="100" />
+          <Property Name="C_COURT_CITY" Type="varchar2" MaxLength="100" />
+          <Property Name="C_COURT_CODE" Type="varchar2" MaxLength="100" />
+          <Property Name="C_COURT_LEVEL" Type="varchar2" MaxLength="100" />
+          <Property Name="C_COURT_NUM" Type="varchar2" MaxLength="100" />
+          <Property Name="C_CASETYPE" Type="varchar2" MaxLength="100" />
+          <Property Name="C_SUBBRANCH" Type="varchar2" MaxLength="100" />
+          <Property Name="C_VERDICTRESULT" Type="varchar2" MaxLength="100" />
           <Property Name="C_APPELLENTINFOS" Type="clob" />
           <Property Name="C_PLAINTIFF_PRES" Type="clob" />
           <Property Name="C_PLAINTIFF_AGENT_NAMES" Type="clob" />
@@ -665,33 +664,39 @@
           <Property Name="C_THIRD_PERSON_PRES" Type="clob" />
           <Property Name="C_THIRD_PERSON_AGENT_NAMES" Type="clob" />
           <Property Name="C_THIRD_PERSON_AGENT_ORGS" Type="clob" />
-          <Property Name="C_LEGALNUMBER_SUPERIORS" Type="varchar2" MaxLength="30" />
+          <Property Name="C_LEGALNUMBER_SUPERIORS" Type="varchar2" MaxLength="100" />
           <Property Name="C_STARTDATE" Type="date" />
-          <Property Name="C_APPLYCOST" Type="varchar2" MaxLength="30" />
-          <Property Name="C_JUDGECOST" Type="varchar2" MaxLength="30" />
-          <Property Name="C_PT_NS" Type="varchar2" MaxLength="200" />
-          <Property Name="C_PL_NS" Type="varchar2" MaxLength="200" />
-          <Property Name="C_TR_NS" Type="varchar2" MaxLength="200" />
+          <Property Name="C_APPLYCOST" Type="varchar2" MaxLength="100" />
+          <Property Name="C_JUDGECOST" Type="varchar2" MaxLength="100" />
           <Property Name="C_VD_IVFO" Type="clob" />
-          <Property Name="C_PRE_JUDGE" Type="varchar2" MaxLength="800" />
-          <Property Name="C_PROXY_PRE_JUDGE" Type="varchar2" MaxLength="800" />
-          <Property Name="C_JUDGE" Type="varchar2" MaxLength="800" />
-          <Property Name="C_PROXY_JUDGE" Type="varchar2" MaxLength="800" />
-          <Property Name="C_JURY" Type="varchar2" MaxLength="800" />
-          <Property Name="C_CLERK" Type="varchar2" MaxLength="800" />
+          <Property Name="C_PRE_JUDGE" Type="varchar2" MaxLength="2000" />
+          <Property Name="C_PROXY_PRE_JUDGE" Type="varchar2" MaxLength="2000" />
+          <Property Name="C_JUDGE" Type="varchar2" MaxLength="2000" />
+          <Property Name="C_PROXY_JUDGE" Type="varchar2" MaxLength="2000" />
+          <Property Name="C_JURY" Type="varchar2" MaxLength="2000" />
+          <Property Name="C_CLERK" Type="varchar2" MaxLength="2000" />
           <Property Name="C_VERDICTDATE" Type="date" />
-          <Property Name="S_YEAR" Type="varchar2" MaxLength="10" />
-          <Property Name="HOLDINGTYPE" Type="varchar2" MaxLength="30" />
+          <Property Name="S_YEAR" Type="varchar2" MaxLength="50" />
+          <Property Name="HOLDINGTYPE" Type="varchar2" MaxLength="100" />
           <Property Name="LAWREFERENCES" Type="clob" />
           <Property Name="EVIDENCES" Type="clob" />
-          <Property Name="C_PL_N_KEY" Type="varchar2" MaxLength="30" />
-          <Property Name="C_PL_N_KEY_STANDARD" Type="varchar2" MaxLength="30" />
+          <Property Name="C_PL_N_KEY" Type="varchar2" MaxLength="100" />
+          <Property Name="C_PL_N_KEY_STANDARD" Type="varchar2" MaxLength="100" />
           <Property Name="ALLTEXT" Type="clob" />
           <Property Name="CASEFAMILY" Type="clob" />
-          <Property Name="PATH_PDF" Type="varchar2" MaxLength="100" />
-          <Property Name="PATH_XML" Type="varchar2" MaxLength="100" />
-          <Property Name="EXIST_PDF" Type="varchar2" MaxLength="1" />
-          <Property Name="EXIST_XML" Type="varchar2" MaxLength="1" />
+          <Property Name="PATH_PDF" Type="varchar2" MaxLength="500" />
+          <Property Name="PATH_XML" Type="varchar2" MaxLength="500" />
+          <Property Name="EXIST_PDF" Type="varchar2" MaxLength="10" />
+          <Property Name="EXIST_XML" Type="varchar2" MaxLength="10" />
+          <Property Name="IMPORT_SESSION_ID" Type="nvarchar2" MaxLength="100" />
+          <Property Name="IMPORT_TIME" Type="date" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
+          <Property Name="FILE_PATH" Type="varchar2" MaxLength="1000" />
+          <Property Name="SESSION_INDEX" Type="number" Precision="38" Scale="0" />
+          <Property Name="C_ID" Type="varchar2" MaxLength="500" />
+          <Property Name="C_PT_NS" Type="clob" />
+          <Property Name="C_PL_NS" Type="clob" />
+          <Property Name="C_TR_NS" Type="clob" />
         </EntityType>
         <EntityType Name="S_CHINA_CUSTOMS_RECORD">
           <Key>
@@ -1831,6 +1836,7 @@
           <Property Name="RES_TYPE" Type="nvarchar2" MaxLength="100" />
           <Property Name="LAST_TIME" Type="number" Precision="38" Scale="0" />
           <Property Name="HANDLED_ITEM_COUNT" Type="number" Precision="38" Scale="0" />
+          <Property Name="NOTE" Type="nvarchar2" MaxLength="1000" />
         </EntityType>
         <EntityType Name="S_ISRAEL_PATENT_DESCRIPTION">
           <Key>
@@ -2875,7 +2881,6 @@
           <EntitySet Name="S_CHINA_BRAND_LICENSE" EntityType="Model.S_CHINA_BRAND_LICENSE" />
           <EntitySet Name="S_CHINA_BRAND_TRANSFER" EntityType="Model.S_CHINA_BRAND_TRANSFER" />
           <EntitySet Name="S_CHINA_CIRCUITLAYOUT" EntityType="Model.S_CHINA_CIRCUITLAYOUT" />
-          <EntitySet Name="S_CHINA_COURTCASE_PROCESS" EntityType="Model.S_CHINA_COURTCASE_PROCESS" />
           <EntitySet Name="S_CHINA_CUSTOMS_RECORD" EntityType="Model.S_CHINA_CUSTOMS_RECORD" />
           <EntitySet Name="S_CHINA_LAWSTATE_INDEXINGLIB" EntityType="Model.S_CHINA_LAWSTATE_INDEXINGLIB" />
           <EntitySet Name="S_CHINA_MEDICINE_PATENT_HANDLE" EntityType="Model.S_CHINA_MEDICINE_PATENT_HANDLE" />
@@ -2939,6 +2944,7 @@
           <EntitySet Name="S_WORLD_LEGAL_STATUS" EntityType="Model.S_WORLD_LEGAL_STATUS" />
           <EntitySet Name="S_ZONE_CODE_BASE" EntityType="Model.S_ZONE_CODE_BASE" />
           <EntitySet Name="S_IMPORT_BATH" EntityType="Model.S_IMPORT_BATH" />
+          <EntitySet Name="S_CHINA_COURTCASE_PROCESS" EntityType="Model.S_CHINA_COURTCASE_PROCESS" />
         </EntityContainer>
         <EntityType Name="IMPORT_ERROR">
           <Key>
@@ -3563,69 +3569,6 @@
           <Property Name="PATH" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="SHWINFO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="PATH_XML" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_XML" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-        </EntityType>
-        <EntityType Name="S_CHINA_COURTCASE_PROCESS">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="PN" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="C_ID" Type="Decimal" Precision="20" Scale="0" />
-          <Property Name="C_LEGAL_NUM" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="C_YEAR" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="C_VERDICTTYPE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="C_TITLE" Type="String" MaxLength="800" FixedLength="false" Unicode="false" />
-          <Property Name="C_NAME" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
-          <Property Name="C_ORIGIN_PASS" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="C_IP_TYPES" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="C_COURT_NAME" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
-          <Property Name="C_COURT_PROVINCE" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="C_COURT_CITY" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="C_COURT_CODE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="C_COURT_LEVEL" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="C_COURT_NUM" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="C_CASETYPE" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="C_SUBBRANCH" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="C_VERDICTRESULT" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="C_APPELLENTINFOS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="C_PLAINTIFF_PRES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="C_PLAINTIFF_AGENT_NAMES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="C_PLAINTIFF_AGENT_ORGS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="C_APPELLEEINFOS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="C_DEFENDENT_PRES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="C_DEFENDENT_AGENT_NAMES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="C_DEFENDENT_AGENT_ORGS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="C_THIRD_PERSONINFOS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="C_THIRD_PERSON_PRES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="C_THIRD_PERSON_AGENT_NAMES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="C_THIRD_PERSON_AGENT_ORGS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="C_LEGALNUMBER_SUPERIORS" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="C_STARTDATE" Type="DateTime" />
-          <Property Name="C_APPLYCOST" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="C_JUDGECOST" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="C_PT_NS" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="C_PL_NS" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="C_TR_NS" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="C_VD_IVFO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="C_PRE_JUDGE" Type="String" MaxLength="800" FixedLength="false" Unicode="false" />
-          <Property Name="C_PROXY_PRE_JUDGE" Type="String" MaxLength="800" FixedLength="false" Unicode="false" />
-          <Property Name="C_JUDGE" Type="String" MaxLength="800" FixedLength="false" Unicode="false" />
-          <Property Name="C_PROXY_JUDGE" Type="String" MaxLength="800" FixedLength="false" Unicode="false" />
-          <Property Name="C_JURY" Type="String" MaxLength="800" FixedLength="false" Unicode="false" />
-          <Property Name="C_CLERK" Type="String" MaxLength="800" FixedLength="false" Unicode="false" />
-          <Property Name="C_VERDICTDATE" Type="DateTime" />
-          <Property Name="S_YEAR" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="HOLDINGTYPE" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="LAWREFERENCES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="EVIDENCES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="C_PL_N_KEY" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="C_PL_N_KEY_STANDARD" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="ALLTEXT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="CASEFAMILY" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_PDF" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_XML" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_PDF" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
           <Property Name="EXIST_XML" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="S_CHINA_CUSTOMS_RECORD">
@@ -5696,6 +5639,75 @@
           <Property Name="RES_TYPE" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="LAST_TIME" Type="Decimal" Precision="38" Scale="0" />
           <Property Name="HANDLED_ITEM_COUNT" Type="Decimal" Precision="38" Scale="0" />
+          <Property Name="NOTE" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="S_CHINA_COURTCASE_PROCESS">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PN" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="C_LEGAL_NUM" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="C_YEAR" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="C_VERDICTTYPE" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="C_TITLE" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="C_NAME" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="C_ORIGIN_PASS" Type="String" MaxLength="3000" FixedLength="false" Unicode="false" />
+          <Property Name="C_IP_TYPES" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="C_COURT_NAME" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="C_COURT_PROVINCE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="C_COURT_CITY" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="C_COURT_CODE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="C_COURT_LEVEL" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="C_COURT_NUM" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="C_CASETYPE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="C_SUBBRANCH" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="C_VERDICTRESULT" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="C_APPELLENTINFOS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_PLAINTIFF_PRES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_PLAINTIFF_AGENT_NAMES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_PLAINTIFF_AGENT_ORGS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_APPELLEEINFOS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_DEFENDENT_PRES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_DEFENDENT_AGENT_NAMES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_DEFENDENT_AGENT_ORGS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_THIRD_PERSONINFOS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_THIRD_PERSON_PRES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_THIRD_PERSON_AGENT_NAMES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_THIRD_PERSON_AGENT_ORGS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_LEGALNUMBER_SUPERIORS" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="C_STARTDATE" Type="DateTime" />
+          <Property Name="C_APPLYCOST" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="C_JUDGECOST" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="C_VD_IVFO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_PRE_JUDGE" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="C_PROXY_PRE_JUDGE" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="C_JUDGE" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="C_PROXY_JUDGE" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="C_JURY" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="C_CLERK" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="C_VERDICTDATE" Type="DateTime" />
+          <Property Name="S_YEAR" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="HOLDINGTYPE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="LAWREFERENCES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="EVIDENCES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_PL_N_KEY" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="C_PL_N_KEY_STANDARD" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="ALLTEXT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CASEFAMILY" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_PDF" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_XML" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_PDF" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_XML" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
+          <Property Name="C_ID" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="C_PT_NS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_PL_NS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="C_TR_NS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
         </EntityType>
         </Schema>
     </edmx:ConceptualModels>
@@ -6345,70 +6357,6 @@
                 <ScalarProperty Name="GGR" ColumnName="GGR" />
                 <ScalarProperty Name="BTSQR" ColumnName="BTSQR" />
                 <ScalarProperty Name="BTDJH" ColumnName="BTDJH" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="S_CHINA_COURTCASE_PROCESS">
-            <EntityTypeMapping TypeName="Model.S_CHINA_COURTCASE_PROCESS">
-              <MappingFragment StoreEntitySet="S_CHINA_COURTCASE_PROCESS">
-                <ScalarProperty Name="EXIST_XML" ColumnName="EXIST_XML" />
-                <ScalarProperty Name="EXIST_PDF" ColumnName="EXIST_PDF" />
-                <ScalarProperty Name="PATH_XML" ColumnName="PATH_XML" />
-                <ScalarProperty Name="PATH_PDF" ColumnName="PATH_PDF" />
-                <ScalarProperty Name="CASEFAMILY" ColumnName="CASEFAMILY" />
-                <ScalarProperty Name="ALLTEXT" ColumnName="ALLTEXT" />
-                <ScalarProperty Name="C_PL_N_KEY_STANDARD" ColumnName="C_PL_N_KEY_STANDARD" />
-                <ScalarProperty Name="C_PL_N_KEY" ColumnName="C_PL_N_KEY" />
-                <ScalarProperty Name="EVIDENCES" ColumnName="EVIDENCES" />
-                <ScalarProperty Name="LAWREFERENCES" ColumnName="LAWREFERENCES" />
-                <ScalarProperty Name="HOLDINGTYPE" ColumnName="HOLDINGTYPE" />
-                <ScalarProperty Name="S_YEAR" ColumnName="S_YEAR" />
-                <ScalarProperty Name="C_VERDICTDATE" ColumnName="C_VERDICTDATE" />
-                <ScalarProperty Name="C_CLERK" ColumnName="C_CLERK" />
-                <ScalarProperty Name="C_JURY" ColumnName="C_JURY" />
-                <ScalarProperty Name="C_PROXY_JUDGE" ColumnName="C_PROXY_JUDGE" />
-                <ScalarProperty Name="C_JUDGE" ColumnName="C_JUDGE" />
-                <ScalarProperty Name="C_PROXY_PRE_JUDGE" ColumnName="C_PROXY_PRE_JUDGE" />
-                <ScalarProperty Name="C_PRE_JUDGE" ColumnName="C_PRE_JUDGE" />
-                <ScalarProperty Name="C_VD_IVFO" ColumnName="C_VD_IVFO" />
-                <ScalarProperty Name="C_TR_NS" ColumnName="C_TR_NS" />
-                <ScalarProperty Name="C_PL_NS" ColumnName="C_PL_NS" />
-                <ScalarProperty Name="C_PT_NS" ColumnName="C_PT_NS" />
-                <ScalarProperty Name="C_JUDGECOST" ColumnName="C_JUDGECOST" />
-                <ScalarProperty Name="C_APPLYCOST" ColumnName="C_APPLYCOST" />
-                <ScalarProperty Name="C_STARTDATE" ColumnName="C_STARTDATE" />
-                <ScalarProperty Name="C_LEGALNUMBER_SUPERIORS" ColumnName="C_LEGALNUMBER_SUPERIORS" />
-                <ScalarProperty Name="C_THIRD_PERSON_AGENT_ORGS" ColumnName="C_THIRD_PERSON_AGENT_ORGS" />
-                <ScalarProperty Name="C_THIRD_PERSON_AGENT_NAMES" ColumnName="C_THIRD_PERSON_AGENT_NAMES" />
-                <ScalarProperty Name="C_THIRD_PERSON_PRES" ColumnName="C_THIRD_PERSON_PRES" />
-                <ScalarProperty Name="C_THIRD_PERSONINFOS" ColumnName="C_THIRD_PERSONINFOS" />
-                <ScalarProperty Name="C_DEFENDENT_AGENT_ORGS" ColumnName="C_DEFENDENT_AGENT_ORGS" />
-                <ScalarProperty Name="C_DEFENDENT_AGENT_NAMES" ColumnName="C_DEFENDENT_AGENT_NAMES" />
-                <ScalarProperty Name="C_DEFENDENT_PRES" ColumnName="C_DEFENDENT_PRES" />
-                <ScalarProperty Name="C_APPELLEEINFOS" ColumnName="C_APPELLEEINFOS" />
-                <ScalarProperty Name="C_PLAINTIFF_AGENT_ORGS" ColumnName="C_PLAINTIFF_AGENT_ORGS" />
-                <ScalarProperty Name="C_PLAINTIFF_AGENT_NAMES" ColumnName="C_PLAINTIFF_AGENT_NAMES" />
-                <ScalarProperty Name="C_PLAINTIFF_PRES" ColumnName="C_PLAINTIFF_PRES" />
-                <ScalarProperty Name="C_APPELLENTINFOS" ColumnName="C_APPELLENTINFOS" />
-                <ScalarProperty Name="C_VERDICTRESULT" ColumnName="C_VERDICTRESULT" />
-                <ScalarProperty Name="C_SUBBRANCH" ColumnName="C_SUBBRANCH" />
-                <ScalarProperty Name="C_CASETYPE" ColumnName="C_CASETYPE" />
-                <ScalarProperty Name="C_COURT_NUM" ColumnName="C_COURT_NUM" />
-                <ScalarProperty Name="C_COURT_LEVEL" ColumnName="C_COURT_LEVEL" />
-                <ScalarProperty Name="C_COURT_CODE" ColumnName="C_COURT_CODE" />
-                <ScalarProperty Name="C_COURT_CITY" ColumnName="C_COURT_CITY" />
-                <ScalarProperty Name="C_COURT_PROVINCE" ColumnName="C_COURT_PROVINCE" />
-                <ScalarProperty Name="C_COURT_NAME" ColumnName="C_COURT_NAME" />
-                <ScalarProperty Name="C_IP_TYPES" ColumnName="C_IP_TYPES" />
-                <ScalarProperty Name="C_ORIGIN_PASS" ColumnName="C_ORIGIN_PASS" />
-                <ScalarProperty Name="C_NAME" ColumnName="C_NAME" />
-                <ScalarProperty Name="C_TITLE" ColumnName="C_TITLE" />
-                <ScalarProperty Name="C_VERDICTTYPE" ColumnName="C_VERDICTTYPE" />
-                <ScalarProperty Name="C_YEAR" ColumnName="C_YEAR" />
-                <ScalarProperty Name="C_LEGAL_NUM" ColumnName="C_LEGAL_NUM" />
-                <ScalarProperty Name="C_ID" ColumnName="C_ID" />
-                <ScalarProperty Name="PN" ColumnName="PN" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>
@@ -8533,6 +8481,7 @@
           <EntitySetMapping Name="S_IMPORT_BATH">
             <EntityTypeMapping TypeName="Model.S_IMPORT_BATH">
               <MappingFragment StoreEntitySet="S_IMPORT_BATH">
+                <ScalarProperty Name="NOTE" ColumnName="NOTE" />
                 <ScalarProperty Name="HANDLED_ITEM_COUNT" ColumnName="HANDLED_ITEM_COUNT" />
                 <ScalarProperty Name="LAST_TIME" ColumnName="LAST_TIME" />
                 <ScalarProperty Name="RES_TYPE" ColumnName="RES_TYPE" />
@@ -8541,6 +8490,75 @@
                 <ScalarProperty Name="FILECOUNT" ColumnName="FILECOUNT" />
                 <ScalarProperty Name="ISCOMPLETED" ColumnName="ISCOMPLETED" />
                 <ScalarProperty Name="START_TIME" ColumnName="START_TIME" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_CHINA_COURTCASE_PROCESS">
+            <EntityTypeMapping TypeName="Model.S_CHINA_COURTCASE_PROCESS">
+              <MappingFragment StoreEntitySet="S_CHINA_COURTCASE_PROCESS">
+                <ScalarProperty Name="C_TR_NS" ColumnName="C_TR_NS" />
+                <ScalarProperty Name="C_PL_NS" ColumnName="C_PL_NS" />
+                <ScalarProperty Name="C_PT_NS" ColumnName="C_PT_NS" />
+                <ScalarProperty Name="C_ID" ColumnName="C_ID" />
+                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="EXIST_XML" ColumnName="EXIST_XML" />
+                <ScalarProperty Name="EXIST_PDF" ColumnName="EXIST_PDF" />
+                <ScalarProperty Name="PATH_XML" ColumnName="PATH_XML" />
+                <ScalarProperty Name="PATH_PDF" ColumnName="PATH_PDF" />
+                <ScalarProperty Name="CASEFAMILY" ColumnName="CASEFAMILY" />
+                <ScalarProperty Name="ALLTEXT" ColumnName="ALLTEXT" />
+                <ScalarProperty Name="C_PL_N_KEY_STANDARD" ColumnName="C_PL_N_KEY_STANDARD" />
+                <ScalarProperty Name="C_PL_N_KEY" ColumnName="C_PL_N_KEY" />
+                <ScalarProperty Name="EVIDENCES" ColumnName="EVIDENCES" />
+                <ScalarProperty Name="LAWREFERENCES" ColumnName="LAWREFERENCES" />
+                <ScalarProperty Name="HOLDINGTYPE" ColumnName="HOLDINGTYPE" />
+                <ScalarProperty Name="S_YEAR" ColumnName="S_YEAR" />
+                <ScalarProperty Name="C_VERDICTDATE" ColumnName="C_VERDICTDATE" />
+                <ScalarProperty Name="C_CLERK" ColumnName="C_CLERK" />
+                <ScalarProperty Name="C_JURY" ColumnName="C_JURY" />
+                <ScalarProperty Name="C_PROXY_JUDGE" ColumnName="C_PROXY_JUDGE" />
+                <ScalarProperty Name="C_JUDGE" ColumnName="C_JUDGE" />
+                <ScalarProperty Name="C_PROXY_PRE_JUDGE" ColumnName="C_PROXY_PRE_JUDGE" />
+                <ScalarProperty Name="C_PRE_JUDGE" ColumnName="C_PRE_JUDGE" />
+                <ScalarProperty Name="C_VD_IVFO" ColumnName="C_VD_IVFO" />
+                <ScalarProperty Name="C_JUDGECOST" ColumnName="C_JUDGECOST" />
+                <ScalarProperty Name="C_APPLYCOST" ColumnName="C_APPLYCOST" />
+                <ScalarProperty Name="C_STARTDATE" ColumnName="C_STARTDATE" />
+                <ScalarProperty Name="C_LEGALNUMBER_SUPERIORS" ColumnName="C_LEGALNUMBER_SUPERIORS" />
+                <ScalarProperty Name="C_THIRD_PERSON_AGENT_ORGS" ColumnName="C_THIRD_PERSON_AGENT_ORGS" />
+                <ScalarProperty Name="C_THIRD_PERSON_AGENT_NAMES" ColumnName="C_THIRD_PERSON_AGENT_NAMES" />
+                <ScalarProperty Name="C_THIRD_PERSON_PRES" ColumnName="C_THIRD_PERSON_PRES" />
+                <ScalarProperty Name="C_THIRD_PERSONINFOS" ColumnName="C_THIRD_PERSONINFOS" />
+                <ScalarProperty Name="C_DEFENDENT_AGENT_ORGS" ColumnName="C_DEFENDENT_AGENT_ORGS" />
+                <ScalarProperty Name="C_DEFENDENT_AGENT_NAMES" ColumnName="C_DEFENDENT_AGENT_NAMES" />
+                <ScalarProperty Name="C_DEFENDENT_PRES" ColumnName="C_DEFENDENT_PRES" />
+                <ScalarProperty Name="C_APPELLEEINFOS" ColumnName="C_APPELLEEINFOS" />
+                <ScalarProperty Name="C_PLAINTIFF_AGENT_ORGS" ColumnName="C_PLAINTIFF_AGENT_ORGS" />
+                <ScalarProperty Name="C_PLAINTIFF_AGENT_NAMES" ColumnName="C_PLAINTIFF_AGENT_NAMES" />
+                <ScalarProperty Name="C_PLAINTIFF_PRES" ColumnName="C_PLAINTIFF_PRES" />
+                <ScalarProperty Name="C_APPELLENTINFOS" ColumnName="C_APPELLENTINFOS" />
+                <ScalarProperty Name="C_VERDICTRESULT" ColumnName="C_VERDICTRESULT" />
+                <ScalarProperty Name="C_SUBBRANCH" ColumnName="C_SUBBRANCH" />
+                <ScalarProperty Name="C_CASETYPE" ColumnName="C_CASETYPE" />
+                <ScalarProperty Name="C_COURT_NUM" ColumnName="C_COURT_NUM" />
+                <ScalarProperty Name="C_COURT_LEVEL" ColumnName="C_COURT_LEVEL" />
+                <ScalarProperty Name="C_COURT_CODE" ColumnName="C_COURT_CODE" />
+                <ScalarProperty Name="C_COURT_CITY" ColumnName="C_COURT_CITY" />
+                <ScalarProperty Name="C_COURT_PROVINCE" ColumnName="C_COURT_PROVINCE" />
+                <ScalarProperty Name="C_COURT_NAME" ColumnName="C_COURT_NAME" />
+                <ScalarProperty Name="C_IP_TYPES" ColumnName="C_IP_TYPES" />
+                <ScalarProperty Name="C_ORIGIN_PASS" ColumnName="C_ORIGIN_PASS" />
+                <ScalarProperty Name="C_NAME" ColumnName="C_NAME" />
+                <ScalarProperty Name="C_TITLE" ColumnName="C_TITLE" />
+                <ScalarProperty Name="C_VERDICTTYPE" ColumnName="C_VERDICTTYPE" />
+                <ScalarProperty Name="C_YEAR" ColumnName="C_YEAR" />
+                <ScalarProperty Name="C_LEGAL_NUM" ColumnName="C_LEGAL_NUM" />
+                <ScalarProperty Name="PN" ColumnName="PN" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>

@@ -46,7 +46,7 @@ namespace TheDataResourceImporter.Utils
 
         public static void WriteLog(string msg)
         {
-            string logDir = ConfigurationManager.AppSettings["tempDir"];
+            string logDir = ConfigurationManager.AppSettings["logDir"];
 
 
             //var task = new Task(() =>
@@ -68,7 +68,7 @@ namespace TheDataResourceImporter.Utils
             //添加消息换行
             msg = Environment.NewLine + timeStamp + Environment.NewLine + msg;
 
-            string logDir = ConfigurationManager.AppSettings["tempDir"];
+            string logDir = ConfigurationManager.AppSettings["logDir"];
 
             var task = new Task(() =>
             {

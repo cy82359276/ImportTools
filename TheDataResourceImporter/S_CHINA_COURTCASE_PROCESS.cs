@@ -16,7 +16,6 @@ namespace TheDataResourceImporter
     {
         public string ID { get; set; }
         public string PN { get; set; }
-        public Nullable<decimal> C_ID { get; set; }
         public string C_LEGAL_NUM { get; set; }
         public string C_YEAR { get; set; }
         public string C_VERDICTTYPE { get; set; }
@@ -49,9 +48,6 @@ namespace TheDataResourceImporter
         public Nullable<System.DateTime> C_STARTDATE { get; set; }
         public string C_APPLYCOST { get; set; }
         public string C_JUDGECOST { get; set; }
-        public string C_PT_NS { get; set; }
-        public string C_PL_NS { get; set; }
-        public string C_TR_NS { get; set; }
         public string C_VD_IVFO { get; set; }
         public string C_PRE_JUDGE { get; set; }
         public string C_PROXY_PRE_JUDGE { get; set; }
@@ -72,5 +68,14 @@ namespace TheDataResourceImporter
         public string PATH_XML { get; set; }
         public string EXIST_PDF { get; set; }
         public string EXIST_XML { get; set; }
+        public string IMPORT_SESSION_ID { get; set; }
+        public Nullable<System.DateTime> IMPORT_TIME { get; set; }
+        public string ARCHIVE_INNER_PATH { get; set; }
+        public string FILE_PATH { get; set; }
+        public Nullable<decimal> SESSION_INDEX { get; set; }
+        public string C_ID { get; set; }
+        public string C_PT_NS { get; set; }
+        public string C_PL_NS { get; set; }
+        public string C_TR_NS { get; set; }
     }
 }
