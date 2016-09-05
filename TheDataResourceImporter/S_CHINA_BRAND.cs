@@ -20,7 +20,7 @@ namespace TheDataResourceImporter
         public string BASEINFO_ORIGINAL_LANGUAGE { get; set; }
         public string BASEINFO_REGISTRATION_NO { get; set; }
         public string BASEINFO_APPLICATION_NO { get; set; }
-        public Nullable<short> BASEINFO_ICN { get; set; }
+        public Nullable<decimal> BASEINFO_ICN { get; set; }
         public string BASEINFO_TRADEMARK_TYPE { get; set; }
         public string BASEINFO_CURRENT_STATE_RIGHT { get; set; }
         public string BASEINFO_SPECIFIED_COLOR { get; set; }
@@ -39,5 +39,10 @@ namespace TheDataResourceImporter
         public string EXIST_JPG { get; set; }
         public string EXIST_JPG_SF { get; set; }
         public string EXIST_FILE { get; set; }
+        public string IMPORT_SESSION_ID { get; set; }
+        public Nullable<System.DateTime> IMPORT_TIME { get; set; }
+        public string ARCHIVE_INNER_PATH { get; set; }
+        public string FILE_PATH { get; set; }
+        public Nullable<decimal> SESSION_INDEX { get; set; }
     }
 }

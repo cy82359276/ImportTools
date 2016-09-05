@@ -26,5 +26,10 @@ namespace TheDataResourceImporter
         public string PAYMENTINFORMATIONS { get; set; }
         public string PATH_XML { get; set; }
         public string EXIST_XML { get; set; }
+        public string IMPORT_SESSION_ID { get; set; }
+        public Nullable<System.DateTime> IMPORT_TIME { get; set; }
+        public string ARCHIVE_INNER_PATH { get; set; }
+        public string FILE_PATH { get; set; }
+        public Nullable<decimal> SESSION_INDEX { get; set; }
     }
 }

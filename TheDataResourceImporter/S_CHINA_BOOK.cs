@@ -24,5 +24,10 @@ namespace TheDataResourceImporter
         public Nullable<short> MG_PAGENUM { get; set; }
         public string MG_FORMAT { get; set; }
         public string MG_SIZE { get; set; }
+        public string IMPORT_SESSION_ID { get; set; }
+        public Nullable<System.DateTime> IMPORT_TIME { get; set; }
+        public string ARCHIVE_INNER_PATH { get; set; }
+        public string FILE_PATH { get; set; }
+        public Nullable<decimal> SESSION_INDEX { get; set; }
     }
 }

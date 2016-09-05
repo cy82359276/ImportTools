@@ -23,5 +23,10 @@ namespace TheDataResourceImporter
         public string LANG { get; set; }
         public string ORIGIN { get; set; }
         public string TYPE { get; set; }
+        public string IMPORT_SESSION_ID { get; set; }
+        public Nullable<System.DateTime> IMPORT_TIME { get; set; }
+        public string ARCHIVE_INNER_PATH { get; set; }
+        public string FILE_PATH { get; set; }
+        public Nullable<decimal> SESSION_INDEX { get; set; }
     }
 }

@@ -44,5 +44,10 @@ namespace TheDataResourceImporter
         public string DOCLIST_SEQLIST_SEQ_OG { get; set; }
         public string DOCLIST_SEQLIST_SEQ_ORGANISM { get; set; }
         public string DOCLIST_SEQLIST_SEQ_FEATURES { get; set; }
+        public string IMPORT_SESSION_ID { get; set; }
+        public Nullable<System.DateTime> IMPORT_TIME { get; set; }
+        public string ARCHIVE_INNER_PATH { get; set; }
+        public string FILE_PATH { get; set; }
+        public Nullable<decimal> SESSION_INDEX { get; set; }
     }
 }

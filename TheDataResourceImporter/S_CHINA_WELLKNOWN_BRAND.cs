@@ -25,5 +25,10 @@ namespace TheDataResourceImporter
         public string TRADEMARK_DETERMINATION_BATCH { get; set; }
         public Nullable<System.DateTime> TRADEMARK_DETERMINATION_TIME { get; set; }
         public string TRADEMARK_WEBSITE { get; set; }
+        public string IMPORT_SESSION_ID { get; set; }
+        public Nullable<System.DateTime> IMPORT_TIME { get; set; }
+        public string ARCHIVE_INNER_PATH { get; set; }
+        public string FILE_PATH { get; set; }
+        public Nullable<decimal> SESSION_INDEX { get; set; }
     }
 }
