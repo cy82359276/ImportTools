@@ -95,6 +95,10 @@ namespace TheDataResourceImporter.Utils
                                select ele.Value;
 
             value = string.Join(";;", targetValues);
+            if (string.IsNullOrEmpty(value) || value.Replace(";;", "").Trim().Length == 0)
+            {
+                value = "";
+            }
 
             return value;
         }
@@ -106,19 +110,29 @@ namespace TheDataResourceImporter.Utils
 
             var targets = currentNode.XPathSelectElements(xPath);
 
-            if(string.IsNullOrEmpty(attriName))
+            if (string.IsNullOrEmpty(attriName))
             {
-            var targetValues = from ele in targets
-                               select ele.Value;
-            value = string.Join(";;", targetValues);
+                var targetValues = from ele in targets
+                                   select ele.Value;
+                value = string.Join(";;", targetValues);
+                if (string.IsNullOrEmpty(value) || value.Replace(";;", "").Trim().Length == 0)
+                {
+                    value = "";
+                }
 
-            return value;
+                return value;
             }
             else
             {
                 var targetValues = from ele in targets
                                    select ele.Attribute(attriName);
                 value = string.Join(";;", targetValues);
+
+                if (string.IsNullOrEmpty(value) || value.Replace(";;", "").Trim().Length == 0)
+                {
+                    value = "";
+                }
+
 
                 return value;
             }

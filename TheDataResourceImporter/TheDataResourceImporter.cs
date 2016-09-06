@@ -211,8 +211,14 @@ namespace TheDataResourceImporter
                 bath.ISCOMPLETED = "Y";
 
                 MessageUtil.DoAppendTBDetail($"当前批次运行完毕，处理了{bath.FILECOUNT}个文件，入库了{bath.HANDLED_ITEM_COUNT}条目，总耗时{bath.LAST_TIME}秒");
-
+                try
+                {
                 dataSourceEntites.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+
+                }
             }
 
             return true;
@@ -2168,43 +2174,43 @@ namespace TheDataResourceImporter
 
                 var rootElement = doc.Root;
 
-                entityObject.INTREGN = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/INTREGN");
-                entityObject.OOCD = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/OOCD");
-                entityObject.INTREGD = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/INTREGD"));
-                entityObject.EXPDATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/EXPDATE"));
-                entityObject.ORIGLAN = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/ORIGLAN");
-                entityObject.HOLGR = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/MARKGR/CURRENT/HOLGR");
-                entityObject.HOLGR_NAME_NAMEL = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/MARKGR/CURRENT/HOLGR/NAME/NAMEL");
-                entityObject.REPGR = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/MARKGR/CURRENT/REPGR");
-                entityObject.PHOLGR = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/MARKGR/CURRENT/PHOLGR");
-                entityObject.IMAGE_COLOUR = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/CURRENT/IMAGE/COLOUR");
-                entityObject.IMAGE_TEXT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/CURRENT/IMAGE/TEXT");
-                entityObject.VIENNAGR_VIECLAI = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/MARKGR/CURRENT/VIENNAGR/VIECLAI");
-                entityObject.VIENNAGR_VIECLA3 = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/MARKGR/CURRENT/VIENNAGR/VIECLA3");
-                entityObject.THRDMAR = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/CURRENT/THRDMAR");
-                entityObject.SOUMARI = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/CURRENT/SOUMARI");
-                entityObject.TYPMARI = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/CURRENT/TYPMARI");
-                entityObject.COLMARI = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/CURRENT/COLMARI");
-                entityObject.PREREGG = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/CURRENT/PREREGG");
-                entityObject.COLCLAGR = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/CURRENT/COLCLAGR");
-                entityObject.MARDESGR = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/CURRENT/MARDESGR");
-                entityObject.MARTRGR = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/CURRENT/MARTRGR");
-                entityObject.DISCLAIMGR = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/CURRENT/DISCLAIMGR");
+                entityObject.INTREGN = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR", "INTREGN");
+                entityObject.OOCD = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR", "OOCD");
+                entityObject.INTREGD = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR", "INTREGD"));
+                entityObject.EXPDATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR", "EXPDATE"));
+                entityObject.ORIGLAN = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR", "ORIGLAN");
+                entityObject.HOLGR = MiscUtil.getXElementInnerXMLByXPath(rootElement, "//MARKGR/CURRENT/HOLGR");
+                entityObject.HOLGR_NAME_NAMEL = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "//MARKGR/CURRENT/HOLGR/NAME/NAMEL");
+                entityObject.REPGR = MiscUtil.getXElementInnerXMLByXPath(rootElement, "//MARKGR/CURRENT/REPGR");
+                entityObject.PHOLGR = MiscUtil.getXElementInnerXMLByXPath(rootElement, "//MARKGR/CURRENT/PHOLGR");
+                entityObject.IMAGE_COLOUR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR/CURRENT/IMAGE", "COLOUR");
+                entityObject.IMAGE_TEXT = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR/CURRENT/IMAGE", "TEXT");
+                entityObject.VIENNAGR_VIECLAI = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "//MARKGR/CURRENT/VIENNAGR", "VIECLAI");
+                entityObject.VIENNAGR_VIECLA3 = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "//MARKGR/CURRENT/VIENNAGR", "VIECLA3");
+                entityObject.THRDMAR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR/CURRENT/THRDMAR");
+                entityObject.SOUMARI = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR/CURRENT/SOUMARI");
+                entityObject.TYPMARI = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR/CURRENT/TYPMARI");
+                entityObject.COLMARI = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR/CURRENT/COLMARI");
+                entityObject.PREREGG = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR/CURRENT/PREREGG");
+                entityObject.COLCLAGR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR/CURRENT/COLCLAGR");
+                entityObject.MARDESGR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR/CURRENT/MARDESGR");
+                entityObject.MARTRGR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR/CURRENT/MARTRGR");
+                entityObject.DISCLAIMGR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR/CURRENT/DISCLAIMGR");
 
 
-                entityObject.BASICGS = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/MARKGR/CURRENT/BASICGS");
+                entityObject.BASICGS = MiscUtil.getXElementInnerXMLByXPath(rootElement, "//MARKGR/CURRENT/BASICGS");
 
 
-                entityObject.BASICGS_GSGR_NICCLAI = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/MARKGR/CURRENT/BASICGS/GSGR", "NICCLAI");
+                entityObject.BASICGS_GSGR_NICCLAI = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "//MARKGR/CURRENT/BASICGS/GSGR", "NICCLAI");
 
 
-                entityObject.BASREGGR = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/MARKGR/CURRENT/BASGR/BASREGGR");
-                entityObject.BASAPPGR = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/MARKGR/CURRENT/BASGR/BASAPPGR");
-                entityObject.PRIGR = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/MARKGR/CURRENT/PRIGR");
-                entityObject.SENGRP = MiscUtil.getXElementSingleValueByXPath(rootElement, "/MARKGR/CURRENT/SENGRP");
-                entityObject.DESAG_DCPCD = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/MARKGR/CURRENT/DESAG/DCPCD");
-                entityObject.DESPG_DCPCD = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/MARKGR/CURRENT/DESPG/DCPCD");
-                entityObject.DESPG2_DCPCD = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/MARKGR/CURRENT/DESPG2/DCPCD");
+                entityObject.BASREGGR = MiscUtil.getXElementInnerXMLByXPath(rootElement, "//MARKGR/CURRENT/BASGR/BASREGGR");
+                entityObject.BASAPPGR = MiscUtil.getXElementInnerXMLByXPath(rootElement, "//MARKGR/CURRENT/BASGR/BASAPPGR");
+                entityObject.PRIGR = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "//MARKGR/CURRENT/PRIGR");
+                entityObject.SENGRP = MiscUtil.getXElementSingleValueByXPath(rootElement, "//MARKGR/CURRENT/SENGRP");
+                entityObject.DESAG_DCPCD = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "//MARKGR/CURRENT/DESAG/DCPCD");
+                entityObject.DESPG_DCPCD = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "//MARKGR/CURRENT/DESPG/DCPCD");
+                entityObject.DESPG2_DCPCD = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "//MARKGR/CURRENT/DESPG2/DCPCD");
 
 
                 entityObject.EXIST_XML = "1";
@@ -2227,7 +2233,7 @@ namespace TheDataResourceImporter
                     entityObject.EXIST_PIC = "0";
                 }
 
-                var sfPICEntry = CompressUtil.getSpecifiedSiblingEntry(archive, entry.Key, markId + "sf.jpg");
+                var sfPICEntry = CompressUtil.getSpecifiedSiblingEntry(archive, entry.Key, markId + "sf.gif");
 
                 if (null != sfPICEntry)
                 {
@@ -2558,32 +2564,32 @@ namespace TheDataResourceImporter
                 var rootElement = doc.Root;
                 entityObject.VERSION_NO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/version/version-no");
                 entityObject.VERSION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/version/version-date"));
-                entityObject.ACTION_KEY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/action-key");
-                entityObject.SERIAL_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/serial-number");
-                entityObject.REGISTRATION_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/registration-number");
-                entityObject.TRANSACTION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/transaction-date"));
-                entityObject.HEADER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/case-file-header");
-                entityObject.HEADER_FILING_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/case-file-header/filing-date"));
-                entityObject.HEADER_REGISTRATION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/case-file-header/registration-date"));
-                entityObject.HEADER_STATUS_CODE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/case-file-header/status-code");
-                entityObject.HEADER_STATUS_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/case-file-header/status-date"));
-                entityObject.HEADER_MARK_IDENTIFICATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/case-file-header/mark-identification");
-                entityObject.HEADER_MARK_DRAWING_CODE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/case-file-header/mark-drawing-code");
-                entityObject.HEADER_ABANDONMENT_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/case-file-header/abandonment-date"));
-                entityObject.HEADER_CANCELLATION_CODE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/case-file-header/cancellation-code");
-                entityObject.HEADER_CANCELLATION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/case-file-header/cancellation-date"));
-                entityObject.STATEMENTS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/case-file-statements");
-                entityObject.EVENT_STATEMENTS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/case-file-event-statements");
-                entityObject.PRIOR_REGISTRATION_APPLICATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/prior-registration-applications");
-                entityObject.FOREIGN_APPLICATIONS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/foreign-applications");
-                entityObject.CLASSIFICATIONS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/classifications");
-                entityObject.INTERNATIONAL_CODE = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/classifications/international-code");
-                entityObject.CORRESPONDENT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/correspondent");
-                entityObject.CASE_FILE_OWNERS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/case-file-owners");
-                entityObject.DESIGN_SEARCHES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/design-searches");
-                entityObject.DESIGN_SEARCH_CODE = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/design-searches/code");
-                entityObject.INTERNATIONAL_REGISTRATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/international-registration");
-                entityObject.MADRID_INTER_FILING_REQUESTS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/madrid-international-filing-requests");
+                entityObject.ACTION_KEY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/action-key");
+                entityObject.SERIAL_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/serial-number");
+                entityObject.REGISTRATION_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/registration-number");
+                entityObject.TRANSACTION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/transaction-date"));
+                entityObject.HEADER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/case-file-header");
+                entityObject.HEADER_FILING_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/case-file-header/filing-date"));
+                entityObject.HEADER_REGISTRATION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/case-file-header/registration-date"));
+                entityObject.HEADER_STATUS_CODE = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/case-file-header/status-code");
+                entityObject.HEADER_STATUS_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/case-file-header/status-date"));
+                entityObject.HEADER_MARK_IDENTIFICATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/case-file-header/mark-identification");
+                entityObject.HEADER_MARK_DRAWING_CODE = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/case-file-header/mark-drawing-code");
+                entityObject.HEADER_ABANDONMENT_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/case-file-header/abandonment-date"));
+                entityObject.HEADER_CANCELLATION_CODE = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/case-file-header/cancellation-code");
+                entityObject.HEADER_CANCELLATION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/case-file-header/cancellation-date"));
+                entityObject.STATEMENTS = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/case-file-statements");
+                entityObject.EVENT_STATEMENTS = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/case-file-event-statements");
+                entityObject.PRIOR_REGISTRATION_APPLICATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/prior-registration-applications");
+                entityObject.FOREIGN_APPLICATIONS = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/foreign-applications");
+                entityObject.CLASSIFICATIONS = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/classifications");
+                entityObject.INTERNATIONAL_CODE = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "//action-keys/case-file/classifications/international-code");
+                entityObject.CORRESPONDENT = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/correspondent");
+                entityObject.CASE_FILE_OWNERS = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/case-file-owners");
+                entityObject.DESIGN_SEARCHES = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/design-searches");
+                entityObject.DESIGN_SEARCH_CODE = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "//action-keys/case-file/design-searches/code");
+                entityObject.INTERNATIONAL_REGISTRATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/international-registration");
+                entityObject.MADRID_INTER_FILING_REQUESTS = MiscUtil.getXElementSingleValueByXPath(rootElement, "//action-keys/case-file/madrid-international-filing-requests");
                 entityObject.EXIST_XML = "1";
                 entityObject.PATH_XML = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + entry.Key;
                 entityObject.IMPORT_TIME = System.DateTime.Now;

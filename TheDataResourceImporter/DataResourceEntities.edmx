@@ -2397,14 +2397,14 @@
             <PropertyRef Name="ID" />
           </Key>
           <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
-          <Property Name="MARK_CN_ID" Type="varchar2" MaxLength="50" />
-          <Property Name="NAMEINFO_NAME" Type="varchar2" MaxLength="50" />
-          <Property Name="BASEINFO_ORIGINAL_LANGUAGE" Type="varchar2" MaxLength="50" />
-          <Property Name="BASEINFO_REGISTRATION_NO" Type="varchar2" MaxLength="50" />
-          <Property Name="BASEINFO_ICN" Type="varchar2" MaxLength="50" />
-          <Property Name="BASEINFO_TRADEMARK_TYPE" Type="varchar2" MaxLength="50" />
-          <Property Name="BASEINFO_CURRENT_STATE_RIGHT" Type="varchar2" MaxLength="50" />
-          <Property Name="BASEINFO_SPECIFIED_COLOR" Type="varchar2" MaxLength="50" />
+          <Property Name="MARK_CN_ID" Type="varchar2" MaxLength="100" />
+          <Property Name="NAMEINFO_NAME" Type="varchar2" MaxLength="500" />
+          <Property Name="BASEINFO_ORIGINAL_LANGUAGE" Type="varchar2" MaxLength="500" />
+          <Property Name="BASEINFO_REGISTRATION_NO" Type="varchar2" MaxLength="500" />
+          <Property Name="BASEINFO_ICN" Type="varchar2" MaxLength="500" />
+          <Property Name="BASEINFO_TRADEMARK_TYPE" Type="varchar2" MaxLength="500" />
+          <Property Name="BASEINFO_CURRENT_STATE_RIGHT" Type="varchar2" MaxLength="500" />
+          <Property Name="BASEINFO_SPECIFIED_COLOR" Type="varchar2" MaxLength="500" />
           <Property Name="DATEINFO_REG_DATE" Type="date" />
           <Property Name="SPECIAL_RIGHT_STARTDATE" Type="date" />
           <Property Name="SPECIAL_RIGHT_ENDDATE" Type="date" />
@@ -2412,12 +2412,12 @@
           <Property Name="APPLICATION_PERSION_INFOS" Type="clob" />
           <Property Name="SERVICE_LIST" Type="clob" />
           <Property Name="OTHERINFO" Type="clob" />
-          <Property Name="PATH_JPG" Type="varchar2" MaxLength="500" />
-          <Property Name="PATH_JPG_SF" Type="varchar2" MaxLength="500" />
-          <Property Name="PATH_FILE" Type="varchar2" MaxLength="500" />
-          <Property Name="EXIST_JPG" Type="varchar2" MaxLength="50" />
-          <Property Name="EXIST_JPG_SF" Type="varchar2" MaxLength="50" />
-          <Property Name="EXIST_FILE" Type="varchar2" MaxLength="50" />
+          <Property Name="PATH_JPG" Type="varchar2" MaxLength="1000" />
+          <Property Name="PATH_JPG_SF" Type="varchar2" MaxLength="1000" />
+          <Property Name="PATH_FILE" Type="varchar2" MaxLength="1000" />
+          <Property Name="EXIST_JPG" Type="varchar2" MaxLength="500" />
+          <Property Name="EXIST_JPG_SF" Type="varchar2" MaxLength="500" />
+          <Property Name="EXIST_FILE" Type="varchar2" MaxLength="500" />
           <Property Name="IMPORT_SESSION_ID" Type="nvarchar2" MaxLength="100" />
           <Property Name="IMPORT_TIME" Type="date" />
           <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
@@ -2435,7 +2435,7 @@
           <Property Name="EXPDATE" Type="date" />
           <Property Name="ORIGLAN" Type="varchar2" MaxLength="100" />
           <Property Name="HOLGR" Type="clob" />
-          <Property Name="HOLGR_NAME_NAMEL" Type="varchar2" MaxLength="100" />
+          <Property Name="HOLGR_NAME_NAMEL" Type="varchar2" MaxLength="2000" />
           <Property Name="REPGR" Type="clob" />
           <Property Name="PHOLGR" Type="clob" />
           <Property Name="IMAGE_COLOUR" Type="varchar2" MaxLength="50" />
@@ -5976,14 +5976,14 @@
             <PropertyRef Name="ID" />
           </Key>
           <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="MARK_CN_ID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="NAMEINFO_NAME" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_ORIGINAL_LANGUAGE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_REGISTRATION_NO" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_ICN" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_TRADEMARK_TYPE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_CURRENT_STATE_RIGHT" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_SPECIFIED_COLOR" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="MARK_CN_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="NAMEINFO_NAME" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_ORIGINAL_LANGUAGE" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_REGISTRATION_NO" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_ICN" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_TRADEMARK_TYPE" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_CURRENT_STATE_RIGHT" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_SPECIFIED_COLOR" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
           <Property Name="DATEINFO_REG_DATE" Type="DateTime" />
           <Property Name="SPECIAL_RIGHT_STARTDATE" Type="DateTime" />
           <Property Name="SPECIAL_RIGHT_ENDDATE" Type="DateTime" />
@@ -5991,12 +5991,12 @@
           <Property Name="APPLICATION_PERSION_INFOS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="SERVICE_LIST" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="OTHERINFO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_JPG" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_JPG_SF" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_FILE" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_JPG" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_JPG_SF" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_FILE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_JPG" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_JPG_SF" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_FILE" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_JPG" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_JPG_SF" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_FILE" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
           <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="IMPORT_TIME" Type="DateTime" />
           <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
@@ -6014,7 +6014,7 @@
           <Property Name="EXPDATE" Type="DateTime" />
           <Property Name="ORIGLAN" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="HOLGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="HOLGR_NAME_NAMEL" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="HOLGR_NAME_NAMEL" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
           <Property Name="REPGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="PHOLGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="IMAGE_COLOUR" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
