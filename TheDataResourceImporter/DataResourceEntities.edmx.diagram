@@ -7,9 +7,6 @@
       <Diagram DiagramId="6f5f703121db478281619b0d0080a358" Name="Diagram1" ZoomLevel="60">
         <EntityTypeShape EntityType="Model.IMPORT_ERROR" Width="1.5" PointX="0.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.IMPORT_SESSION" Width="1.5" PointX="2.75" PointY="0.75" />
-        <EntityTypeShape EntityType="Model.S_AMERICA_APPLY_BRAND" Width="1.5" PointX="4.75" PointY="0.75" />
-        <EntityTypeShape EntityType="Model.S_AMERICA_TRANSFER_BRAND" Width="1.5" PointX="6.75" PointY="0.75" />
-        <EntityTypeShape EntityType="Model.S_AMERICA_TRIAL_BRAND" Width="1.5" PointX="0.75" PointY="6.75" />
         <EntityTypeShape EntityType="Model.S_AMERICAN_BRAND_GRAPHCLASSIFY" Width="1.5" PointX="6.75" PointY="6.75" />
         <EntityTypeShape EntityType="Model.S_AMERICAN_BRAND_USCLASSIFY" Width="1.5" PointX="8.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_AMERICAN_DESIGN_PATENT" Width="1.5" PointX="8.75" PointY="4.75" />
@@ -23,8 +20,6 @@
         <EntityTypeShape EntityType="Model.S_CHINA_BOOK" Width="1.5" PointX="14.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_BRAND" Width="1.5" PointX="14.75" PointY="5.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_BRAND_CLASSIFICATION" Width="1.5" PointX="14.75" PointY="13.75" />
-        <EntityTypeShape EntityType="Model.S_CHINA_BRAND_LICENSE" Width="1.5" PointX="16.75" PointY="0.75" />
-        <EntityTypeShape EntityType="Model.S_CHINA_BRAND_TRANSFER" Width="1.5" PointX="16.75" PointY="6.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_CIRCUITLAYOUT" Width="1.5" PointX="16.75" PointY="11.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_COURTCASE_PROCESS" Width="1.5" PointX="14.75" PointY="17.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_CUSTOMS_RECORD" Width="1.5" PointX="16.75" PointY="17.75" />
@@ -50,7 +45,6 @@
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_TEXTIMAGE" Width="1.5" PointX="24.75" PointY="9.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PHARMACEUTICAL_PATENT" Width="1.5" PointX="24.75" PointY="13.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_STANDARD_SIMPCITATION" Width="1.5" PointX="24.75" PointY="24.75" />
-        <EntityTypeShape EntityType="Model.S_CHINA_WELLKNOWN_BRAND" Width="1.5" PointX="26.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_COMMUNITY_INTELLECTUALRECORD" Width="1.5" PointX="4.75" PointY="26.75" />
         <EntityTypeShape EntityType="Model.S_COMPANY_CODE_LIBRARY" Width="1.5" PointX="26.75" PointY="5.75" />
         <EntityTypeShape EntityType="Model.S_DATA_RESOURCE_TYPES_DETAIL" Width="1.5" PointX="26.75" PointY="10.75" />
@@ -75,8 +69,6 @@
         <EntityTypeShape EntityType="Model.S_KOREA_PATENT_ABSTRACTS" Width="1.5" PointX="14.75" PointY="31.75" />
         <EntityTypeShape EntityType="Model.S_KOREAN_PATENT_FULLTEXTCODE" Width="1.5" PointX="32.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_MACAO_PATENT_DESCRIPTION" Width="1.5" PointX="32.75" PointY="9.75" />
-        <EntityTypeShape EntityType="Model.S_MADRID_BRAND_ENTER_CHINA" Width="1.5" PointX="32.75" PointY="18.75" />
-        <EntityTypeShape EntityType="Model.S_MADRID_BRAND_PURCHASE" Width="1.5" PointX="32.75" PointY="25.75" />
         <EntityTypeShape EntityType="Model.S_PATENT_FAMILY" Width="1.5" PointX="22.75" PointY="33.75" />
         <EntityTypeShape EntityType="Model.S_PATENT_PAYMENT" Width="1.5" PointX="34.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_POLAND_PATENT_DESCRIPTION" Width="1.5" PointX="2.75" PointY="34.75" />
@@ -90,6 +82,14 @@
         <EntityTypeShape EntityType="Model.S_WIPO_PATENT_DESCRIPTION" Width="1.5" PointX="30.75" PointY="35.75" />
         <EntityTypeShape EntityType="Model.S_WORLD_LEGAL_STATUS" Width="1.5" PointX="36.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_ZONE_CODE_BASE" Width="1.5" PointX="4.75" PointY="36.75" />
+        <EntityTypeShape EntityType="Model.S_AMERICA_APPLY_BRAND" Width="1.5" PointX="7.375" PointY="36.75" />
+        <EntityTypeShape EntityType="Model.S_AMERICA_TRANSFER_BRAND" Width="1.5" PointX="5.375" PointY="0.75" />
+        <EntityTypeShape EntityType="Model.S_AMERICA_TRIAL_BRAND" Width="1.5" PointX="9.375" PointY="36.75" />
+        <EntityTypeShape EntityType="Model.S_CHINA_BRAND_LICENSE" Width="1.5" PointX="37.375" PointY="6.75" />
+        <EntityTypeShape EntityType="Model.S_CHINA_BRAND_TRANSFER" Width="1.5" PointX="37.375" PointY="12.75" />
+        <EntityTypeShape EntityType="Model.S_CHINA_WELLKNOWN_BRAND" Width="1.5" PointX="37.375" PointY="17.75" />
+        <EntityTypeShape EntityType="Model.S_MADRID_BRAND_ENTER_CHINA" Width="1.5" PointX="21.375" PointY="37.75" />
+        <EntityTypeShape EntityType="Model.S_MADRID_BRAND_PURCHASE" Width="1.5" PointX="37.375" PointY="22.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

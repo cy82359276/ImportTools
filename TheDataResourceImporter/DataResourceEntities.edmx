@@ -48,37 +48,37 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="VERSION_NO" Type="varchar2" MaxLength="5" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="VERSION_NO" Type="varchar2" MaxLength="50" />
           <Property Name="VERSION_DATE" Type="date" />
-          <Property Name="ACTION_KEY" Type="varchar2" MaxLength="2" />
-          <Property Name="SERIAL_NUMBER" Type="varchar2" MaxLength="8" />
-          <Property Name="REGISTRATION_NUMBER" Type="varchar2" MaxLength="7" />
+          <Property Name="ACTION_KEY" Type="varchar2" MaxLength="50" />
+          <Property Name="SERIAL_NUMBER" Type="varchar2" MaxLength="50" />
+          <Property Name="REGISTRATION_NUMBER" Type="varchar2" MaxLength="50" />
           <Property Name="TRANSACTION_DATE" Type="date" />
           <Property Name="HEADER" Type="clob" />
           <Property Name="HEADER_FILING_DATE" Type="date" />
           <Property Name="HEADER_REGISTRATION_DATE" Type="date" />
-          <Property Name="HEADER_STATUS_CODE" Type="varchar2" MaxLength="3" />
+          <Property Name="HEADER_STATUS_CODE" Type="varchar2" MaxLength="50" />
           <Property Name="HEADER_STATUS_DATE" Type="date" />
           <Property Name="HEADER_MARK_IDENTIFICATION" Type="clob" />
-          <Property Name="HEADER_MARK_DRAWING_CODE" Type="varchar2" MaxLength="4" />
+          <Property Name="HEADER_MARK_DRAWING_CODE" Type="varchar2" MaxLength="50" />
           <Property Name="HEADER_ABANDONMENT_DATE" Type="date" />
-          <Property Name="HEADER_CANCELLATION_CODE" Type="varchar2" MaxLength="1" />
+          <Property Name="HEADER_CANCELLATION_CODE" Type="varchar2" MaxLength="50" />
           <Property Name="HEADER_CANCELLATION_DATE" Type="date" />
           <Property Name="STATEMENTS" Type="clob" />
           <Property Name="EVENT_STATEMENTS" Type="clob" />
           <Property Name="PRIOR_REGISTRATION_APPLICATION" Type="clob" />
           <Property Name="FOREIGN_APPLICATIONS" Type="clob" />
           <Property Name="CLASSIFICATIONS" Type="clob" />
-          <Property Name="INTERNATIONAL_CODE" Type="varchar2" MaxLength="200" />
+          <Property Name="INTERNATIONAL_CODE" Type="varchar2" MaxLength="500" />
           <Property Name="CORRESPONDENT" Type="clob" />
           <Property Name="CASE_FILE_OWNERS" Type="clob" />
           <Property Name="DESIGN_SEARCHES" Type="clob" />
-          <Property Name="DESIGN_SEARCH_CODE" Type="varchar2" MaxLength="200" />
+          <Property Name="DESIGN_SEARCH_CODE" Type="varchar2" MaxLength="500" />
           <Property Name="INTERNATIONAL_REGISTRATION" Type="clob" />
           <Property Name="MADRID_INTER_FILING_REQUESTS" Type="clob" />
-          <Property Name="PATH_XML" Type="varchar2" MaxLength="200" />
-          <Property Name="EXIST_XML" Type="varchar2" MaxLength="1" />
+          <Property Name="PATH_XML" Type="varchar2" MaxLength="500" />
+          <Property Name="EXIST_XML" Type="varchar2" MaxLength="10" />
           <Property Name="IMPORT_SESSION_ID" Type="nvarchar2" MaxLength="100" />
           <Property Name="IMPORT_TIME" Type="date" />
           <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
@@ -89,22 +89,22 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="VERSION_NO" Type="varchar2" MaxLength="5" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="VERSION_NO" Type="varchar2" MaxLength="50" />
           <Property Name="VERSION_DATE" Type="date" />
           <Property Name="TRANSACTION_DATE" Type="date" />
           <Property Name="ASSIGNMENT" Type="clob" />
-          <Property Name="ASSIGNMENT_REEL_NO" Type="varchar2" MaxLength="4" />
-          <Property Name="ASSIGNMENT_FRAME_NO" Type="varchar2" MaxLength="4" />
+          <Property Name="ASSIGNMENT_REEL_NO" Type="varchar2" MaxLength="50" />
+          <Property Name="ASSIGNMENT_FRAME_NO" Type="varchar2" MaxLength="50" />
           <Property Name="ASSIGNMENT_DATE_RECORDED" Type="date" />
-          <Property Name="ASSIGNMENT_CONVEYANCE_TEXT" Type="varchar2" MaxLength="50" />
+          <Property Name="ASSIGNMENT_CONVEYANCE_TEXT" Type="varchar2" MaxLength="100" />
           <Property Name="ASSIGNORS" Type="clob" />
-          <Property Name="ASSIGNOR_PERSON_NAME" Type="varchar2" MaxLength="200" />
+          <Property Name="ASSIGNOR_PERSON_NAME" Type="varchar2" MaxLength="500" />
           <Property Name="ASSIGNEES" Type="clob" />
-          <Property Name="ASSIGNEE_PERSON_NAME" Type="varchar2" MaxLength="200" />
-          <Property Name="SERIAL_NO" Type="varchar2" MaxLength="8" />
-          <Property Name="PATH_XML" Type="varchar2" MaxLength="200" />
-          <Property Name="EXIST_XML" Type="varchar2" MaxLength="1" />
+          <Property Name="ASSIGNEE_PERSON_NAME" Type="varchar2" MaxLength="500" />
+          <Property Name="SERIAL_NO" Type="varchar2" MaxLength="50" />
+          <Property Name="PATH_XML" Type="varchar2" MaxLength="500" />
+          <Property Name="EXIST_XML" Type="varchar2" MaxLength="50" />
           <Property Name="IMPORT_SESSION_ID" Type="nvarchar2" MaxLength="100" />
           <Property Name="IMPORT_TIME" Type="date" />
           <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
@@ -115,22 +115,22 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="VERSION_NO" Type="varchar2" MaxLength="5" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="VERSION_NO" Type="varchar2" MaxLength="50" />
           <Property Name="VERSION_DATE" Type="date" />
-          <Property Name="ACTION_KEY_CODE" Type="varchar2" MaxLength="2" />
+          <Property Name="ACTION_KEY_CODE" Type="varchar2" MaxLength="50" />
           <Property Name="TRANSACTION_DATE" Type="date" />
-          <Property Name="JUDGMENT_NUMBER" Type="varchar2" MaxLength="10" />
-          <Property Name="TYPE_CODE" Type="varchar2" MaxLength="3" />
+          <Property Name="JUDGMENT_NUMBER" Type="varchar2" MaxLength="50" />
+          <Property Name="TYPE_CODE" Type="varchar2" MaxLength="50" />
           <Property Name="FILING_DATE" Type="date" />
           <Property Name="STATUS_UPDATE_DATE" Type="date" />
-          <Property Name="STATUS_CODE" Type="varchar2" MaxLength="3" />
+          <Property Name="STATUS_CODE" Type="varchar2" MaxLength="50" />
           <Property Name="PARTY_INFORMATION" Type="clob" />
-          <Property Name="SERIAL_NUMBER" Type="varchar2" MaxLength="10" />
-          <Property Name="REGISTRATION_NUMBER" Type="varchar2" MaxLength="10" />
+          <Property Name="SERIAL_NUMBER" Type="varchar2" MaxLength="50" />
+          <Property Name="REGISTRATION_NUMBER" Type="varchar2" MaxLength="50" />
           <Property Name="PROSECUTION_HISTORY" Type="clob" />
-          <Property Name="PATH_XML" Type="varchar2" MaxLength="200" />
-          <Property Name="EXIST_XML" Type="varchar2" MaxLength="1" />
+          <Property Name="PATH_XML" Type="varchar2" MaxLength="500" />
+          <Property Name="EXIST_XML" Type="varchar2" MaxLength="50" />
           <Property Name="IMPORT_SESSION_ID" Type="nvarchar2" MaxLength="100" />
           <Property Name="IMPORT_TIME" Type="date" />
           <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
@@ -606,20 +606,20 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="MARK_CN_ID" Type="varchar2" MaxLength="16" />
-          <Property Name="NAMEINFO_NAME" Type="varchar2" MaxLength="50" />
-          <Property Name="BASEINFO_REGISTRATION_NO" Type="varchar2" MaxLength="10" />
-          <Property Name="LICENSEPROCESSINFO_SEQUENCE" Type="varchar2" MaxLength="3" />
-          <Property Name="LICENSEPROCESSINFO_XKBAGGQH" Type="varchar2" MaxLength="20" />
-          <Property Name="LICENSEPROCESSINFO_PAGENUM" Type="varchar2" MaxLength="10" />
-          <Property Name="LICENSEPROCESSINFO_GGTYPE" Type="varchar2" MaxLength="20" />
-          <Property Name="LICENSEPROCESSINFO_BAH" Type="varchar2" MaxLength="20" />
-          <Property Name="LICENSEPROCESSINFO_XKQX" Type="varchar2" MaxLength="20" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="MARK_CN_ID" Type="varchar2" MaxLength="50" />
+          <Property Name="NAMEINFO_NAME" Type="varchar2" MaxLength="100" />
+          <Property Name="BASEINFO_REGISTRATION_NO" Type="varchar2" MaxLength="50" />
+          <Property Name="LICENSEPROCESSINFO_SEQUENCE" Type="varchar2" MaxLength="20" />
+          <Property Name="LICENSEPROCESSINFO_XKBAGGQH" Type="varchar2" MaxLength="100" />
+          <Property Name="LICENSEPROCESSINFO_PAGENUM" Type="varchar2" MaxLength="50" />
+          <Property Name="LICENSEPROCESSINFO_GGTYPE" Type="varchar2" MaxLength="50" />
+          <Property Name="LICENSEPROCESSINFO_BAH" Type="varchar2" MaxLength="50" />
+          <Property Name="LICENSEPROCESSINFO_XKQX" Type="varchar2" MaxLength="50" />
           <Property Name="LICENSEPROCESSINFO_XKR" Type="clob" />
-          <Property Name="LICENSEPROCESSINFO_XKR_NAME" Type="varchar2" MaxLength="200" />
+          <Property Name="LICENSEPROCESSINFO_XKR_NAME" Type="varchar2" MaxLength="1000" />
           <Property Name="LICENSEPROCESSINFO_BXKR" Type="clob" />
-          <Property Name="LICENSEPROCESSINFO_BXKR_NAME" Type="varchar2" MaxLength="200" />
+          <Property Name="LICENSEPROCESSINFO_BXKR_NAME" Type="varchar2" MaxLength="1000" />
           <Property Name="LICENSEPROCESSINFO_XKGS" Type="clob" />
           <Property Name="LICENSEPROCESSINFO_XKBAGGRQ" Type="date" />
           <Property Name="IMPORT_SESSION_ID" Type="nvarchar2" MaxLength="100" />
@@ -632,17 +632,17 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="MARK_CN_ID" Type="varchar2" MaxLength="16" />
-          <Property Name="NAMEINFO_NAME" Type="varchar2" MaxLength="50" />
-          <Property Name="BASEINFO_REGISTRATION_NO" Type="varchar2" MaxLength="10" />
-          <Property Name="TRANSFERINFO_SEQUENCE" Type="varchar2" MaxLength="3" />
-          <Property Name="TRANSFERINFO_ZHRGGQH" Type="varchar2" MaxLength="10" />
-          <Property Name="TRANSFERINFO_YM" Type="varchar2" MaxLength="10" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="MARK_CN_ID" Type="varchar2" MaxLength="50" />
+          <Property Name="NAMEINFO_NAME" Type="varchar2" MaxLength="100" />
+          <Property Name="BASEINFO_REGISTRATION_NO" Type="varchar2" MaxLength="50" />
+          <Property Name="TRANSFERINFO_SEQUENCE" Type="varchar2" MaxLength="20" />
+          <Property Name="TRANSFERINFO_ZHRGGQH" Type="varchar2" MaxLength="50" />
+          <Property Name="TRANSFERINFO_YM" Type="varchar2" MaxLength="50" />
           <Property Name="TRANSFERINFO_ZHRR" Type="clob" />
-          <Property Name="TRANSFERINFO_ZHRR_NAME" Type="varchar2" MaxLength="200" />
+          <Property Name="TRANSFERINFO_ZHRR_NAME" Type="varchar2" MaxLength="500" />
           <Property Name="TRANSFERINFO_SHRR" Type="clob" />
-          <Property Name="TRANSFERINFO_SHRR_NAME" Type="varchar2" MaxLength="200" />
+          <Property Name="TRANSFERINFO_SHRR_NAME" Type="varchar2" MaxLength="500" />
           <Property Name="TRANSFERINFO_ZHGGRQ" Type="date" />
           <Property Name="IMPORT_SESSION_ID" Type="nvarchar2" MaxLength="100" />
           <Property Name="IMPORT_TIME" Type="date" />
@@ -1455,17 +1455,17 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="MARK_CN_ID" Type="varchar2" MaxLength="16" />
-          <Property Name="NAMEINFO_NAME" Type="varchar2" MaxLength="50" />
-          <Property Name="BASEINFO_REGISTRATION_NO" Type="varchar2" MaxLength="10" />
-          <Property Name="TRADEMARK_CERTIFICATION" Type="varchar2" MaxLength="100" />
-          <Property Name="TRADEMARK_AREA" Type="varchar2" MaxLength="20" />
-          <Property Name="TRADEMARK_DETERMINATION_ORGAN" Type="varchar2" MaxLength="200" />
-          <Property Name="TRADEMARK_DETERMINATION_METHOD" Type="varchar2" MaxLength="100" />
-          <Property Name="TRADEMARK_DETERMINATION_BATCH" Type="varchar2" MaxLength="20" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="MARK_CN_ID" Type="varchar2" MaxLength="50" />
+          <Property Name="NAMEINFO_NAME" Type="varchar2" MaxLength="100" />
+          <Property Name="BASEINFO_REGISTRATION_NO" Type="varchar2" MaxLength="50" />
+          <Property Name="TRADEMARK_CERTIFICATION" Type="varchar2" MaxLength="200" />
+          <Property Name="TRADEMARK_AREA" Type="varchar2" MaxLength="50" />
+          <Property Name="TRADEMARK_DETERMINATION_ORGAN" Type="varchar2" MaxLength="500" />
+          <Property Name="TRADEMARK_DETERMINATION_METHOD" Type="varchar2" MaxLength="500" />
+          <Property Name="TRADEMARK_DETERMINATION_BATCH" Type="varchar2" MaxLength="50" />
           <Property Name="TRADEMARK_DETERMINATION_TIME" Type="date" />
-          <Property Name="TRADEMARK_WEBSITE" Type="varchar2" MaxLength="200" />
+          <Property Name="TRADEMARK_WEBSITE" Type="varchar2" MaxLength="500" />
           <Property Name="IMPORT_SESSION_ID" Type="nvarchar2" MaxLength="100" />
           <Property Name="IMPORT_TIME" Type="date" />
           <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
@@ -2396,15 +2396,15 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="MARK_CN_ID" Type="varchar2" MaxLength="16" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="MARK_CN_ID" Type="varchar2" MaxLength="50" />
           <Property Name="NAMEINFO_NAME" Type="varchar2" MaxLength="50" />
-          <Property Name="BASEINFO_ORIGINAL_LANGUAGE" Type="varchar2" MaxLength="2" />
-          <Property Name="BASEINFO_REGISTRATION_NO" Type="varchar2" MaxLength="10" />
-          <Property Name="BASEINFO_ICN" Type="varchar2" MaxLength="2" />
-          <Property Name="BASEINFO_TRADEMARK_TYPE" Type="varchar2" MaxLength="20" />
-          <Property Name="BASEINFO_CURRENT_STATE_RIGHT" Type="varchar2" MaxLength="6" />
-          <Property Name="BASEINFO_SPECIFIED_COLOR" Type="varchar2" MaxLength="5" />
+          <Property Name="BASEINFO_ORIGINAL_LANGUAGE" Type="varchar2" MaxLength="50" />
+          <Property Name="BASEINFO_REGISTRATION_NO" Type="varchar2" MaxLength="50" />
+          <Property Name="BASEINFO_ICN" Type="varchar2" MaxLength="50" />
+          <Property Name="BASEINFO_TRADEMARK_TYPE" Type="varchar2" MaxLength="50" />
+          <Property Name="BASEINFO_CURRENT_STATE_RIGHT" Type="varchar2" MaxLength="50" />
+          <Property Name="BASEINFO_SPECIFIED_COLOR" Type="varchar2" MaxLength="50" />
           <Property Name="DATEINFO_REG_DATE" Type="date" />
           <Property Name="SPECIAL_RIGHT_STARTDATE" Type="date" />
           <Property Name="SPECIAL_RIGHT_ENDDATE" Type="date" />
@@ -2412,12 +2412,12 @@
           <Property Name="APPLICATION_PERSION_INFOS" Type="clob" />
           <Property Name="SERVICE_LIST" Type="clob" />
           <Property Name="OTHERINFO" Type="clob" />
-          <Property Name="PATH_JPG" Type="varchar2" MaxLength="200" />
-          <Property Name="PATH_JPG_SF" Type="varchar2" MaxLength="200" />
-          <Property Name="PATH_FILE" Type="varchar2" MaxLength="200" />
-          <Property Name="EXIST_JPG" Type="varchar2" MaxLength="1" />
-          <Property Name="EXIST_JPG_SF" Type="varchar2" MaxLength="1" />
-          <Property Name="EXIST_FILE" Type="varchar2" MaxLength="1" />
+          <Property Name="PATH_JPG" Type="varchar2" MaxLength="500" />
+          <Property Name="PATH_JPG_SF" Type="varchar2" MaxLength="500" />
+          <Property Name="PATH_FILE" Type="varchar2" MaxLength="500" />
+          <Property Name="EXIST_JPG" Type="varchar2" MaxLength="50" />
+          <Property Name="EXIST_JPG_SF" Type="varchar2" MaxLength="50" />
+          <Property Name="EXIST_FILE" Type="varchar2" MaxLength="50" />
           <Property Name="IMPORT_SESSION_ID" Type="nvarchar2" MaxLength="100" />
           <Property Name="IMPORT_TIME" Type="date" />
           <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
@@ -2428,20 +2428,20 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="INTREGN" Type="varchar2" MaxLength="50" />
-          <Property Name="OOCD" Type="varchar2" MaxLength="50" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="INTREGN" Type="varchar2" MaxLength="100" />
+          <Property Name="OOCD" Type="varchar2" MaxLength="100" />
           <Property Name="INTREGD" Type="date" />
           <Property Name="EXPDATE" Type="date" />
-          <Property Name="ORIGLAN" Type="varchar2" MaxLength="50" />
+          <Property Name="ORIGLAN" Type="varchar2" MaxLength="100" />
           <Property Name="HOLGR" Type="clob" />
-          <Property Name="HOLGR_NAME_NAMEL" Type="varchar2" MaxLength="50" />
+          <Property Name="HOLGR_NAME_NAMEL" Type="varchar2" MaxLength="100" />
           <Property Name="REPGR" Type="clob" />
           <Property Name="PHOLGR" Type="clob" />
-          <Property Name="IMAGE_COLOUR" Type="varchar2" MaxLength="1" />
-          <Property Name="IMAGE_TEXT" Type="varchar2" MaxLength="200" />
-          <Property Name="VIENNAGR_VIECLAI" Type="varchar2" MaxLength="50" />
-          <Property Name="VIENNAGR_VIECLA3" Type="varchar2" MaxLength="50" />
+          <Property Name="IMAGE_COLOUR" Type="varchar2" MaxLength="50" />
+          <Property Name="IMAGE_TEXT" Type="varchar2" MaxLength="1000" />
+          <Property Name="VIENNAGR_VIECLAI" Type="varchar2" MaxLength="100" />
+          <Property Name="VIENNAGR_VIECLA3" Type="varchar2" MaxLength="100" />
           <Property Name="THRDMAR" Type="clob" />
           <Property Name="SOUMARI" Type="clob" />
           <Property Name="COLMARI" Type="clob" />
@@ -2451,20 +2451,20 @@
           <Property Name="MARTRGR" Type="clob" />
           <Property Name="DISCLAIMGR" Type="clob" />
           <Property Name="BASICGS" Type="clob" />
-          <Property Name="BASICGS_GSGR_NICCLAI" Type="varchar2" MaxLength="200" />
+          <Property Name="BASICGS_GSGR_NICCLAI" Type="varchar2" MaxLength="1000" />
           <Property Name="BASREGGR" Type="clob" />
           <Property Name="BASAPPGR" Type="clob" />
           <Property Name="PRIGR" Type="clob" />
           <Property Name="SENGRP" Type="clob" />
-          <Property Name="DESAG_DCPCD" Type="varchar2" MaxLength="500" />
-          <Property Name="DESPG_DCPCD" Type="varchar2" MaxLength="500" />
-          <Property Name="DESPG2_DCPCD" Type="varchar2" MaxLength="500" />
+          <Property Name="DESAG_DCPCD" Type="varchar2" MaxLength="1000" />
+          <Property Name="DESPG_DCPCD" Type="varchar2" MaxLength="1000" />
+          <Property Name="DESPG2_DCPCD" Type="varchar2" MaxLength="1000" />
           <Property Name="PATH_XML" Type="varchar2" MaxLength="200" />
           <Property Name="PATH_PIC" Type="varchar2" MaxLength="200" />
           <Property Name="PATH_PIC_SF" Type="varchar2" MaxLength="200" />
-          <Property Name="EXIST_XML" Type="varchar2" MaxLength="1" />
-          <Property Name="EXIST_PIC" Type="varchar2" MaxLength="1" />
-          <Property Name="EXIST_PIC_SF" Type="varchar2" MaxLength="1" />
+          <Property Name="EXIST_XML" Type="varchar2" MaxLength="100" />
+          <Property Name="EXIST_PIC" Type="varchar2" MaxLength="100" />
+          <Property Name="EXIST_PIC_SF" Type="varchar2" MaxLength="100" />
           <Property Name="TYPMARI" Type="varchar2" MaxLength="200" />
           <Property Name="IMPORT_SESSION_ID" Type="nvarchar2" MaxLength="100" />
           <Property Name="IMPORT_TIME" Type="date" />
@@ -3033,9 +3033,6 @@
         <EntityContainer Name="DataSourceEntities" annotation:LazyLoadingEnabled="true" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
           <EntitySet Name="IMPORT_ERROR" EntityType="Model.IMPORT_ERROR" />
           <EntitySet Name="IMPORT_SESSION" EntityType="Model.IMPORT_SESSION" />
-          <EntitySet Name="S_AMERICA_APPLY_BRAND" EntityType="Model.S_AMERICA_APPLY_BRAND" />
-          <EntitySet Name="S_AMERICA_TRANSFER_BRAND" EntityType="Model.S_AMERICA_TRANSFER_BRAND" />
-          <EntitySet Name="S_AMERICA_TRIAL_BRAND" EntityType="Model.S_AMERICA_TRIAL_BRAND" />
           <EntitySet Name="S_AMERICAN_BRAND_GRAPHCLASSIFY" EntityType="Model.S_AMERICAN_BRAND_GRAPHCLASSIFY" />
           <EntitySet Name="S_AMERICAN_BRAND_USCLASSIFY" EntityType="Model.S_AMERICAN_BRAND_USCLASSIFY" />
           <EntitySet Name="S_AMERICAN_DESIGN_PATENT" EntityType="Model.S_AMERICAN_DESIGN_PATENT" />
@@ -3049,8 +3046,6 @@
           <EntitySet Name="S_CHINA_BOOK" EntityType="Model.S_CHINA_BOOK" />
           <EntitySet Name="S_CHINA_BRAND" EntityType="Model.S_CHINA_BRAND" />
           <EntitySet Name="S_CHINA_BRAND_CLASSIFICATION" EntityType="Model.S_CHINA_BRAND_CLASSIFICATION" />
-          <EntitySet Name="S_CHINA_BRAND_LICENSE" EntityType="Model.S_CHINA_BRAND_LICENSE" />
-          <EntitySet Name="S_CHINA_BRAND_TRANSFER" EntityType="Model.S_CHINA_BRAND_TRANSFER" />
           <EntitySet Name="S_CHINA_CIRCUITLAYOUT" EntityType="Model.S_CHINA_CIRCUITLAYOUT" />
           <EntitySet Name="S_CHINA_COURTCASE_PROCESS" EntityType="Model.S_CHINA_COURTCASE_PROCESS" />
           <EntitySet Name="S_CHINA_CUSTOMS_RECORD" EntityType="Model.S_CHINA_CUSTOMS_RECORD" />
@@ -3076,7 +3071,6 @@
           <EntitySet Name="S_CHINA_PATENT_TEXTIMAGE" EntityType="Model.S_CHINA_PATENT_TEXTIMAGE" />
           <EntitySet Name="S_CHINA_PHARMACEUTICAL_PATENT" EntityType="Model.S_CHINA_PHARMACEUTICAL_PATENT" />
           <EntitySet Name="S_CHINA_STANDARD_SIMPCITATION" EntityType="Model.S_CHINA_STANDARD_SIMPCITATION" />
-          <EntitySet Name="S_CHINA_WELLKNOWN_BRAND" EntityType="Model.S_CHINA_WELLKNOWN_BRAND" />
           <EntitySet Name="S_COMMUNITY_INTELLECTUALRECORD" EntityType="Model.S_COMMUNITY_INTELLECTUALRECORD" />
           <EntitySet Name="S_COMPANY_CODE_LIBRARY" EntityType="Model.S_COMPANY_CODE_LIBRARY" />
           <EntitySet Name="S_DATA_RESOURCE_TYPES_DETAIL" EntityType="Model.S_DATA_RESOURCE_TYPES_DETAIL" />
@@ -3101,8 +3095,6 @@
           <EntitySet Name="S_KOREA_PATENT_ABSTRACTS" EntityType="Model.S_KOREA_PATENT_ABSTRACTS" />
           <EntitySet Name="S_KOREAN_PATENT_FULLTEXTCODE" EntityType="Model.S_KOREAN_PATENT_FULLTEXTCODE" />
           <EntitySet Name="S_MACAO_PATENT_DESCRIPTION" EntityType="Model.S_MACAO_PATENT_DESCRIPTION" />
-          <EntitySet Name="S_MADRID_BRAND_ENTER_CHINA" EntityType="Model.S_MADRID_BRAND_ENTER_CHINA" />
-          <EntitySet Name="S_MADRID_BRAND_PURCHASE" EntityType="Model.S_MADRID_BRAND_PURCHASE" />
           <EntitySet Name="S_PATENT_FAMILY" EntityType="Model.S_PATENT_FAMILY" />
           <EntitySet Name="S_PATENT_PAYMENT" EntityType="Model.S_PATENT_PAYMENT" />
           <EntitySet Name="S_POLAND_PATENT_DESCRIPTION" EntityType="Model.S_POLAND_PATENT_DESCRIPTION" />
@@ -3116,6 +3108,14 @@
           <EntitySet Name="S_WIPO_PATENT_DESCRIPTION" EntityType="Model.S_WIPO_PATENT_DESCRIPTION" />
           <EntitySet Name="S_WORLD_LEGAL_STATUS" EntityType="Model.S_WORLD_LEGAL_STATUS" />
           <EntitySet Name="S_ZONE_CODE_BASE" EntityType="Model.S_ZONE_CODE_BASE" />
+          <EntitySet Name="S_AMERICA_APPLY_BRAND" EntityType="Model.S_AMERICA_APPLY_BRAND" />
+          <EntitySet Name="S_AMERICA_TRANSFER_BRAND" EntityType="Model.S_AMERICA_TRANSFER_BRAND" />
+          <EntitySet Name="S_AMERICA_TRIAL_BRAND" EntityType="Model.S_AMERICA_TRIAL_BRAND" />
+          <EntitySet Name="S_CHINA_BRAND_LICENSE" EntityType="Model.S_CHINA_BRAND_LICENSE" />
+          <EntitySet Name="S_CHINA_BRAND_TRANSFER" EntityType="Model.S_CHINA_BRAND_TRANSFER" />
+          <EntitySet Name="S_CHINA_WELLKNOWN_BRAND" EntityType="Model.S_CHINA_WELLKNOWN_BRAND" />
+          <EntitySet Name="S_MADRID_BRAND_ENTER_CHINA" EntityType="Model.S_MADRID_BRAND_ENTER_CHINA" />
+          <EntitySet Name="S_MADRID_BRAND_PURCHASE" EntityType="Model.S_MADRID_BRAND_PURCHASE" />
         </EntityContainer>
         <EntityType Name="IMPORT_ERROR">
           <Key>
@@ -3155,99 +3155,6 @@
           <Property Name="NOTE" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="TABLENAME" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
           <Property Name="BATCH_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-        </EntityType>
-        <EntityType Name="S_AMERICA_APPLY_BRAND">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="VERSION_NO" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="VERSION_DATE" Type="DateTime" />
-          <Property Name="ACTION_KEY" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
-          <Property Name="SERIAL_NUMBER" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
-          <Property Name="REGISTRATION_NUMBER" Type="String" MaxLength="7" FixedLength="false" Unicode="false" />
-          <Property Name="TRANSACTION_DATE" Type="DateTime" />
-          <Property Name="HEADER" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="HEADER_FILING_DATE" Type="DateTime" />
-          <Property Name="HEADER_REGISTRATION_DATE" Type="DateTime" />
-          <Property Name="HEADER_STATUS_CODE" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
-          <Property Name="HEADER_STATUS_DATE" Type="DateTime" />
-          <Property Name="HEADER_MARK_IDENTIFICATION" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="HEADER_MARK_DRAWING_CODE" Type="String" MaxLength="4" FixedLength="false" Unicode="false" />
-          <Property Name="HEADER_ABANDONMENT_DATE" Type="DateTime" />
-          <Property Name="HEADER_CANCELLATION_CODE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="HEADER_CANCELLATION_DATE" Type="DateTime" />
-          <Property Name="STATEMENTS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="EVENT_STATEMENTS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="PRIOR_REGISTRATION_APPLICATION" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="FOREIGN_APPLICATIONS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="CLASSIFICATIONS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="INTERNATIONAL_CODE" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="CORRESPONDENT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="CASE_FILE_OWNERS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="DESIGN_SEARCHES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="DESIGN_SEARCH_CODE" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="INTERNATIONAL_REGISTRATION" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="MADRID_INTER_FILING_REQUESTS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_XML" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_XML" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="IMPORT_TIME" Type="DateTime" />
-          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
-        </EntityType>
-        <EntityType Name="S_AMERICA_TRANSFER_BRAND">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="VERSION_NO" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="VERSION_DATE" Type="DateTime" />
-          <Property Name="TRANSACTION_DATE" Type="DateTime" />
-          <Property Name="ASSIGNMENT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="ASSIGNMENT_REEL_NO" Type="String" MaxLength="4" FixedLength="false" Unicode="false" />
-          <Property Name="ASSIGNMENT_FRAME_NO" Type="String" MaxLength="4" FixedLength="false" Unicode="false" />
-          <Property Name="ASSIGNMENT_DATE_RECORDED" Type="DateTime" />
-          <Property Name="ASSIGNMENT_CONVEYANCE_TEXT" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ASSIGNORS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="ASSIGNOR_PERSON_NAME" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="ASSIGNEES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="ASSIGNEE_PERSON_NAME" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="SERIAL_NO" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_XML" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_XML" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="IMPORT_TIME" Type="DateTime" />
-          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
-        </EntityType>
-        <EntityType Name="S_AMERICA_TRIAL_BRAND">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="VERSION_NO" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="VERSION_DATE" Type="DateTime" />
-          <Property Name="ACTION_KEY_CODE" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
-          <Property Name="TRANSACTION_DATE" Type="DateTime" />
-          <Property Name="JUDGMENT_NUMBER" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="TYPE_CODE" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
-          <Property Name="FILING_DATE" Type="DateTime" />
-          <Property Name="STATUS_UPDATE_DATE" Type="DateTime" />
-          <Property Name="STATUS_CODE" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
-          <Property Name="PARTY_INFORMATION" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="SERIAL_NUMBER" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="REGISTRATION_NUMBER" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="PROSECUTION_HISTORY" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_XML" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_XML" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="IMPORT_TIME" Type="DateTime" />
-          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
         </EntityType>
         <EntityType Name="S_AMERICAN_BRAND_GRAPHCLASSIFY">
           <Key>
@@ -3712,54 +3619,6 @@
           <Property Name="IMPORT_TIME" Type="DateTime" />
           <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
-        </EntityType>
-        <EntityType Name="S_CHINA_BRAND_LICENSE">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="MARK_CN_ID" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
-          <Property Name="NAMEINFO_NAME" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_REGISTRATION_NO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="LICENSEPROCESSINFO_SEQUENCE" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
-          <Property Name="LICENSEPROCESSINFO_XKBAGGQH" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="LICENSEPROCESSINFO_PAGENUM" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="LICENSEPROCESSINFO_GGTYPE" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="LICENSEPROCESSINFO_BAH" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="LICENSEPROCESSINFO_XKQX" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="LICENSEPROCESSINFO_XKR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="LICENSEPROCESSINFO_XKR_NAME" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="LICENSEPROCESSINFO_BXKR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="LICENSEPROCESSINFO_BXKR_NAME" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="LICENSEPROCESSINFO_XKGS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="LICENSEPROCESSINFO_XKBAGGRQ" Type="DateTime" />
-          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="IMPORT_TIME" Type="DateTime" />
-          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
-        </EntityType>
-        <EntityType Name="S_CHINA_BRAND_TRANSFER">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="MARK_CN_ID" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
-          <Property Name="NAMEINFO_NAME" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_REGISTRATION_NO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="TRANSFERINFO_SEQUENCE" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
-          <Property Name="TRANSFERINFO_ZHRGGQH" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="TRANSFERINFO_YM" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="TRANSFERINFO_ZHRR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="TRANSFERINFO_ZHRR_NAME" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="TRANSFERINFO_SHRR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="TRANSFERINFO_SHRR_NAME" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="TRANSFERINFO_ZHGGRQ" Type="DateTime" />
-          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="IMPORT_TIME" Type="DateTime" />
-          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
         </EntityType>
         <EntityType Name="S_CHINA_CIRCUITLAYOUT">
@@ -4562,27 +4421,6 @@
           <Property Name="SESSION_INDEX" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
           <Property Name="ABSTRACT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="DESIGNBRIEFEXPLANATION" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-        </EntityType>
-        <EntityType Name="S_CHINA_WELLKNOWN_BRAND">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="MARK_CN_ID" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
-          <Property Name="NAMEINFO_NAME" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_REGISTRATION_NO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="TRADEMARK_CERTIFICATION" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="TRADEMARK_AREA" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="TRADEMARK_DETERMINATION_ORGAN" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="TRADEMARK_DETERMINATION_METHOD" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="TRADEMARK_DETERMINATION_BATCH" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="TRADEMARK_DETERMINATION_TIME" Type="DateTime" />
-          <Property Name="TRADEMARK_WEBSITE" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="IMPORT_TIME" Type="DateTime" />
-          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
         </EntityType>
         <EntityType Name="S_COMMUNITY_INTELLECTUALRECORD">
           <Key>
@@ -5504,86 +5342,6 @@
           <Property Name="ABSTRACT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="DESIGNBRIEFEXPLANATION" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
         </EntityType>
-        <EntityType Name="S_MADRID_BRAND_ENTER_CHINA">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="MARK_CN_ID" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
-          <Property Name="NAMEINFO_NAME" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_ORIGINAL_LANGUAGE" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_REGISTRATION_NO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_ICN" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_TRADEMARK_TYPE" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_CURRENT_STATE_RIGHT" Type="String" MaxLength="6" FixedLength="false" Unicode="false" />
-          <Property Name="BASEINFO_SPECIFIED_COLOR" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="DATEINFO_REG_DATE" Type="DateTime" />
-          <Property Name="SPECIAL_RIGHT_STARTDATE" Type="DateTime" />
-          <Property Name="SPECIAL_RIGHT_ENDDATE" Type="DateTime" />
-          <Property Name="DATEINFO_PRIORITY_RIGHT_DATE" Type="DateTime" />
-          <Property Name="APPLICATION_PERSION_INFOS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="SERVICE_LIST" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="OTHERINFO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_JPG" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_JPG_SF" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_FILE" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_JPG" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_JPG_SF" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_FILE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="IMPORT_TIME" Type="DateTime" />
-          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
-        </EntityType>
-        <EntityType Name="S_MADRID_BRAND_PURCHASE">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="INTREGN" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="OOCD" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="INTREGD" Type="DateTime" />
-          <Property Name="EXPDATE" Type="DateTime" />
-          <Property Name="ORIGLAN" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="HOLGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="HOLGR_NAME_NAMEL" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="REPGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="PHOLGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="IMAGE_COLOUR" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="IMAGE_TEXT" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="VIENNAGR_VIECLAI" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="VIENNAGR_VIECLA3" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="THRDMAR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="SOUMARI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="COLMARI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="PREREGG" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="COLCLAGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="MARDESGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="MARTRGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="DISCLAIMGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="BASICGS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="BASICGS_GSGR_NICCLAI" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="BASREGGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="BASAPPGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="PRIGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="SENGRP" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="DESAG_DCPCD" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="DESPG_DCPCD" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="DESPG2_DCPCD" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_XML" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_PIC" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="PATH_PIC_SF" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_XML" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_PIC" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="EXIST_PIC_SF" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="TYPMARI" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="IMPORT_TIME" Type="DateTime" />
-          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
-        </EntityType>
         <EntityType Name="S_PATENT_FAMILY">
           <Key>
             <PropertyRef Name="ID" />
@@ -6051,6 +5809,248 @@
           <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
         </EntityType>
+        <EntityType Name="S_AMERICA_APPLY_BRAND">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="VERSION_NO" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="VERSION_DATE" Type="DateTime" />
+          <Property Name="ACTION_KEY" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="SERIAL_NUMBER" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="REGISTRATION_NUMBER" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="TRANSACTION_DATE" Type="DateTime" />
+          <Property Name="HEADER" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="HEADER_FILING_DATE" Type="DateTime" />
+          <Property Name="HEADER_REGISTRATION_DATE" Type="DateTime" />
+          <Property Name="HEADER_STATUS_CODE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="HEADER_STATUS_DATE" Type="DateTime" />
+          <Property Name="HEADER_MARK_IDENTIFICATION" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="HEADER_MARK_DRAWING_CODE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="HEADER_ABANDONMENT_DATE" Type="DateTime" />
+          <Property Name="HEADER_CANCELLATION_CODE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="HEADER_CANCELLATION_DATE" Type="DateTime" />
+          <Property Name="STATEMENTS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="EVENT_STATEMENTS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="PRIOR_REGISTRATION_APPLICATION" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="FOREIGN_APPLICATIONS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CLASSIFICATIONS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="INTERNATIONAL_CODE" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="CORRESPONDENT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CASE_FILE_OWNERS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="DESIGN_SEARCHES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="DESIGN_SEARCH_CODE" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="INTERNATIONAL_REGISTRATION" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="MADRID_INTER_FILING_REQUESTS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_XML" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_XML" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
+        </EntityType>
+        <EntityType Name="S_AMERICA_TRANSFER_BRAND">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="VERSION_NO" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="VERSION_DATE" Type="DateTime" />
+          <Property Name="TRANSACTION_DATE" Type="DateTime" />
+          <Property Name="ASSIGNMENT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ASSIGNMENT_REEL_NO" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ASSIGNMENT_FRAME_NO" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ASSIGNMENT_DATE_RECORDED" Type="DateTime" />
+          <Property Name="ASSIGNMENT_CONVEYANCE_TEXT" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="ASSIGNORS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ASSIGNOR_PERSON_NAME" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="ASSIGNEES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ASSIGNEE_PERSON_NAME" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="SERIAL_NO" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_XML" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_XML" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
+        </EntityType>
+        <EntityType Name="S_AMERICA_TRIAL_BRAND">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="VERSION_NO" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="VERSION_DATE" Type="DateTime" />
+          <Property Name="ACTION_KEY_CODE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="TRANSACTION_DATE" Type="DateTime" />
+          <Property Name="JUDGMENT_NUMBER" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="TYPE_CODE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="FILING_DATE" Type="DateTime" />
+          <Property Name="STATUS_UPDATE_DATE" Type="DateTime" />
+          <Property Name="STATUS_CODE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="PARTY_INFORMATION" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="SERIAL_NUMBER" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="REGISTRATION_NUMBER" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="PROSECUTION_HISTORY" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_XML" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_XML" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
+        </EntityType>
+        <EntityType Name="S_CHINA_BRAND_LICENSE">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="MARK_CN_ID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="NAMEINFO_NAME" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_REGISTRATION_NO" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="LICENSEPROCESSINFO_SEQUENCE" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="LICENSEPROCESSINFO_XKBAGGQH" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="LICENSEPROCESSINFO_PAGENUM" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="LICENSEPROCESSINFO_GGTYPE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="LICENSEPROCESSINFO_BAH" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="LICENSEPROCESSINFO_XKQX" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="LICENSEPROCESSINFO_XKR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="LICENSEPROCESSINFO_XKR_NAME" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="LICENSEPROCESSINFO_BXKR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="LICENSEPROCESSINFO_BXKR_NAME" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="LICENSEPROCESSINFO_XKGS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="LICENSEPROCESSINFO_XKBAGGRQ" Type="DateTime" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
+        </EntityType>
+        <EntityType Name="S_CHINA_BRAND_TRANSFER">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="MARK_CN_ID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="NAMEINFO_NAME" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_REGISTRATION_NO" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="TRANSFERINFO_SEQUENCE" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="TRANSFERINFO_ZHRGGQH" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="TRANSFERINFO_YM" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="TRANSFERINFO_ZHRR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="TRANSFERINFO_ZHRR_NAME" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="TRANSFERINFO_SHRR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="TRANSFERINFO_SHRR_NAME" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="TRANSFERINFO_ZHGGRQ" Type="DateTime" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
+        </EntityType>
+        <EntityType Name="S_CHINA_WELLKNOWN_BRAND">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="MARK_CN_ID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="NAMEINFO_NAME" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_REGISTRATION_NO" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="TRADEMARK_CERTIFICATION" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="TRADEMARK_AREA" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="TRADEMARK_DETERMINATION_ORGAN" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="TRADEMARK_DETERMINATION_METHOD" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="TRADEMARK_DETERMINATION_BATCH" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="TRADEMARK_DETERMINATION_TIME" Type="DateTime" />
+          <Property Name="TRADEMARK_WEBSITE" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
+        </EntityType>
+        <EntityType Name="S_MADRID_BRAND_ENTER_CHINA">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="MARK_CN_ID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="NAMEINFO_NAME" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_ORIGINAL_LANGUAGE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_REGISTRATION_NO" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_ICN" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_TRADEMARK_TYPE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_CURRENT_STATE_RIGHT" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="BASEINFO_SPECIFIED_COLOR" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DATEINFO_REG_DATE" Type="DateTime" />
+          <Property Name="SPECIAL_RIGHT_STARTDATE" Type="DateTime" />
+          <Property Name="SPECIAL_RIGHT_ENDDATE" Type="DateTime" />
+          <Property Name="DATEINFO_PRIORITY_RIGHT_DATE" Type="DateTime" />
+          <Property Name="APPLICATION_PERSION_INFOS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="SERVICE_LIST" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="OTHERINFO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_JPG" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_JPG_SF" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_FILE" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_JPG" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_JPG_SF" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_FILE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
+        </EntityType>
+        <EntityType Name="S_MADRID_BRAND_PURCHASE">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="INTREGN" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="OOCD" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="INTREGD" Type="DateTime" />
+          <Property Name="EXPDATE" Type="DateTime" />
+          <Property Name="ORIGLAN" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="HOLGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="HOLGR_NAME_NAMEL" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="REPGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="PHOLGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="IMAGE_COLOUR" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="IMAGE_TEXT" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="VIENNAGR_VIECLAI" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="VIENNAGR_VIECLA3" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="THRDMAR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="SOUMARI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="COLMARI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="PREREGG" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="COLCLAGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="MARDESGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="MARTRGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="DISCLAIMGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="BASICGS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="BASICGS_GSGR_NICCLAI" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="BASREGGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="BASAPPGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="PRIGR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="SENGRP" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="DESAG_DCPCD" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="DESPG_DCPCD" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="DESPG2_DCPCD" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_XML" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_PIC" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="PATH_PIC_SF" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_XML" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_PIC" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="EXIST_PIC_SF" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="TYPMARI" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -6095,102 +6095,6 @@
                 <ScalarProperty Name="LAST_TIME" ColumnName="LAST_TIME" />
                 <ScalarProperty Name="START_TIME" ColumnName="START_TIME" />
                 <ScalarProperty Name="SESSION_ID" ColumnName="SESSION_ID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="S_AMERICA_APPLY_BRAND">
-            <EntityTypeMapping TypeName="Model.S_AMERICA_APPLY_BRAND">
-              <MappingFragment StoreEntitySet="S_AMERICA_APPLY_BRAND">
-                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
-                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
-                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
-                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
-                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
-                <ScalarProperty Name="EXIST_XML" ColumnName="EXIST_XML" />
-                <ScalarProperty Name="PATH_XML" ColumnName="PATH_XML" />
-                <ScalarProperty Name="MADRID_INTER_FILING_REQUESTS" ColumnName="MADRID_INTER_FILING_REQUESTS" />
-                <ScalarProperty Name="INTERNATIONAL_REGISTRATION" ColumnName="INTERNATIONAL_REGISTRATION" />
-                <ScalarProperty Name="DESIGN_SEARCH_CODE" ColumnName="DESIGN_SEARCH_CODE" />
-                <ScalarProperty Name="DESIGN_SEARCHES" ColumnName="DESIGN_SEARCHES" />
-                <ScalarProperty Name="CASE_FILE_OWNERS" ColumnName="CASE_FILE_OWNERS" />
-                <ScalarProperty Name="CORRESPONDENT" ColumnName="CORRESPONDENT" />
-                <ScalarProperty Name="INTERNATIONAL_CODE" ColumnName="INTERNATIONAL_CODE" />
-                <ScalarProperty Name="CLASSIFICATIONS" ColumnName="CLASSIFICATIONS" />
-                <ScalarProperty Name="FOREIGN_APPLICATIONS" ColumnName="FOREIGN_APPLICATIONS" />
-                <ScalarProperty Name="PRIOR_REGISTRATION_APPLICATION" ColumnName="PRIOR_REGISTRATION_APPLICATION" />
-                <ScalarProperty Name="EVENT_STATEMENTS" ColumnName="EVENT_STATEMENTS" />
-                <ScalarProperty Name="STATEMENTS" ColumnName="STATEMENTS" />
-                <ScalarProperty Name="HEADER_CANCELLATION_DATE" ColumnName="HEADER_CANCELLATION_DATE" />
-                <ScalarProperty Name="HEADER_CANCELLATION_CODE" ColumnName="HEADER_CANCELLATION_CODE" />
-                <ScalarProperty Name="HEADER_ABANDONMENT_DATE" ColumnName="HEADER_ABANDONMENT_DATE" />
-                <ScalarProperty Name="HEADER_MARK_DRAWING_CODE" ColumnName="HEADER_MARK_DRAWING_CODE" />
-                <ScalarProperty Name="HEADER_MARK_IDENTIFICATION" ColumnName="HEADER_MARK_IDENTIFICATION" />
-                <ScalarProperty Name="HEADER_STATUS_DATE" ColumnName="HEADER_STATUS_DATE" />
-                <ScalarProperty Name="HEADER_STATUS_CODE" ColumnName="HEADER_STATUS_CODE" />
-                <ScalarProperty Name="HEADER_REGISTRATION_DATE" ColumnName="HEADER_REGISTRATION_DATE" />
-                <ScalarProperty Name="HEADER_FILING_DATE" ColumnName="HEADER_FILING_DATE" />
-                <ScalarProperty Name="HEADER" ColumnName="HEADER" />
-                <ScalarProperty Name="TRANSACTION_DATE" ColumnName="TRANSACTION_DATE" />
-                <ScalarProperty Name="REGISTRATION_NUMBER" ColumnName="REGISTRATION_NUMBER" />
-                <ScalarProperty Name="SERIAL_NUMBER" ColumnName="SERIAL_NUMBER" />
-                <ScalarProperty Name="ACTION_KEY" ColumnName="ACTION_KEY" />
-                <ScalarProperty Name="VERSION_DATE" ColumnName="VERSION_DATE" />
-                <ScalarProperty Name="VERSION_NO" ColumnName="VERSION_NO" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="S_AMERICA_TRANSFER_BRAND">
-            <EntityTypeMapping TypeName="Model.S_AMERICA_TRANSFER_BRAND">
-              <MappingFragment StoreEntitySet="S_AMERICA_TRANSFER_BRAND">
-                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
-                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
-                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
-                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
-                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
-                <ScalarProperty Name="EXIST_XML" ColumnName="EXIST_XML" />
-                <ScalarProperty Name="PATH_XML" ColumnName="PATH_XML" />
-                <ScalarProperty Name="SERIAL_NO" ColumnName="SERIAL_NO" />
-                <ScalarProperty Name="ASSIGNEE_PERSON_NAME" ColumnName="ASSIGNEE_PERSON_NAME" />
-                <ScalarProperty Name="ASSIGNEES" ColumnName="ASSIGNEES" />
-                <ScalarProperty Name="ASSIGNOR_PERSON_NAME" ColumnName="ASSIGNOR_PERSON_NAME" />
-                <ScalarProperty Name="ASSIGNORS" ColumnName="ASSIGNORS" />
-                <ScalarProperty Name="ASSIGNMENT_CONVEYANCE_TEXT" ColumnName="ASSIGNMENT_CONVEYANCE_TEXT" />
-                <ScalarProperty Name="ASSIGNMENT_DATE_RECORDED" ColumnName="ASSIGNMENT_DATE_RECORDED" />
-                <ScalarProperty Name="ASSIGNMENT_FRAME_NO" ColumnName="ASSIGNMENT_FRAME_NO" />
-                <ScalarProperty Name="ASSIGNMENT_REEL_NO" ColumnName="ASSIGNMENT_REEL_NO" />
-                <ScalarProperty Name="ASSIGNMENT" ColumnName="ASSIGNMENT" />
-                <ScalarProperty Name="TRANSACTION_DATE" ColumnName="TRANSACTION_DATE" />
-                <ScalarProperty Name="VERSION_DATE" ColumnName="VERSION_DATE" />
-                <ScalarProperty Name="VERSION_NO" ColumnName="VERSION_NO" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="S_AMERICA_TRIAL_BRAND">
-            <EntityTypeMapping TypeName="Model.S_AMERICA_TRIAL_BRAND">
-              <MappingFragment StoreEntitySet="S_AMERICA_TRIAL_BRAND">
-                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
-                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
-                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
-                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
-                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
-                <ScalarProperty Name="EXIST_XML" ColumnName="EXIST_XML" />
-                <ScalarProperty Name="PATH_XML" ColumnName="PATH_XML" />
-                <ScalarProperty Name="PROSECUTION_HISTORY" ColumnName="PROSECUTION_HISTORY" />
-                <ScalarProperty Name="REGISTRATION_NUMBER" ColumnName="REGISTRATION_NUMBER" />
-                <ScalarProperty Name="SERIAL_NUMBER" ColumnName="SERIAL_NUMBER" />
-                <ScalarProperty Name="PARTY_INFORMATION" ColumnName="PARTY_INFORMATION" />
-                <ScalarProperty Name="STATUS_CODE" ColumnName="STATUS_CODE" />
-                <ScalarProperty Name="STATUS_UPDATE_DATE" ColumnName="STATUS_UPDATE_DATE" />
-                <ScalarProperty Name="FILING_DATE" ColumnName="FILING_DATE" />
-                <ScalarProperty Name="TYPE_CODE" ColumnName="TYPE_CODE" />
-                <ScalarProperty Name="JUDGMENT_NUMBER" ColumnName="JUDGMENT_NUMBER" />
-                <ScalarProperty Name="TRANSACTION_DATE" ColumnName="TRANSACTION_DATE" />
-                <ScalarProperty Name="ACTION_KEY_CODE" ColumnName="ACTION_KEY_CODE" />
-                <ScalarProperty Name="VERSION_DATE" ColumnName="VERSION_DATE" />
-                <ScalarProperty Name="VERSION_NO" ColumnName="VERSION_NO" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -6668,56 +6572,6 @@
                 <ScalarProperty Name="GOODS_SERVICE_CN" ColumnName="GOODS_SERVICE_CN" />
                 <ScalarProperty Name="F_CLNO" ColumnName="F_CLNO" />
                 <ScalarProperty Name="CLNO" ColumnName="CLNO" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="S_CHINA_BRAND_LICENSE">
-            <EntityTypeMapping TypeName="Model.S_CHINA_BRAND_LICENSE">
-              <MappingFragment StoreEntitySet="S_CHINA_BRAND_LICENSE">
-                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
-                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
-                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
-                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
-                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
-                <ScalarProperty Name="LICENSEPROCESSINFO_XKBAGGRQ" ColumnName="LICENSEPROCESSINFO_XKBAGGRQ" />
-                <ScalarProperty Name="LICENSEPROCESSINFO_XKGS" ColumnName="LICENSEPROCESSINFO_XKGS" />
-                <ScalarProperty Name="LICENSEPROCESSINFO_BXKR_NAME" ColumnName="LICENSEPROCESSINFO_BXKR_NAME" />
-                <ScalarProperty Name="LICENSEPROCESSINFO_BXKR" ColumnName="LICENSEPROCESSINFO_BXKR" />
-                <ScalarProperty Name="LICENSEPROCESSINFO_XKR_NAME" ColumnName="LICENSEPROCESSINFO_XKR_NAME" />
-                <ScalarProperty Name="LICENSEPROCESSINFO_XKR" ColumnName="LICENSEPROCESSINFO_XKR" />
-                <ScalarProperty Name="LICENSEPROCESSINFO_XKQX" ColumnName="LICENSEPROCESSINFO_XKQX" />
-                <ScalarProperty Name="LICENSEPROCESSINFO_BAH" ColumnName="LICENSEPROCESSINFO_BAH" />
-                <ScalarProperty Name="LICENSEPROCESSINFO_GGTYPE" ColumnName="LICENSEPROCESSINFO_GGTYPE" />
-                <ScalarProperty Name="LICENSEPROCESSINFO_PAGENUM" ColumnName="LICENSEPROCESSINFO_PAGENUM" />
-                <ScalarProperty Name="LICENSEPROCESSINFO_XKBAGGQH" ColumnName="LICENSEPROCESSINFO_XKBAGGQH" />
-                <ScalarProperty Name="LICENSEPROCESSINFO_SEQUENCE" ColumnName="LICENSEPROCESSINFO_SEQUENCE" />
-                <ScalarProperty Name="BASEINFO_REGISTRATION_NO" ColumnName="BASEINFO_REGISTRATION_NO" />
-                <ScalarProperty Name="NAMEINFO_NAME" ColumnName="NAMEINFO_NAME" />
-                <ScalarProperty Name="MARK_CN_ID" ColumnName="MARK_CN_ID" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="S_CHINA_BRAND_TRANSFER">
-            <EntityTypeMapping TypeName="Model.S_CHINA_BRAND_TRANSFER">
-              <MappingFragment StoreEntitySet="S_CHINA_BRAND_TRANSFER">
-                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
-                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
-                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
-                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
-                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
-                <ScalarProperty Name="TRANSFERINFO_ZHGGRQ" ColumnName="TRANSFERINFO_ZHGGRQ" />
-                <ScalarProperty Name="TRANSFERINFO_SHRR_NAME" ColumnName="TRANSFERINFO_SHRR_NAME" />
-                <ScalarProperty Name="TRANSFERINFO_SHRR" ColumnName="TRANSFERINFO_SHRR" />
-                <ScalarProperty Name="TRANSFERINFO_ZHRR_NAME" ColumnName="TRANSFERINFO_ZHRR_NAME" />
-                <ScalarProperty Name="TRANSFERINFO_ZHRR" ColumnName="TRANSFERINFO_ZHRR" />
-                <ScalarProperty Name="TRANSFERINFO_YM" ColumnName="TRANSFERINFO_YM" />
-                <ScalarProperty Name="TRANSFERINFO_ZHRGGQH" ColumnName="TRANSFERINFO_ZHRGGQH" />
-                <ScalarProperty Name="TRANSFERINFO_SEQUENCE" ColumnName="TRANSFERINFO_SEQUENCE" />
-                <ScalarProperty Name="BASEINFO_REGISTRATION_NO" ColumnName="BASEINFO_REGISTRATION_NO" />
-                <ScalarProperty Name="NAMEINFO_NAME" ColumnName="NAMEINFO_NAME" />
-                <ScalarProperty Name="MARK_CN_ID" ColumnName="MARK_CN_ID" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>
@@ -7544,28 +7398,6 @@
                 <ScalarProperty Name="STA_PUB_KIND" ColumnName="STA_PUB_KIND" />
                 <ScalarProperty Name="STA_PUB_NUMBER" ColumnName="STA_PUB_NUMBER" />
                 <ScalarProperty Name="STA_PUB_COUNTRY" ColumnName="STA_PUB_COUNTRY" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="S_CHINA_WELLKNOWN_BRAND">
-            <EntityTypeMapping TypeName="Model.S_CHINA_WELLKNOWN_BRAND">
-              <MappingFragment StoreEntitySet="S_CHINA_WELLKNOWN_BRAND">
-                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
-                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
-                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
-                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
-                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
-                <ScalarProperty Name="TRADEMARK_WEBSITE" ColumnName="TRADEMARK_WEBSITE" />
-                <ScalarProperty Name="TRADEMARK_DETERMINATION_TIME" ColumnName="TRADEMARK_DETERMINATION_TIME" />
-                <ScalarProperty Name="TRADEMARK_DETERMINATION_BATCH" ColumnName="TRADEMARK_DETERMINATION_BATCH" />
-                <ScalarProperty Name="TRADEMARK_DETERMINATION_METHOD" ColumnName="TRADEMARK_DETERMINATION_METHOD" />
-                <ScalarProperty Name="TRADEMARK_DETERMINATION_ORGAN" ColumnName="TRADEMARK_DETERMINATION_ORGAN" />
-                <ScalarProperty Name="TRADEMARK_AREA" ColumnName="TRADEMARK_AREA" />
-                <ScalarProperty Name="TRADEMARK_CERTIFICATION" ColumnName="TRADEMARK_CERTIFICATION" />
-                <ScalarProperty Name="BASEINFO_REGISTRATION_NO" ColumnName="BASEINFO_REGISTRATION_NO" />
-                <ScalarProperty Name="NAMEINFO_NAME" ColumnName="NAMEINFO_NAME" />
-                <ScalarProperty Name="MARK_CN_ID" ColumnName="MARK_CN_ID" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>
@@ -8514,88 +8346,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="S_MADRID_BRAND_ENTER_CHINA">
-            <EntityTypeMapping TypeName="Model.S_MADRID_BRAND_ENTER_CHINA">
-              <MappingFragment StoreEntitySet="S_MADRID_BRAND_ENTER_CHINA">
-                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
-                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
-                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
-                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
-                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
-                <ScalarProperty Name="EXIST_FILE" ColumnName="EXIST_FILE" />
-                <ScalarProperty Name="EXIST_JPG_SF" ColumnName="EXIST_JPG_SF" />
-                <ScalarProperty Name="EXIST_JPG" ColumnName="EXIST_JPG" />
-                <ScalarProperty Name="PATH_FILE" ColumnName="PATH_FILE" />
-                <ScalarProperty Name="PATH_JPG_SF" ColumnName="PATH_JPG_SF" />
-                <ScalarProperty Name="PATH_JPG" ColumnName="PATH_JPG" />
-                <ScalarProperty Name="OTHERINFO" ColumnName="OTHERINFO" />
-                <ScalarProperty Name="SERVICE_LIST" ColumnName="SERVICE_LIST" />
-                <ScalarProperty Name="APPLICATION_PERSION_INFOS" ColumnName="APPLICATION_PERSION_INFOS" />
-                <ScalarProperty Name="DATEINFO_PRIORITY_RIGHT_DATE" ColumnName="DATEINFO_PRIORITY_RIGHT_DATE" />
-                <ScalarProperty Name="SPECIAL_RIGHT_ENDDATE" ColumnName="SPECIAL_RIGHT_ENDDATE" />
-                <ScalarProperty Name="SPECIAL_RIGHT_STARTDATE" ColumnName="SPECIAL_RIGHT_STARTDATE" />
-                <ScalarProperty Name="DATEINFO_REG_DATE" ColumnName="DATEINFO_REG_DATE" />
-                <ScalarProperty Name="BASEINFO_SPECIFIED_COLOR" ColumnName="BASEINFO_SPECIFIED_COLOR" />
-                <ScalarProperty Name="BASEINFO_CURRENT_STATE_RIGHT" ColumnName="BASEINFO_CURRENT_STATE_RIGHT" />
-                <ScalarProperty Name="BASEINFO_TRADEMARK_TYPE" ColumnName="BASEINFO_TRADEMARK_TYPE" />
-                <ScalarProperty Name="BASEINFO_ICN" ColumnName="BASEINFO_ICN" />
-                <ScalarProperty Name="BASEINFO_REGISTRATION_NO" ColumnName="BASEINFO_REGISTRATION_NO" />
-                <ScalarProperty Name="BASEINFO_ORIGINAL_LANGUAGE" ColumnName="BASEINFO_ORIGINAL_LANGUAGE" />
-                <ScalarProperty Name="NAMEINFO_NAME" ColumnName="NAMEINFO_NAME" />
-                <ScalarProperty Name="MARK_CN_ID" ColumnName="MARK_CN_ID" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="S_MADRID_BRAND_PURCHASE">
-            <EntityTypeMapping TypeName="Model.S_MADRID_BRAND_PURCHASE">
-              <MappingFragment StoreEntitySet="S_MADRID_BRAND_PURCHASE">
-                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
-                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
-                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
-                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
-                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
-                <ScalarProperty Name="TYPMARI" ColumnName="TYPMARI" />
-                <ScalarProperty Name="EXIST_PIC_SF" ColumnName="EXIST_PIC_SF" />
-                <ScalarProperty Name="EXIST_PIC" ColumnName="EXIST_PIC" />
-                <ScalarProperty Name="EXIST_XML" ColumnName="EXIST_XML" />
-                <ScalarProperty Name="PATH_PIC_SF" ColumnName="PATH_PIC_SF" />
-                <ScalarProperty Name="PATH_PIC" ColumnName="PATH_PIC" />
-                <ScalarProperty Name="PATH_XML" ColumnName="PATH_XML" />
-                <ScalarProperty Name="DESPG2_DCPCD" ColumnName="DESPG2_DCPCD" />
-                <ScalarProperty Name="DESPG_DCPCD" ColumnName="DESPG_DCPCD" />
-                <ScalarProperty Name="DESAG_DCPCD" ColumnName="DESAG_DCPCD" />
-                <ScalarProperty Name="SENGRP" ColumnName="SENGRP" />
-                <ScalarProperty Name="PRIGR" ColumnName="PRIGR" />
-                <ScalarProperty Name="BASAPPGR" ColumnName="BASAPPGR" />
-                <ScalarProperty Name="BASREGGR" ColumnName="BASREGGR" />
-                <ScalarProperty Name="BASICGS_GSGR_NICCLAI" ColumnName="BASICGS_GSGR_NICCLAI" />
-                <ScalarProperty Name="BASICGS" ColumnName="BASICGS" />
-                <ScalarProperty Name="DISCLAIMGR" ColumnName="DISCLAIMGR" />
-                <ScalarProperty Name="MARTRGR" ColumnName="MARTRGR" />
-                <ScalarProperty Name="MARDESGR" ColumnName="MARDESGR" />
-                <ScalarProperty Name="COLCLAGR" ColumnName="COLCLAGR" />
-                <ScalarProperty Name="PREREGG" ColumnName="PREREGG" />
-                <ScalarProperty Name="COLMARI" ColumnName="COLMARI" />
-                <ScalarProperty Name="SOUMARI" ColumnName="SOUMARI" />
-                <ScalarProperty Name="THRDMAR" ColumnName="THRDMAR" />
-                <ScalarProperty Name="VIENNAGR_VIECLA3" ColumnName="VIENNAGR_VIECLA3" />
-                <ScalarProperty Name="VIENNAGR_VIECLAI" ColumnName="VIENNAGR_VIECLAI" />
-                <ScalarProperty Name="IMAGE_TEXT" ColumnName="IMAGE_TEXT" />
-                <ScalarProperty Name="IMAGE_COLOUR" ColumnName="IMAGE_COLOUR" />
-                <ScalarProperty Name="PHOLGR" ColumnName="PHOLGR" />
-                <ScalarProperty Name="REPGR" ColumnName="REPGR" />
-                <ScalarProperty Name="HOLGR_NAME_NAMEL" ColumnName="HOLGR_NAME_NAMEL" />
-                <ScalarProperty Name="HOLGR" ColumnName="HOLGR" />
-                <ScalarProperty Name="ORIGLAN" ColumnName="ORIGLAN" />
-                <ScalarProperty Name="EXPDATE" ColumnName="EXPDATE" />
-                <ScalarProperty Name="INTREGD" ColumnName="INTREGD" />
-                <ScalarProperty Name="OOCD" ColumnName="OOCD" />
-                <ScalarProperty Name="INTREGN" ColumnName="INTREGN" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="S_PATENT_FAMILY">
             <EntityTypeMapping TypeName="Model.S_PATENT_FAMILY">
               <MappingFragment StoreEntitySet="S_PATENT_FAMILY">
@@ -9072,6 +8822,256 @@
                 <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
                 <ScalarProperty Name="ZONECODE" ColumnName="ZONECODE" />
                 <ScalarProperty Name="ZONEADDRESS" ColumnName="ZONEADDRESS" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_AMERICA_APPLY_BRAND">
+            <EntityTypeMapping TypeName="Model.S_AMERICA_APPLY_BRAND">
+              <MappingFragment StoreEntitySet="S_AMERICA_APPLY_BRAND">
+                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="EXIST_XML" ColumnName="EXIST_XML" />
+                <ScalarProperty Name="PATH_XML" ColumnName="PATH_XML" />
+                <ScalarProperty Name="MADRID_INTER_FILING_REQUESTS" ColumnName="MADRID_INTER_FILING_REQUESTS" />
+                <ScalarProperty Name="INTERNATIONAL_REGISTRATION" ColumnName="INTERNATIONAL_REGISTRATION" />
+                <ScalarProperty Name="DESIGN_SEARCH_CODE" ColumnName="DESIGN_SEARCH_CODE" />
+                <ScalarProperty Name="DESIGN_SEARCHES" ColumnName="DESIGN_SEARCHES" />
+                <ScalarProperty Name="CASE_FILE_OWNERS" ColumnName="CASE_FILE_OWNERS" />
+                <ScalarProperty Name="CORRESPONDENT" ColumnName="CORRESPONDENT" />
+                <ScalarProperty Name="INTERNATIONAL_CODE" ColumnName="INTERNATIONAL_CODE" />
+                <ScalarProperty Name="CLASSIFICATIONS" ColumnName="CLASSIFICATIONS" />
+                <ScalarProperty Name="FOREIGN_APPLICATIONS" ColumnName="FOREIGN_APPLICATIONS" />
+                <ScalarProperty Name="PRIOR_REGISTRATION_APPLICATION" ColumnName="PRIOR_REGISTRATION_APPLICATION" />
+                <ScalarProperty Name="EVENT_STATEMENTS" ColumnName="EVENT_STATEMENTS" />
+                <ScalarProperty Name="STATEMENTS" ColumnName="STATEMENTS" />
+                <ScalarProperty Name="HEADER_CANCELLATION_DATE" ColumnName="HEADER_CANCELLATION_DATE" />
+                <ScalarProperty Name="HEADER_CANCELLATION_CODE" ColumnName="HEADER_CANCELLATION_CODE" />
+                <ScalarProperty Name="HEADER_ABANDONMENT_DATE" ColumnName="HEADER_ABANDONMENT_DATE" />
+                <ScalarProperty Name="HEADER_MARK_DRAWING_CODE" ColumnName="HEADER_MARK_DRAWING_CODE" />
+                <ScalarProperty Name="HEADER_MARK_IDENTIFICATION" ColumnName="HEADER_MARK_IDENTIFICATION" />
+                <ScalarProperty Name="HEADER_STATUS_DATE" ColumnName="HEADER_STATUS_DATE" />
+                <ScalarProperty Name="HEADER_STATUS_CODE" ColumnName="HEADER_STATUS_CODE" />
+                <ScalarProperty Name="HEADER_REGISTRATION_DATE" ColumnName="HEADER_REGISTRATION_DATE" />
+                <ScalarProperty Name="HEADER_FILING_DATE" ColumnName="HEADER_FILING_DATE" />
+                <ScalarProperty Name="HEADER" ColumnName="HEADER" />
+                <ScalarProperty Name="TRANSACTION_DATE" ColumnName="TRANSACTION_DATE" />
+                <ScalarProperty Name="REGISTRATION_NUMBER" ColumnName="REGISTRATION_NUMBER" />
+                <ScalarProperty Name="SERIAL_NUMBER" ColumnName="SERIAL_NUMBER" />
+                <ScalarProperty Name="ACTION_KEY" ColumnName="ACTION_KEY" />
+                <ScalarProperty Name="VERSION_DATE" ColumnName="VERSION_DATE" />
+                <ScalarProperty Name="VERSION_NO" ColumnName="VERSION_NO" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_AMERICA_TRANSFER_BRAND">
+            <EntityTypeMapping TypeName="Model.S_AMERICA_TRANSFER_BRAND">
+              <MappingFragment StoreEntitySet="S_AMERICA_TRANSFER_BRAND">
+                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="EXIST_XML" ColumnName="EXIST_XML" />
+                <ScalarProperty Name="PATH_XML" ColumnName="PATH_XML" />
+                <ScalarProperty Name="SERIAL_NO" ColumnName="SERIAL_NO" />
+                <ScalarProperty Name="ASSIGNEE_PERSON_NAME" ColumnName="ASSIGNEE_PERSON_NAME" />
+                <ScalarProperty Name="ASSIGNEES" ColumnName="ASSIGNEES" />
+                <ScalarProperty Name="ASSIGNOR_PERSON_NAME" ColumnName="ASSIGNOR_PERSON_NAME" />
+                <ScalarProperty Name="ASSIGNORS" ColumnName="ASSIGNORS" />
+                <ScalarProperty Name="ASSIGNMENT_CONVEYANCE_TEXT" ColumnName="ASSIGNMENT_CONVEYANCE_TEXT" />
+                <ScalarProperty Name="ASSIGNMENT_DATE_RECORDED" ColumnName="ASSIGNMENT_DATE_RECORDED" />
+                <ScalarProperty Name="ASSIGNMENT_FRAME_NO" ColumnName="ASSIGNMENT_FRAME_NO" />
+                <ScalarProperty Name="ASSIGNMENT_REEL_NO" ColumnName="ASSIGNMENT_REEL_NO" />
+                <ScalarProperty Name="ASSIGNMENT" ColumnName="ASSIGNMENT" />
+                <ScalarProperty Name="TRANSACTION_DATE" ColumnName="TRANSACTION_DATE" />
+                <ScalarProperty Name="VERSION_DATE" ColumnName="VERSION_DATE" />
+                <ScalarProperty Name="VERSION_NO" ColumnName="VERSION_NO" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_AMERICA_TRIAL_BRAND">
+            <EntityTypeMapping TypeName="Model.S_AMERICA_TRIAL_BRAND">
+              <MappingFragment StoreEntitySet="S_AMERICA_TRIAL_BRAND">
+                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="EXIST_XML" ColumnName="EXIST_XML" />
+                <ScalarProperty Name="PATH_XML" ColumnName="PATH_XML" />
+                <ScalarProperty Name="PROSECUTION_HISTORY" ColumnName="PROSECUTION_HISTORY" />
+                <ScalarProperty Name="REGISTRATION_NUMBER" ColumnName="REGISTRATION_NUMBER" />
+                <ScalarProperty Name="SERIAL_NUMBER" ColumnName="SERIAL_NUMBER" />
+                <ScalarProperty Name="PARTY_INFORMATION" ColumnName="PARTY_INFORMATION" />
+                <ScalarProperty Name="STATUS_CODE" ColumnName="STATUS_CODE" />
+                <ScalarProperty Name="STATUS_UPDATE_DATE" ColumnName="STATUS_UPDATE_DATE" />
+                <ScalarProperty Name="FILING_DATE" ColumnName="FILING_DATE" />
+                <ScalarProperty Name="TYPE_CODE" ColumnName="TYPE_CODE" />
+                <ScalarProperty Name="JUDGMENT_NUMBER" ColumnName="JUDGMENT_NUMBER" />
+                <ScalarProperty Name="TRANSACTION_DATE" ColumnName="TRANSACTION_DATE" />
+                <ScalarProperty Name="ACTION_KEY_CODE" ColumnName="ACTION_KEY_CODE" />
+                <ScalarProperty Name="VERSION_DATE" ColumnName="VERSION_DATE" />
+                <ScalarProperty Name="VERSION_NO" ColumnName="VERSION_NO" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_CHINA_BRAND_LICENSE">
+            <EntityTypeMapping TypeName="Model.S_CHINA_BRAND_LICENSE">
+              <MappingFragment StoreEntitySet="S_CHINA_BRAND_LICENSE">
+                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="LICENSEPROCESSINFO_XKBAGGRQ" ColumnName="LICENSEPROCESSINFO_XKBAGGRQ" />
+                <ScalarProperty Name="LICENSEPROCESSINFO_XKGS" ColumnName="LICENSEPROCESSINFO_XKGS" />
+                <ScalarProperty Name="LICENSEPROCESSINFO_BXKR_NAME" ColumnName="LICENSEPROCESSINFO_BXKR_NAME" />
+                <ScalarProperty Name="LICENSEPROCESSINFO_BXKR" ColumnName="LICENSEPROCESSINFO_BXKR" />
+                <ScalarProperty Name="LICENSEPROCESSINFO_XKR_NAME" ColumnName="LICENSEPROCESSINFO_XKR_NAME" />
+                <ScalarProperty Name="LICENSEPROCESSINFO_XKR" ColumnName="LICENSEPROCESSINFO_XKR" />
+                <ScalarProperty Name="LICENSEPROCESSINFO_XKQX" ColumnName="LICENSEPROCESSINFO_XKQX" />
+                <ScalarProperty Name="LICENSEPROCESSINFO_BAH" ColumnName="LICENSEPROCESSINFO_BAH" />
+                <ScalarProperty Name="LICENSEPROCESSINFO_GGTYPE" ColumnName="LICENSEPROCESSINFO_GGTYPE" />
+                <ScalarProperty Name="LICENSEPROCESSINFO_PAGENUM" ColumnName="LICENSEPROCESSINFO_PAGENUM" />
+                <ScalarProperty Name="LICENSEPROCESSINFO_XKBAGGQH" ColumnName="LICENSEPROCESSINFO_XKBAGGQH" />
+                <ScalarProperty Name="LICENSEPROCESSINFO_SEQUENCE" ColumnName="LICENSEPROCESSINFO_SEQUENCE" />
+                <ScalarProperty Name="BASEINFO_REGISTRATION_NO" ColumnName="BASEINFO_REGISTRATION_NO" />
+                <ScalarProperty Name="NAMEINFO_NAME" ColumnName="NAMEINFO_NAME" />
+                <ScalarProperty Name="MARK_CN_ID" ColumnName="MARK_CN_ID" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_CHINA_BRAND_TRANSFER">
+            <EntityTypeMapping TypeName="Model.S_CHINA_BRAND_TRANSFER">
+              <MappingFragment StoreEntitySet="S_CHINA_BRAND_TRANSFER">
+                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="TRANSFERINFO_ZHGGRQ" ColumnName="TRANSFERINFO_ZHGGRQ" />
+                <ScalarProperty Name="TRANSFERINFO_SHRR_NAME" ColumnName="TRANSFERINFO_SHRR_NAME" />
+                <ScalarProperty Name="TRANSFERINFO_SHRR" ColumnName="TRANSFERINFO_SHRR" />
+                <ScalarProperty Name="TRANSFERINFO_ZHRR_NAME" ColumnName="TRANSFERINFO_ZHRR_NAME" />
+                <ScalarProperty Name="TRANSFERINFO_ZHRR" ColumnName="TRANSFERINFO_ZHRR" />
+                <ScalarProperty Name="TRANSFERINFO_YM" ColumnName="TRANSFERINFO_YM" />
+                <ScalarProperty Name="TRANSFERINFO_ZHRGGQH" ColumnName="TRANSFERINFO_ZHRGGQH" />
+                <ScalarProperty Name="TRANSFERINFO_SEQUENCE" ColumnName="TRANSFERINFO_SEQUENCE" />
+                <ScalarProperty Name="BASEINFO_REGISTRATION_NO" ColumnName="BASEINFO_REGISTRATION_NO" />
+                <ScalarProperty Name="NAMEINFO_NAME" ColumnName="NAMEINFO_NAME" />
+                <ScalarProperty Name="MARK_CN_ID" ColumnName="MARK_CN_ID" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_CHINA_WELLKNOWN_BRAND">
+            <EntityTypeMapping TypeName="Model.S_CHINA_WELLKNOWN_BRAND">
+              <MappingFragment StoreEntitySet="S_CHINA_WELLKNOWN_BRAND">
+                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="TRADEMARK_WEBSITE" ColumnName="TRADEMARK_WEBSITE" />
+                <ScalarProperty Name="TRADEMARK_DETERMINATION_TIME" ColumnName="TRADEMARK_DETERMINATION_TIME" />
+                <ScalarProperty Name="TRADEMARK_DETERMINATION_BATCH" ColumnName="TRADEMARK_DETERMINATION_BATCH" />
+                <ScalarProperty Name="TRADEMARK_DETERMINATION_METHOD" ColumnName="TRADEMARK_DETERMINATION_METHOD" />
+                <ScalarProperty Name="TRADEMARK_DETERMINATION_ORGAN" ColumnName="TRADEMARK_DETERMINATION_ORGAN" />
+                <ScalarProperty Name="TRADEMARK_AREA" ColumnName="TRADEMARK_AREA" />
+                <ScalarProperty Name="TRADEMARK_CERTIFICATION" ColumnName="TRADEMARK_CERTIFICATION" />
+                <ScalarProperty Name="BASEINFO_REGISTRATION_NO" ColumnName="BASEINFO_REGISTRATION_NO" />
+                <ScalarProperty Name="NAMEINFO_NAME" ColumnName="NAMEINFO_NAME" />
+                <ScalarProperty Name="MARK_CN_ID" ColumnName="MARK_CN_ID" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_MADRID_BRAND_ENTER_CHINA">
+            <EntityTypeMapping TypeName="Model.S_MADRID_BRAND_ENTER_CHINA">
+              <MappingFragment StoreEntitySet="S_MADRID_BRAND_ENTER_CHINA">
+                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="EXIST_FILE" ColumnName="EXIST_FILE" />
+                <ScalarProperty Name="EXIST_JPG_SF" ColumnName="EXIST_JPG_SF" />
+                <ScalarProperty Name="EXIST_JPG" ColumnName="EXIST_JPG" />
+                <ScalarProperty Name="PATH_FILE" ColumnName="PATH_FILE" />
+                <ScalarProperty Name="PATH_JPG_SF" ColumnName="PATH_JPG_SF" />
+                <ScalarProperty Name="PATH_JPG" ColumnName="PATH_JPG" />
+                <ScalarProperty Name="OTHERINFO" ColumnName="OTHERINFO" />
+                <ScalarProperty Name="SERVICE_LIST" ColumnName="SERVICE_LIST" />
+                <ScalarProperty Name="APPLICATION_PERSION_INFOS" ColumnName="APPLICATION_PERSION_INFOS" />
+                <ScalarProperty Name="DATEINFO_PRIORITY_RIGHT_DATE" ColumnName="DATEINFO_PRIORITY_RIGHT_DATE" />
+                <ScalarProperty Name="SPECIAL_RIGHT_ENDDATE" ColumnName="SPECIAL_RIGHT_ENDDATE" />
+                <ScalarProperty Name="SPECIAL_RIGHT_STARTDATE" ColumnName="SPECIAL_RIGHT_STARTDATE" />
+                <ScalarProperty Name="DATEINFO_REG_DATE" ColumnName="DATEINFO_REG_DATE" />
+                <ScalarProperty Name="BASEINFO_SPECIFIED_COLOR" ColumnName="BASEINFO_SPECIFIED_COLOR" />
+                <ScalarProperty Name="BASEINFO_CURRENT_STATE_RIGHT" ColumnName="BASEINFO_CURRENT_STATE_RIGHT" />
+                <ScalarProperty Name="BASEINFO_TRADEMARK_TYPE" ColumnName="BASEINFO_TRADEMARK_TYPE" />
+                <ScalarProperty Name="BASEINFO_ICN" ColumnName="BASEINFO_ICN" />
+                <ScalarProperty Name="BASEINFO_REGISTRATION_NO" ColumnName="BASEINFO_REGISTRATION_NO" />
+                <ScalarProperty Name="BASEINFO_ORIGINAL_LANGUAGE" ColumnName="BASEINFO_ORIGINAL_LANGUAGE" />
+                <ScalarProperty Name="NAMEINFO_NAME" ColumnName="NAMEINFO_NAME" />
+                <ScalarProperty Name="MARK_CN_ID" ColumnName="MARK_CN_ID" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_MADRID_BRAND_PURCHASE">
+            <EntityTypeMapping TypeName="Model.S_MADRID_BRAND_PURCHASE">
+              <MappingFragment StoreEntitySet="S_MADRID_BRAND_PURCHASE">
+                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="TYPMARI" ColumnName="TYPMARI" />
+                <ScalarProperty Name="EXIST_PIC_SF" ColumnName="EXIST_PIC_SF" />
+                <ScalarProperty Name="EXIST_PIC" ColumnName="EXIST_PIC" />
+                <ScalarProperty Name="EXIST_XML" ColumnName="EXIST_XML" />
+                <ScalarProperty Name="PATH_PIC_SF" ColumnName="PATH_PIC_SF" />
+                <ScalarProperty Name="PATH_PIC" ColumnName="PATH_PIC" />
+                <ScalarProperty Name="PATH_XML" ColumnName="PATH_XML" />
+                <ScalarProperty Name="DESPG2_DCPCD" ColumnName="DESPG2_DCPCD" />
+                <ScalarProperty Name="DESPG_DCPCD" ColumnName="DESPG_DCPCD" />
+                <ScalarProperty Name="DESAG_DCPCD" ColumnName="DESAG_DCPCD" />
+                <ScalarProperty Name="SENGRP" ColumnName="SENGRP" />
+                <ScalarProperty Name="PRIGR" ColumnName="PRIGR" />
+                <ScalarProperty Name="BASAPPGR" ColumnName="BASAPPGR" />
+                <ScalarProperty Name="BASREGGR" ColumnName="BASREGGR" />
+                <ScalarProperty Name="BASICGS_GSGR_NICCLAI" ColumnName="BASICGS_GSGR_NICCLAI" />
+                <ScalarProperty Name="BASICGS" ColumnName="BASICGS" />
+                <ScalarProperty Name="DISCLAIMGR" ColumnName="DISCLAIMGR" />
+                <ScalarProperty Name="MARTRGR" ColumnName="MARTRGR" />
+                <ScalarProperty Name="MARDESGR" ColumnName="MARDESGR" />
+                <ScalarProperty Name="COLCLAGR" ColumnName="COLCLAGR" />
+                <ScalarProperty Name="PREREGG" ColumnName="PREREGG" />
+                <ScalarProperty Name="COLMARI" ColumnName="COLMARI" />
+                <ScalarProperty Name="SOUMARI" ColumnName="SOUMARI" />
+                <ScalarProperty Name="THRDMAR" ColumnName="THRDMAR" />
+                <ScalarProperty Name="VIENNAGR_VIECLA3" ColumnName="VIENNAGR_VIECLA3" />
+                <ScalarProperty Name="VIENNAGR_VIECLAI" ColumnName="VIENNAGR_VIECLAI" />
+                <ScalarProperty Name="IMAGE_TEXT" ColumnName="IMAGE_TEXT" />
+                <ScalarProperty Name="IMAGE_COLOUR" ColumnName="IMAGE_COLOUR" />
+                <ScalarProperty Name="PHOLGR" ColumnName="PHOLGR" />
+                <ScalarProperty Name="REPGR" ColumnName="REPGR" />
+                <ScalarProperty Name="HOLGR_NAME_NAMEL" ColumnName="HOLGR_NAME_NAMEL" />
+                <ScalarProperty Name="HOLGR" ColumnName="HOLGR" />
+                <ScalarProperty Name="ORIGLAN" ColumnName="ORIGLAN" />
+                <ScalarProperty Name="EXPDATE" ColumnName="EXPDATE" />
+                <ScalarProperty Name="INTREGD" ColumnName="INTREGD" />
+                <ScalarProperty Name="OOCD" ColumnName="OOCD" />
+                <ScalarProperty Name="INTREGN" ColumnName="INTREGN" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>

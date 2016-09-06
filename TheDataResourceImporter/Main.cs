@@ -68,8 +68,8 @@ namespace TheDataResourceImporter
                     filePaths = null;
                     tb_FilePath.Text = string.Empty;
 
-                    
-                    filePaths =new string[] { dialog.FileName};
+
+                    filePaths = new string[] { dialog.FileName };
 
                     tb_FilePath.Text = dialog.FileName;
                     //foreach (string filePath in filePaths)
@@ -182,12 +182,19 @@ namespace TheDataResourceImporter
             func.BeginInvoke(filePaths, fileType.Trim(),
                 delegate (IAsyncResult ia)
                 {
-                    bool result = func.EndInvoke(ia);
-                    if (result)
+                    try
                     {
-                        double totalSeconds = System.DateTime.Now.Subtract(ImportManger.importStartTime).TotalSeconds;
+                        bool result = func.EndInvoke(ia);
+                        if (result)
+                        {
+                            double totalSeconds = System.DateTime.Now.Subtract(ImportManger.importStartTime).TotalSeconds;
 
-                        MessageUtil.DoAppendTBDetail(String.Format("\r\n导入结束!共运行了{0:0.##}秒, 成功入库{1}件，平均用时：{2:0.#######}", totalSeconds, ImportManger.handledCount, totalSeconds / ImportManger.handledCount));
+                            MessageUtil.DoAppendTBDetail(String.Format("\r\n导入结束!共运行了{0:0.##}秒, 成功入库{1}件，平均用时：{2:0.#######}", totalSeconds, ImportManger.handledCount, totalSeconds / ImportManger.handledCount));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
                     }
 
                     SetEnabled(btn_Choose, true);

@@ -27,9 +27,6 @@ namespace TheDataResourceImporter
     
         public DbSet<IMPORT_ERROR> IMPORT_ERROR { get; set; }
         public DbSet<IMPORT_SESSION> IMPORT_SESSION { get; set; }
-        public DbSet<S_AMERICA_APPLY_BRAND> S_AMERICA_APPLY_BRAND { get; set; }
-        public DbSet<S_AMERICA_TRANSFER_BRAND> S_AMERICA_TRANSFER_BRAND { get; set; }
-        public DbSet<S_AMERICA_TRIAL_BRAND> S_AMERICA_TRIAL_BRAND { get; set; }
         public DbSet<S_AMERICAN_BRAND_GRAPHCLASSIFY> S_AMERICAN_BRAND_GRAPHCLASSIFY { get; set; }
         public DbSet<S_AMERICAN_BRAND_USCLASSIFY> S_AMERICAN_BRAND_USCLASSIFY { get; set; }
         public DbSet<S_AMERICAN_DESIGN_PATENT> S_AMERICAN_DESIGN_PATENT { get; set; }
@@ -43,8 +40,6 @@ namespace TheDataResourceImporter
         public DbSet<S_CHINA_BOOK> S_CHINA_BOOK { get; set; }
         public DbSet<S_CHINA_BRAND> S_CHINA_BRAND { get; set; }
         public DbSet<S_CHINA_BRAND_CLASSIFICATION> S_CHINA_BRAND_CLASSIFICATION { get; set; }
-        public DbSet<S_CHINA_BRAND_LICENSE> S_CHINA_BRAND_LICENSE { get; set; }
-        public DbSet<S_CHINA_BRAND_TRANSFER> S_CHINA_BRAND_TRANSFER { get; set; }
         public DbSet<S_CHINA_CIRCUITLAYOUT> S_CHINA_CIRCUITLAYOUT { get; set; }
         public DbSet<S_CHINA_COURTCASE_PROCESS> S_CHINA_COURTCASE_PROCESS { get; set; }
         public DbSet<S_CHINA_CUSTOMS_RECORD> S_CHINA_CUSTOMS_RECORD { get; set; }
@@ -70,7 +65,6 @@ namespace TheDataResourceImporter
         public DbSet<S_CHINA_PATENT_TEXTIMAGE> S_CHINA_PATENT_TEXTIMAGE { get; set; }
         public DbSet<S_CHINA_PHARMACEUTICAL_PATENT> S_CHINA_PHARMACEUTICAL_PATENT { get; set; }
         public DbSet<S_CHINA_STANDARD_SIMPCITATION> S_CHINA_STANDARD_SIMPCITATION { get; set; }
-        public DbSet<S_CHINA_WELLKNOWN_BRAND> S_CHINA_WELLKNOWN_BRAND { get; set; }
         public DbSet<S_COMMUNITY_INTELLECTUALRECORD> S_COMMUNITY_INTELLECTUALRECORD { get; set; }
         public DbSet<S_COMPANY_CODE_LIBRARY> S_COMPANY_CODE_LIBRARY { get; set; }
         public DbSet<S_DATA_RESOURCE_TYPES_DETAIL> S_DATA_RESOURCE_TYPES_DETAIL { get; set; }
@@ -95,8 +89,6 @@ namespace TheDataResourceImporter
         public DbSet<S_KOREA_PATENT_ABSTRACTS> S_KOREA_PATENT_ABSTRACTS { get; set; }
         public DbSet<S_KOREAN_PATENT_FULLTEXTCODE> S_KOREAN_PATENT_FULLTEXTCODE { get; set; }
         public DbSet<S_MACAO_PATENT_DESCRIPTION> S_MACAO_PATENT_DESCRIPTION { get; set; }
-        public DbSet<S_MADRID_BRAND_ENTER_CHINA> S_MADRID_BRAND_ENTER_CHINA { get; set; }
-        public DbSet<S_MADRID_BRAND_PURCHASE> S_MADRID_BRAND_PURCHASE { get; set; }
         public DbSet<S_PATENT_FAMILY> S_PATENT_FAMILY { get; set; }
         public DbSet<S_PATENT_PAYMENT> S_PATENT_PAYMENT { get; set; }
         public DbSet<S_POLAND_PATENT_DESCRIPTION> S_POLAND_PATENT_DESCRIPTION { get; set; }
@@ -110,5 +102,13 @@ namespace TheDataResourceImporter
         public DbSet<S_WIPO_PATENT_DESCRIPTION> S_WIPO_PATENT_DESCRIPTION { get; set; }
         public DbSet<S_WORLD_LEGAL_STATUS> S_WORLD_LEGAL_STATUS { get; set; }
         public DbSet<S_ZONE_CODE_BASE> S_ZONE_CODE_BASE { get; set; }
+        public DbSet<S_AMERICA_APPLY_BRAND> S_AMERICA_APPLY_BRAND { get; set; }
+        public DbSet<S_AMERICA_TRANSFER_BRAND> S_AMERICA_TRANSFER_BRAND { get; set; }
+        public DbSet<S_AMERICA_TRIAL_BRAND> S_AMERICA_TRIAL_BRAND { get; set; }
+        public DbSet<S_CHINA_BRAND_LICENSE> S_CHINA_BRAND_LICENSE { get; set; }
+        public DbSet<S_CHINA_BRAND_TRANSFER> S_CHINA_BRAND_TRANSFER { get; set; }
+        public DbSet<S_CHINA_WELLKNOWN_BRAND> S_CHINA_WELLKNOWN_BRAND { get; set; }
+        public DbSet<S_MADRID_BRAND_ENTER_CHINA> S_MADRID_BRAND_ENTER_CHINA { get; set; }
+        public DbSet<S_MADRID_BRAND_PURCHASE> S_MADRID_BRAND_PURCHASE { get; set; }
     }
 }

@@ -2556,8 +2556,6 @@ namespace TheDataResourceImporter
                 //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
 
                 var rootElement = doc.Root;
-
-
                 entityObject.VERSION_NO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/version/version-no");
                 entityObject.VERSION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/version/version-date"));
                 entityObject.ACTION_KEY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/action-key");
@@ -2588,7 +2586,6 @@ namespace TheDataResourceImporter
                 entityObject.MADRID_INTER_FILING_REQUESTS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/trademark-applications-daily/application-information/action-keys/case-file/madrid-international-filing-requests");
                 entityObject.EXIST_XML = "1";
                 entityObject.PATH_XML = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + entry.Key;
-
                 entityObject.IMPORT_TIME = System.DateTime.Now;
 
                 var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
