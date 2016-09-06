@@ -100,6 +100,31 @@ namespace TheDataResourceImporter.Utils
         }
 
 
+        public static string getXElementMultiValueByXPathSepratedByDoubleColon(XElement currentNode, string xPath, string attriName)
+        {
+            string value = "";
+
+            var targets = currentNode.XPathSelectElements(xPath);
+
+            if(string.IsNullOrEmpty(attriName))
+            {
+            var targetValues = from ele in targets
+                               select ele.Value;
+            value = string.Join(";;", targetValues);
+
+            return value;
+            }
+            else
+            {
+                var targetValues = from ele in targets
+                                   select ele.Attribute(attriName);
+                value = string.Join(";;", targetValues);
+
+                return value;
+            }
+        }
+
+
         public static string getXElementInnerXMLByXPath(XElement currentNode, string xPath, IXmlNamespaceResolver resolver = null)
         {
             string value = "";

@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2008/10/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="6f5f703121db478281619b0d0080a358" Name="Diagram1" ZoomLevel="93">
+      <Diagram DiagramId="6f5f703121db478281619b0d0080a358" Name="Diagram1" ZoomLevel="60">
         <EntityTypeShape EntityType="Model.IMPORT_ERROR" Width="1.5" PointX="0.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.IMPORT_SESSION" Width="1.5" PointX="2.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_AMERICA_APPLY_BRAND" Width="1.5" PointX="4.75" PointY="0.75" />

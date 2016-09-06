@@ -196,9 +196,8 @@ namespace TheDataResourceImporter.Utils
         /// <returns></returns>
         public static IArchiveEntry getSpecifiedSiblingEntry(IArchive achive, string entryKey, string suffix)
         {
-            var currentEntryDepth = getEntryDepth(entryKey);
             var target = (from entryTemp in achive.Entries
-                         where (!entryTemp.Key.Equals(entryKey)) && (getFileEntryParentPath(entryTemp.Key).Equals(getFileEntryParentPath(entryKey))) && entryKey.ToUpper().EndsWith(suffix.ToUpper())
+                         where (!entryTemp.Key.Equals(entryKey)) && (getFileEntryParentPath(entryTemp.Key).Equals(getFileEntryParentPath(entryKey))) && entryTemp.Key.ToUpper().EndsWith(suffix.ToUpper())
                          select entryTemp).FirstOrDefault();
             return target;
         }
