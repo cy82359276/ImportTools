@@ -46,5 +46,6 @@ namespace TheDataResourceImporter
         public string ARCHIVE_INNER_PATH { get; set; }
         public string FILE_PATH { get; set; }
         public Nullable<decimal> SESSION_INDEX { get; set; }
+        public string REEXAMINE_INVALID { get; set; }
     }
 }

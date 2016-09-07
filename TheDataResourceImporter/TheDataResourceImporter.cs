@@ -54,6 +54,7 @@ namespace TheDataResourceImporter
         public static bool BeginImport(string[] AllFilePaths, string fileType)
         {
 
+            bool specialDirctoryMode = false;
             //importStartTime = System.DateTime.Now;
             fileCount = AllFilePaths.Length;
             using (DataSourceEntities dataSourceEntites = new DataSourceEntities())
@@ -131,9 +132,10 @@ namespace TheDataResourceImporter
                     }
 
 
-                    if ("中国专利复审数据".Equals(fileType) || "中国专利无效数据".Equals(fileType)) //194, 196 xml格式 不遍历文件夹路径
+                    if ("中国专利复审（无效）数据".Equals(fileType) || "中国专利的判决书数据".Equals(fileType)) //194, 196 xml格式 不遍历文件夹路径
                     {
                         //什么也不做, 直接传递文件夹路径
+                        specialDirctoryMode = true; //特殊的文件夹模式: 文件夹内文件即需入库文件，不需要在解压等处理
                     }
                     else
                     {
@@ -160,12 +162,9 @@ namespace TheDataResourceImporter
 
                 #endregion
 
-
                 bath.FILECOUNT = AllFilePaths.Count();
                 dataSourceEntites.S_IMPORT_BATH.Add(bath);
                 dataSourceEntites.SaveChanges();
-
-
 
                 #region 对指定的或发现的路径进行处理
 
@@ -183,6 +182,19 @@ namespace TheDataResourceImporter
                     try
                     {
                         if (File.Exists(path))
+                        {
+                            try
+                            {
+                                ImportByPath(path, fileType, dataSourceEntites, bath);
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                            System.GC.Collect();
+                        }
+                        //特殊文件夹模式
+                        else if (specialDirctoryMode && Directory.Exists(path) && !Main.showFileDialog)
                         {
                             try
                             {
@@ -959,31 +971,23 @@ namespace TheDataResourceImporter
             #region 186 国外专利生物序列加工成品数据 XML
             else if (fileType == "国外专利生物序列加工成品数据")
             {
-                parseTarGz186(filePath, entiesContext, importSession, "S_MADRID_BRAND_PURCHASE", fileType);
+                parseTarGz186(filePath, entiesContext, importSession, "S_FOREIGN_PATENT_SEQUENCE", fileType);
             }
 
 
-
-            else if (fileType == "中国专利复审数据")
+            #endregion
+            #region 194 中国专利复审（无效）数据 XML
+            else if (fileType == "中国专利复审（无效）数据")
             {
-
-
+                parseXML194(filePath, entiesContext, importSession, "S_CHINA_PATENT_REVIEW", fileType);
             }
-            else if (fileType == "中国专利无效数据")
-            {
-
-
-            }
-
-
 
             #endregion
             #region 196 中国专利的判决书数据 XML
 
             else if (fileType == "中国专利的判决书数据")
             {
-
-
+                parseXML196(filePath, entiesContext, importSession, "S_CHINA_PATENT_JUDGMENT", fileType);
             }
 
             #endregion
@@ -1535,7 +1539,7 @@ namespace TheDataResourceImporter
             accUtil.Close();//关闭数据库                
         }
 
-        private static void parseZip196(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession, string tableName, string dataResChineseName)
+        private static void parseXML196(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession, string tableName, string dataResChineseName)
         {
             handledCount = 0;
             importStartTime = importSession.START_TIME.Value;
@@ -1583,7 +1587,7 @@ namespace TheDataResourceImporter
                 }
             }
 
-
+            totalCount = xmlFiles.Count;
             #region 循环入库
             foreach (var xmlFilePath in xmlFiles)
             {
@@ -1630,7 +1634,7 @@ namespace TheDataResourceImporter
 
                 entityObject.CN_COURT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-court");
                 entityObject.CN_DECISION_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-decision-number");
-                entityObject.ASSIGNEES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/assignees");
+                entityObject.ASSIGNEES = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/assignees");
                 entityObject.PATENT_APPLICATION_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/application-reference/document-id/country");
                 entityObject.PATENT_APPLICATION_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/application-reference/document-id/doc-number");
                 entityObject.PATENT_APPLICATION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/application-reference/document-id/date"));
@@ -1640,17 +1644,17 @@ namespace TheDataResourceImporter
                 entityObject.INVENTION_TITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/invention-title");
                 entityObject.CLASSIFICATION_IPC = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/classification-ipc");
                 entityObject.CN_LEGAL_FILE_NUMBERS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-legal-file-numbers");
-                entityObject.CN_LEGAL_PLAINTIFFS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-legal-case-parties/cn-legal-plaintiffs");
-                entityObject.CN_LEGAL_DEFENDANTS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-legal-case-parties/cn-legal-defendants");
-                entityObject.CN_JUDGES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-judges");
-                entityObject.CN_COURT_REPORTERS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-court-reporters");
-                entityObject.CN_VERDICT_DETAIL = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-verdict-detail");
+                entityObject.CN_LEGAL_PLAINTIFFS = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/cn-patent-verdict/cn-legal-case-parties/cn-legal-plaintiffs");
+                entityObject.CN_LEGAL_DEFENDANTS = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/cn-patent-verdict/cn-legal-case-parties/cn-legal-defendants");
+                entityObject.CN_JUDGES = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/cn-patent-verdict/cn-judges");
+                entityObject.CN_COURT_REPORTERS = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/cn-patent-verdict/cn-court-reporters");
+                entityObject.CN_VERDICT_DETAIL = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/cn-patent-verdict/cn-verdict-detail");
                 entityObject.CN_VERDICT_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-verdict-date/date"));
                 entityObject.PUBLICATION_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-publication-info/document-id/country");
                 entityObject.PUBLICATION_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-publication-info/document-id/doc-number");
                 entityObject.PUBLICATION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-publication-info/document-id/date"));
                 entityObject.CN_PUB_VOL = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-publication-info/cn-pub-vol");
-                entityObject.PATH_XML = xmlFilePath;
+                entityObject.PATH_XML = MiscUtil.getRelativeFilePathInclude(xmlFilePath, 4);
 
                 var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
                 try
@@ -1674,7 +1678,7 @@ namespace TheDataResourceImporter
         }
 
 
-        private static void parseZip194(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession, string tableName, string dataResChineseName)
+        private static void parseXML194(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession, string tableName, string dataResChineseName)
         {
             handledCount = 0;
             importStartTime = importSession.START_TIME.Value;
@@ -1722,7 +1726,7 @@ namespace TheDataResourceImporter
                 }
             }
 
-
+            totalCount = xmlFiles.Count;
             #region 循环入库
             foreach (var xmlFilePath in xmlFiles)
             {
@@ -1781,7 +1785,7 @@ namespace TheDataResourceImporter
                 entityObject.INVENTION_TITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-patent-info/invention-title");
                 entityObject.CLASSIFICATION_IPC = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-patent-info/classification-ipc");
                 entityObject.CN_COMPLAINANT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-parties/cn-complainant");
-                entityObject.CN_EXAMINERS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-examiners");
+                entityObject.CN_EXAMINERS = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-examiners");
                 entityObject.PUBLICATION_INFO_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-publication-info/document-id/country");
                 entityObject.PUBLICATION_INFO_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-publication-info/document-id/doc-number");
                 entityObject.PUBLICATION_INFO_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-publication-info/document-id/date"));
@@ -1794,7 +1798,9 @@ namespace TheDataResourceImporter
                 entityObject.CN_BRIEF_HISTORY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-decision-detail/cn-brief-history");
                 entityObject.CN_REASONING = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-decision-detail/cn-reasoning");
                 entityObject.CN_HOLDING = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-decision-detail/cn-holding");
-                entityObject.PATH_XML = xmlFilePath;
+                var appealType = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision", "appeal-type");
+                entityObject.REEXAMINE_INVALID = "invalidation".Equals(appealType) ? "无效" : "复审";
+                entityObject.PATH_XML = MiscUtil.getRelativeFilePathInclude(xmlFilePath, 4);
 
 
 
