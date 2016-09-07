@@ -289,5 +289,43 @@ namespace TheDataResourceImporter.Utils
             }
             return fileInfos;
         }
+
+
+        /// <summary>
+        /// 尝试解析字符串为decimal?类型
+        /// </summary>
+        /// <param name="valueStr"></param>
+        /// <returns></returns>
+        public static decimal? tryParseDecimalNullable(string valueStr)
+        {
+            decimal? result = null;
+
+            try
+            {
+                result = new decimal?(new decimal(double.Parse(valueStr)));
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return result;
+        }
+
+
+        public static int? tryParseIntNullable(string valueStr)
+        {
+            int? result = null;
+
+            try
+            {
+                result = new int?(int.Parse(valueStr));
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return result;
+        }
+
     }
 }

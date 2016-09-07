@@ -33,12 +33,10 @@
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_FULLTEXT_PDF" Width="1.5" PointX="18.75" PointY="19.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_GAZETTE" Width="1.5" PointX="20.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_INVALID" Width="1.5" PointX="20.75" PointY="4.75" />
-        <EntityTypeShape EntityType="Model.S_CHINA_PATENT_JUDGMENT" Width="1.5" PointX="20.75" PointY="12.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_LAWSPROCESS" Width="1.5" PointX="20.75" PointY="20.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_LAWSTATE" Width="1.5" PointX="22.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_LAWSTATE_CHANGE" Width="1.5" PointX="22.75" PointY="4.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_NOTICES" Width="1.5" PointX="22.75" PointY="8.75" />
-        <EntityTypeShape EntityType="Model.S_CHINA_PATENT_REVIEW" Width="1.5" PointX="22.75" PointY="13.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_STAND_TEXTIMAGE" Width="1.5" PointX="22.75" PointY="21.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_STANDARDFULLTXT" Width="1.5" PointX="24.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_TEXTCODE" Width="1.5" PointX="2.75" PointY="24.75" />
@@ -52,7 +50,6 @@
         <EntityTypeShape EntityType="Model.S_EURASIAN_PATENT_DESCRIPTION" Width="1.5" PointX="18.75" PointY="26.75" />
         <EntityTypeShape EntityType="Model.S_EUROPEAN_PATENT_FULLTEXT" Width="1.5" PointX="20.75" PointY="26.75" />
         <EntityTypeShape EntityType="Model.S_FOREIGN_PATENT_FULLTEXT_PDF" Width="1.5" PointX="26.75" PointY="22.75" />
-        <EntityTypeShape EntityType="Model.S_FOREIGN_PATENT_SEQUENCE" Width="1.5" PointX="26.75" PointY="26.75" />
         <EntityTypeShape EntityType="Model.S_FRENCH_DESIGN_PATENT" Width="1.5" PointX="6.75" PointY="27.75" />
         <EntityTypeShape EntityType="Model.S_FRENCH_PATENT_DESCRIPTION" Width="1.5" PointX="8.75" PointY="27.75" />
         <EntityTypeShape EntityType="Model.S_GERMAN_DESIGN_PATENT" Width="1.5" PointX="10.75" PointY="27.75" />
@@ -90,6 +87,9 @@
         <EntityTypeShape EntityType="Model.S_CHINA_WELLKNOWN_BRAND" Width="1.5" PointX="37.375" PointY="17.75" />
         <EntityTypeShape EntityType="Model.S_MADRID_BRAND_ENTER_CHINA" Width="1.5" PointX="21.375" PointY="37.75" />
         <EntityTypeShape EntityType="Model.S_MADRID_BRAND_PURCHASE" Width="1.5" PointX="37.375" PointY="22.75" />
+        <EntityTypeShape EntityType="Model.S_FOREIGN_PATENT_SEQUENCE" Width="1.5" PointX="37.375" PointY="32.75" />
+        <EntityTypeShape EntityType="Model.S_CHINA_PATENT_JUDGMENT" Width="1.5" PointX="27.375" PointY="38.75" />
+        <EntityTypeShape EntityType="Model.S_CHINA_PATENT_REVIEW" Width="1.5" PointX="39.375" PointY="0.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

@@ -53,12 +53,10 @@ namespace TheDataResourceImporter
         public DbSet<S_CHINA_PATENT_FULLTEXT_PDF> S_CHINA_PATENT_FULLTEXT_PDF { get; set; }
         public DbSet<S_CHINA_PATENT_GAZETTE> S_CHINA_PATENT_GAZETTE { get; set; }
         public DbSet<S_CHINA_PATENT_INVALID> S_CHINA_PATENT_INVALID { get; set; }
-        public DbSet<S_CHINA_PATENT_JUDGMENT> S_CHINA_PATENT_JUDGMENT { get; set; }
         public DbSet<S_CHINA_PATENT_LAWSPROCESS> S_CHINA_PATENT_LAWSPROCESS { get; set; }
         public DbSet<S_CHINA_PATENT_LAWSTATE> S_CHINA_PATENT_LAWSTATE { get; set; }
         public DbSet<S_CHINA_PATENT_LAWSTATE_CHANGE> S_CHINA_PATENT_LAWSTATE_CHANGE { get; set; }
         public DbSet<S_CHINA_PATENT_NOTICES> S_CHINA_PATENT_NOTICES { get; set; }
-        public DbSet<S_CHINA_PATENT_REVIEW> S_CHINA_PATENT_REVIEW { get; set; }
         public DbSet<S_CHINA_PATENT_STAND_TEXTIMAGE> S_CHINA_PATENT_STAND_TEXTIMAGE { get; set; }
         public DbSet<S_CHINA_PATENT_STANDARDFULLTXT> S_CHINA_PATENT_STANDARDFULLTXT { get; set; }
         public DbSet<S_CHINA_PATENT_TEXTCODE> S_CHINA_PATENT_TEXTCODE { get; set; }
@@ -72,7 +70,6 @@ namespace TheDataResourceImporter
         public DbSet<S_EURASIAN_PATENT_DESCRIPTION> S_EURASIAN_PATENT_DESCRIPTION { get; set; }
         public DbSet<S_EUROPEAN_PATENT_FULLTEXT> S_EUROPEAN_PATENT_FULLTEXT { get; set; }
         public DbSet<S_FOREIGN_PATENT_FULLTEXT_PDF> S_FOREIGN_PATENT_FULLTEXT_PDF { get; set; }
-        public DbSet<S_FOREIGN_PATENT_SEQUENCE> S_FOREIGN_PATENT_SEQUENCE { get; set; }
         public DbSet<S_FRENCH_DESIGN_PATENT> S_FRENCH_DESIGN_PATENT { get; set; }
         public DbSet<S_FRENCH_PATENT_DESCRIPTION> S_FRENCH_PATENT_DESCRIPTION { get; set; }
         public DbSet<S_GERMAN_DESIGN_PATENT> S_GERMAN_DESIGN_PATENT { get; set; }
@@ -110,5 +107,8 @@ namespace TheDataResourceImporter
         public DbSet<S_CHINA_WELLKNOWN_BRAND> S_CHINA_WELLKNOWN_BRAND { get; set; }
         public DbSet<S_MADRID_BRAND_ENTER_CHINA> S_MADRID_BRAND_ENTER_CHINA { get; set; }
         public DbSet<S_MADRID_BRAND_PURCHASE> S_MADRID_BRAND_PURCHASE { get; set; }
+        public DbSet<S_FOREIGN_PATENT_SEQUENCE> S_FOREIGN_PATENT_SEQUENCE { get; set; }
+        public DbSet<S_CHINA_PATENT_JUDGMENT> S_CHINA_PATENT_JUDGMENT { get; set; }
+        public DbSet<S_CHINA_PATENT_REVIEW> S_CHINA_PATENT_REVIEW { get; set; }
     }
 }

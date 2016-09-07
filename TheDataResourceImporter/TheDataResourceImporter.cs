@@ -119,6 +119,11 @@ namespace TheDataResourceImporter
 
 
                     }
+                    else if ("国外专利生物序列加工成品数据".Equals(fileType)) //186 生物序列 压缩包是.tar.gz格式
+                    {
+                        //tar.gz
+                        suffixFilter = "*.tar.gz";
+                    }
                     else //默认是zip包
                     {
                         //Zip XML
@@ -126,26 +131,30 @@ namespace TheDataResourceImporter
                     }
 
 
-                    // List<FileInfo> fileInfos = MiscUtil.getFileInfosByDirPathRecuriouslyWithMultiSearchPattern(dirPath, new string[] { suffixFilter.ToLower(), suffixFilter.ToUpper()});
-                    List<FileInfo> fileInfos = MiscUtil.getFileInfosByDirPathRecuriouslyWithSingleSearchPattern(dirPath, suffixFilter);
-
-
-
-                    var allFoundFilePaths = (from fileTemp in fileInfos
-                                             select fileTemp.FullName).Distinct().ToArray();
-
-                    if (allFoundFilePaths.Count() == 0)
+                    if ("中国专利复审数据".Equals(fileType) || "中国专利无效数据".Equals(fileType)) //194, 196 xml格式 不遍历文件夹路径
                     {
-                        MessageBox.Show("没有找到指定的文件，请选择正确的路径！");
-                        LogHelper.WriteErrorLog("没有找到指定的文件");
-                        return true;
+                        //什么也不做, 直接传递文件夹路径
                     }
                     else
                     {
-                        MessageUtil.DoAppendTBDetail($"发现{allFoundFilePaths.Count()}个符合条件的文件,他们是{MiscUtil.jsonSerilizeObject(allFoundFilePaths)}");
-                        AllFilePaths = allFoundFilePaths;
-                        bath.IS_DIR_MODE = "Y";
-                        bath.DIR_PATH = dirPath;
+                        // List<FileInfo> fileInfos = MiscUtil.getFileInfosByDirPathRecuriouslyWithMultiSearchPattern(dirPath, new string[] { suffixFilter.ToLower(), suffixFilter.ToUpper()});
+                        List<FileInfo> fileInfos = MiscUtil.getFileInfosByDirPathRecuriouslyWithSingleSearchPattern(dirPath, suffixFilter);
+                        var allFoundFilePaths = (from fileTemp in fileInfos
+                                                 select fileTemp.FullName).Distinct().ToArray();
+
+                        if (allFoundFilePaths.Count() == 0)
+                        {
+                            MessageBox.Show("没有找到指定的文件，请选择正确的路径！");
+                            LogHelper.WriteErrorLog("没有找到指定的文件");
+                            return true;
+                        }
+                        else
+                        {
+                            MessageUtil.DoAppendTBDetail($"发现{allFoundFilePaths.Count()}个符合条件的文件,他们是{MiscUtil.jsonSerilizeObject(allFoundFilePaths)}");
+                            AllFilePaths = allFoundFilePaths;
+                            bath.IS_DIR_MODE = "Y";
+                            bath.DIR_PATH = dirPath;
+                        }
                     }
                 }
 
@@ -213,7 +222,7 @@ namespace TheDataResourceImporter
                 MessageUtil.DoAppendTBDetail($"当前批次运行完毕，处理了{bath.FILECOUNT}个文件，入库了{bath.HANDLED_ITEM_COUNT}条目，总耗时{bath.LAST_TIME}秒");
                 try
                 {
-                dataSourceEntites.SaveChanges();
+                    dataSourceEntites.SaveChanges();
                 }
                 catch (Exception ex)
                 {
@@ -287,7 +296,7 @@ namespace TheDataResourceImporter
             }
 
             #endregion
-            #region 06 中国专利著录项目与文摘数据 通用字段 未完成
+            #region 06 中国专利著录项目与文摘数据 通用字段 
             else if (fileType == "中国专利著录项目与文摘数据")
             {
                 //parse06(filePath, entiesContext, importSession);
@@ -334,37 +343,37 @@ namespace TheDataResourceImporter
 
             }
             #endregion
-            #region 50 美国专利全文文本数据（标准化） 通用 未完成 未建库
+            #region 50 美国专利全文文本数据（标准化） 通用  未建库
             else if (fileType == "美国专利全文文本数据（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_AMERICAN_PATENT_FULLTEXT, typeof(S_AMERICAN_PATENT_FULLTEXT));
             }
             #endregion
-            #region 51 欧专局专利全文文本数据（标准化） 通用 未完成 未建库
+            #region 51 欧专局专利全文文本数据（标准化） 通用  未建库
             else if (fileType == "欧专局专利全文文本数据（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_EUROPEAN_PATENT_FULLTEXT, typeof(S_EUROPEAN_PATENT_FULLTEXT));
             }
             #endregion
-            #region  52 韩国专利全文代码化数据（标准化） 通用 未完成 未建库 
+            #region  52 韩国专利全文代码化数据（标准化） 通用  未建库 
             else if (fileType == "韩国专利全文代码化数据（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_KOREAN_PATENT_FULLTEXTCODE, typeof(S_KOREAN_PATENT_FULLTEXTCODE));
             }
             #endregion
-            #region  53 瑞士专利全文代码化数据（标准化）通用 未完成 未建库
+            #region  53 瑞士专利全文代码化数据（标准化）通用  未建库
             else if (fileType == "瑞士专利全文代码化数据（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_SWISS_PATENT_FULLTEXTCODE, typeof(S_SWISS_PATENT_FULLTEXTCODE));
             }
             #endregion
-            #region 54 英国专利全文代码化数据（标准化）通用 未完成 未建库
+            #region 54 英国专利全文代码化数据（标准化）通用  未建库
             else if (fileType == "英国专利全文代码化数据（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_BRITISH_PATENT_FULLTEXTCODE, typeof(S_BRITISH_PATENT_FULLTEXTCODE));
             }
             #endregion
-            #region 55 日本专利全文代码化数据（标准化）通用 未完成 未建库
+            #region 55 日本专利全文代码化数据（标准化）通用  未建库
             else if (fileType == "日本专利全文代码化数据（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_JAPAN_PATENT_FULLTEXTCODE, typeof(S_JAPAN_PATENT_FULLTEXTCODE));
@@ -545,37 +554,37 @@ namespace TheDataResourceImporter
 
             }
             #endregion
-            #region 103 比利时专利全文数据（BE）（标准化） 通用字段 未完成
+            #region 103 比利时专利全文数据（BE）（标准化） 通用字段 
             else if (fileType == "比利时专利全文数据（BE）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_BELGIAN_PATENT_FULLTEXT, typeof(S_BELGIAN_PATENT_FULLTEXT));
             }
-            #endregion 未完成
-            #region 104 奥地利专利全文数据（AT）（标准化） 通用字段 未完成
+            #endregion 
+            #region 104 奥地利专利全文数据（AT）（标准化） 通用字段 
             else if (fileType == "奥地利专利全文数据（AT）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_AUSTRIA_PATENT_FULLTEXT, typeof(S_AUSTRIA_PATENT_FULLTEXT));
             }
             #endregion
-            #region 105 西班牙专利全文数据（ES）（标准化） 通用字段 未完成
+            #region 105 西班牙专利全文数据（ES）（标准化） 通用字段 
             else if (fileType == "西班牙专利全文数据（ES）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_SPANISH_PATENT_FULLTEXT, typeof(S_SPANISH_PATENT_FULLTEXT));
             }
             #endregion
-            #region 106 波兰专利著录项及全文数据（PL）（标准化） 通用字段 未完成
+            #region 106 波兰专利著录项及全文数据（PL）（标准化） 通用字段 
             else if (fileType == "波兰专利著录项及全文数据（PL）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_POLAND_PATENT_DESCRIPTION, typeof(S_POLAND_PATENT_DESCRIPTION));
             }
             #endregion
-            #region 107 以色列专利著录项及全文数据（IL）（标准化） 通用字段 未完成
+            #region 107 以色列专利著录项及全文数据（IL）（标准化） 通用字段 
             else if (fileType == "以色列专利著录项及全文数据（IL）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_ISRAEL_PATENT_DESCRIPTION, typeof(S_ISRAEL_PATENT_DESCRIPTION));
             }
             #endregion
-            #region 108 新加坡专利著录项及全文数据（SG）（标准化） 通用字段 未完成
+            #region 108 新加坡专利著录项及全文数据（SG）（标准化） 通用字段 
             else if (fileType == "新加坡专利著录项及全文数据（SG）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_SINGAPORE_PATENT_DESCRIPTION, typeof(S_SINGAPORE_PATENT_DESCRIPTION));
@@ -609,19 +618,19 @@ namespace TheDataResourceImporter
 
             }
             #endregion
-            #region 113 美国外观设计专利数据（DI）通用 未完成
+            #region 113 美国外观设计专利数据（DI）通用 
             else if (fileType == "美国外观设计专利数据（DI）")
             {
 
             }
             #endregion
-            #region 日本外观设计专利数据（DI）通用 未完成
+            #region 日本外观设计专利数据（DI）通用 
             else if (fileType == "日本外观设计专利数据（DI）")
             {
-                
+
             }
             #endregion
-            #region 115 韩国外观设计专利数据（DI）通用 未完成
+            #region 115 韩国外观设计专利数据（DI）通用 
             else if (fileType == "韩国外观设计专利数据（DI）")
             {
 
@@ -676,10 +685,10 @@ namespace TheDataResourceImporter
 
             }
             #endregion
-            #region 127 俄罗斯专利文摘英文翻译数据（DI） 通用字段 未完成
+            #region 127 俄罗斯专利文摘英文翻译数据（DI） 通用字段 
             else if (fileType == "俄罗斯专利文摘英文翻译数据（DI）")
             {
-               
+
 
 
             }
@@ -947,11 +956,10 @@ namespace TheDataResourceImporter
 
             }
             #endregion
-            #region 184 国外专利生物序列加工成品数据 XML
+            #region 186 国外专利生物序列加工成品数据 XML
             else if (fileType == "国外专利生物序列加工成品数据")
             {
-
-
+                parseTarGz186(filePath, entiesContext, importSession, "S_MADRID_BRAND_PURCHASE", fileType);
             }
 
 
@@ -1013,7 +1021,7 @@ namespace TheDataResourceImporter
 
             }
             #endregion
-            #region 213 中国专利摘要英文翻译数据（标准化） XML 通用字段 未完成
+            #region 213 中国专利摘要英文翻译数据（标准化） XML 通用字段 
             else if (fileType == "中国专利摘要英文翻译数据（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_CHINA_PATENT_ABSTRACTS, typeof(S_CHINA_PATENT_ABSTRACTS));
@@ -1218,97 +1226,97 @@ namespace TheDataResourceImporter
 
             }
             #endregion
-            #region 215 国际知识产权组织专利著录项及全文数据（WIPO)（标准化） XML  通用字段 未完成
+            #region 215 国际知识产权组织专利著录项及全文数据（WIPO)（标准化） XML  通用字段 
             else if (fileType == "国际知识产权组织专利著录项及全文数据（WIPO)（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_WIPO_PATENT_DESCRIPTION, typeof(S_WIPO_PATENT_DESCRIPTION));
             }
             #endregion
-            #region 216 加拿大专利著录项及全文数据（CA）（标准化） XML  通用字段 未完成
+            #region 216 加拿大专利著录项及全文数据（CA）（标准化） XML  通用字段 
             else if (fileType == "加拿大专利著录项及全文数据（CA）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_CANADIAN_PATENT_DESCRIPTION, typeof(S_CANADIAN_PATENT_DESCRIPTION));
             }
             #endregion
-            #region 217 俄罗斯专利著录项及全文数据（RU）（标准化） XML  通用字段 未完成
+            #region 217 俄罗斯专利著录项及全文数据（RU）（标准化） XML  通用字段 
             else if (fileType == "俄罗斯专利著录项及全文数据（RU）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_RUSSIAN_PATENT_DESCRIPTION, typeof(S_RUSSIAN_PATENT_DESCRIPTION));
             }
             #endregion
-            #region 218 澳大利亚专利全文文本数据（AU）（标准化） XML  通用字段 未完成
+            #region 218 澳大利亚专利全文文本数据（AU）（标准化） XML  通用字段 
             else if (fileType == "澳大利亚专利全文文本数据（AU）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_AUSTRALIAN_PATENT_FULLTEXT, typeof(S_AUSTRALIAN_PATENT_FULLTEXT));
             }
             #endregion
-            #region 219 德国专利著录项及全文数据（DE）（标准化） XML  通用字段 未完成
+            #region 219 德国专利著录项及全文数据（DE）（标准化） XML  通用字段 
             else if (fileType == "德国专利著录项及全文数据（DE）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_GERMAN_PATENT_DESCRIPTION, typeof(S_GERMAN_PATENT_DESCRIPTION));
             }
             #endregion
-            #region 220 法国专利著录项及全文数据（FR）（标准化） XML  通用字段 未完成
+            #region 220 法国专利著录项及全文数据（FR）（标准化） XML  通用字段 
             else if (fileType == "法国专利著录项及全文数据（FR）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_FRENCH_PATENT_DESCRIPTION, typeof(S_FRENCH_PATENT_DESCRIPTION));
             }
             #endregion
-            #region 221 台湾专利著录项及全文数据（TW）（标准化） XML  通用字段 未完成
+            #region 221 台湾专利著录项及全文数据（TW）（标准化） XML  通用字段 
             else if (fileType == "台湾专利著录项及全文数据（TW）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_TAIWAN_PATENT_DESCRIPTION, typeof(S_TAIWAN_PATENT_DESCRIPTION));
             }
             #endregion
-            #region 222 香港专利著录项数据（HK）（标准化） XML  通用字段 未完成
+            #region 222 香港专利著录项数据（HK）（标准化） XML  通用字段 
             else if (fileType == "香港专利著录项数据（HK）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_HONGKONG_PATENT_DESCRIPTION, typeof(S_HONGKONG_PATENT_DESCRIPTION));
             }
             #endregion
-            #region 223 澳门专利著录项数据（MO）（标准化） XML  通用字段 未完成
+            #region 223 澳门专利著录项数据（MO）（标准化） XML  通用字段 
             else if (fileType == "澳门专利著录项数据（MO）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_MACAO_PATENT_DESCRIPTION, typeof(S_MACAO_PATENT_DESCRIPTION));
             }
             #endregion
-            #region 224 欧亚组织专利著录项及全文数据（EA）（标准化） XML  通用字段 未完成
+            #region 224 欧亚组织专利著录项及全文数据（EA）（标准化） XML  通用字段 
             else if (fileType == "欧亚组织专利著录项及全文数据（EA）（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_EURASIAN_PATENT_DESCRIPTION, typeof(S_EURASIAN_PATENT_DESCRIPTION));
             }
             #endregion
-            #region 225 日本外观设计专利数据（标准化） XML  通用字段 未完成
+            #region 225 日本外观设计专利数据（标准化） XML  通用字段 
             else if (fileType == "日本外观设计专利数据（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_JAPAN_DESIGN_PATENT, typeof(S_JAPAN_DESIGN_PATENT));
             }
             #endregion
-            #region 226 德国外观设计专利数据（标准化） XML  通用字段 未完成
+            #region 226 德国外观设计专利数据（标准化） XML  通用字段 
             else if (fileType == "德国外观设计专利数据（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_GERMAN_DESIGN_PATENT, typeof(S_GERMAN_DESIGN_PATENT));
             }
             #endregion
-            #region 227 法国外观设计专利数据（标准化） XML  通用字段 未完成
+            #region 227 法国外观设计专利数据（标准化） XML  通用字段 
             else if (fileType == "法国外观设计专利数据（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_FRENCH_DESIGN_PATENT, typeof(S_FRENCH_DESIGN_PATENT));
             }
             #endregion
-            #region 228 俄罗斯外观设计专利数据（标准化） XML  通用字段 未完成
+            #region 228 俄罗斯外观设计专利数据（标准化） XML  通用字段 
             else if (fileType == "俄罗斯外观设计专利数据（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_RUSSIAN_DESIGN_PATENT, typeof(S_RUSSIAN_DESIGN_PATENT));
             }
             #endregion
-            #region 229 日本专利文摘英文翻译数据（PAJ)（标准化） XML  通用字段 未完成
+            #region 229 日本专利文摘英文翻译数据（PAJ)（标准化） XML  通用字段 
             else if (fileType == "日本专利文摘英文翻译数据（PAJ)（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_JAPAN_PATENT_ABSTRACTS, typeof(S_JAPAN_PATENT_ABSTRACTS));
             }
             #endregion
-            #region 230 韩国专利文摘英文翻译数据(KPA)（标准化） XML  通用字段 未完成
+            #region 230 韩国专利文摘英文翻译数据(KPA)（标准化） XML  通用字段 
             else if (fileType == "韩国专利文摘英文翻译数据(KPA)（标准化）")
             {
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_KOREA_PATENT_ABSTRACTS, typeof(S_KOREA_PATENT_ABSTRACTS));
@@ -1527,6 +1535,290 @@ namespace TheDataResourceImporter
             accUtil.Close();//关闭数据库                
         }
 
+        private static void parseZip196(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession, string tableName, string dataResChineseName)
+        {
+            handledCount = 0;
+            importStartTime = importSession.START_TIME.Value;
+
+            importSession.TABLENAME = tableName;//设置表名
+            entiesContext.SaveChanges();
+
+
+            MessageUtil.DoAppendTBDetail($"开始寻找'{dataResChineseName}'XML文件：");
+
+
+            List<string> xmlFiles = new List<string>();
+            if (Main.showFileDialog)//文件模式
+            {
+                if (File.Exists(filePath) && filePath.ToUpper().EndsWith("XML"))//指定的文件是必须是XML文件
+                {
+                    xmlFiles.Add(filePath);
+                }
+                else
+                {
+                    importSession.HAS_ERROR = "Y";
+                    IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = filePath, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "没找到指定的XML" };
+                    importSession.FAILED_COUNT++;
+                    entiesContext.IMPORT_ERROR.Add(importError);
+                    entiesContext.SaveChanges();
+                }
+            }
+            else//文件夹模式
+            {
+                string suffix = "*.xml";
+                List<FileInfo> fileInfos = MiscUtil.getFileInfosByDirPathRecuriouslyWithSingleSearchPattern(filePath, suffix);
+                var allXMLFilesFullPaths = (from xmlFileInfo in fileInfos
+                                            select xmlFileInfo.FullName).ToList();
+                if (allXMLFilesFullPaths.Count > 0)
+                {
+                    xmlFiles.AddRange(allXMLFilesFullPaths);
+                }
+                else
+                {
+                    importSession.HAS_ERROR = "Y";
+                    IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = filePath, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "没找到指定的XML" };
+                    importSession.FAILED_COUNT++;
+                    entiesContext.IMPORT_ERROR.Add(importError);
+                    entiesContext.SaveChanges();
+                }
+            }
+
+
+            #region 循环入库
+            foreach (var xmlFilePath in xmlFiles)
+            {
+                //计数变量
+                handledCount++;
+
+                if (forcedStop)
+                {
+                    MessageUtil.DoAppendTBDetail("强制终止了插入");
+                    importSession.NOTE = "用户强制终止了本次插入";
+                    entiesContext.SaveChanges();
+                    break;
+                }
+
+                //解压当前的XML文件
+                string entryFullPath = xmlFilePath;
+
+                //S_CHINA_PATENT_BIBLIOGRAPHIC entityObject = new S_CHINA_PATENT_BIBLIOGRAPHIC() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                //dynamic entityObject = Activator.CreateInstance(entityObjectType);
+                var entityObject = new S_CHINA_PATENT_JUDGMENT();
+                entityObject.ID = System.Guid.NewGuid().ToString();
+
+                entityObject.IMPORT_SESSION_ID = importSession.SESSION_ID;
+                //entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                entityObject.FILE_PATH = filePath;
+                //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                //entiesContext.S_CHINA_PATENT_BIBLIOGRAPHIC.Add(entityObject);
+                entiesContext.S_CHINA_PATENT_JUDGMENT.Add(entityObject);
+                //entiesContext.SaveChanges();
+
+                XDocument doc = XDocument.Load(entryFullPath);
+
+                #region 具体的入库操作,EF
+                //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                //定义命名空间
+                XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                var rootElement = doc.Root;
+
+                entityObject.CN_COURT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-court");
+                entityObject.CN_DECISION_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-decision-number");
+                entityObject.ASSIGNEES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/assignees");
+                entityObject.PATENT_APPLICATION_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/application-reference/document-id/country");
+                entityObject.PATENT_APPLICATION_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/application-reference/document-id/doc-number");
+                entityObject.PATENT_APPLICATION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/application-reference/document-id/date"));
+                entityObject.PATENT_PUBLICATION_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/publication-reference/document-id/country");
+                entityObject.PATENT_PUBLICATION_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/publication-reference/document-id/doc-number");
+                entityObject.PATENT_PUBLICATION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/publication-reference/document-id/date"));
+                entityObject.INVENTION_TITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/invention-title");
+                entityObject.CLASSIFICATION_IPC = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-patent-info/classification-ipc");
+                entityObject.CN_LEGAL_FILE_NUMBERS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-legal-file-numbers");
+                entityObject.CN_LEGAL_PLAINTIFFS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-legal-case-parties/cn-legal-plaintiffs");
+                entityObject.CN_LEGAL_DEFENDANTS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-legal-case-parties/cn-legal-defendants");
+                entityObject.CN_JUDGES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-judges");
+                entityObject.CN_COURT_REPORTERS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-court-reporters");
+                entityObject.CN_VERDICT_DETAIL = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-verdict-detail");
+                entityObject.CN_VERDICT_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-verdict-date/date"));
+                entityObject.PUBLICATION_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-publication-info/document-id/country");
+                entityObject.PUBLICATION_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-publication-info/document-id/doc-number");
+                entityObject.PUBLICATION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-publication-info/document-id/date"));
+                entityObject.CN_PUB_VOL = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-verdict/cn-publication-info/cn-pub-vol");
+                entityObject.PATH_XML = xmlFilePath;
+
+                var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+                try
+                {
+                    entiesContext.SaveChanges();
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+                }
+                catch (Exception ex)
+                {
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入失败!!!");
+                    throw ex;
+                }
+
+                //输出插入记录
+                #endregion
+
+                //更新进度信息
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+            }
+            #endregion 循环入库
+        }
+
+
+        private static void parseZip194(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession, string tableName, string dataResChineseName)
+        {
+            handledCount = 0;
+            importStartTime = importSession.START_TIME.Value;
+
+            importSession.TABLENAME = tableName;//设置表名
+            entiesContext.SaveChanges();
+
+
+            MessageUtil.DoAppendTBDetail($"开始寻找'{dataResChineseName}'XML文件：");
+
+
+            List<string> xmlFiles = new List<string>();
+            if (Main.showFileDialog)//文件模式
+            {
+                if (File.Exists(filePath) && filePath.ToUpper().EndsWith("XML"))//指定的文件是必须是XML文件
+                {
+                    xmlFiles.Add(filePath);
+                }
+                else
+                {
+                    importSession.HAS_ERROR = "Y";
+                    IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = filePath, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "没找到指定的XML" };
+                    importSession.FAILED_COUNT++;
+                    entiesContext.IMPORT_ERROR.Add(importError);
+                    entiesContext.SaveChanges();
+                }
+            }
+            else//文件夹模式
+            {
+                string suffix = "*.xml";
+                List<FileInfo> fileInfos = MiscUtil.getFileInfosByDirPathRecuriouslyWithSingleSearchPattern(filePath, suffix);
+                var allXMLFilesFullPaths = (from xmlFileInfo in fileInfos
+                                            select xmlFileInfo.FullName).ToList();
+                if (allXMLFilesFullPaths.Count > 0)
+                {
+                    xmlFiles.AddRange(allXMLFilesFullPaths);
+                }
+                else
+                {
+                    importSession.HAS_ERROR = "Y";
+                    IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = filePath, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "没找到指定的XML" };
+                    importSession.FAILED_COUNT++;
+                    entiesContext.IMPORT_ERROR.Add(importError);
+                    entiesContext.SaveChanges();
+                }
+            }
+
+
+            #region 循环入库
+            foreach (var xmlFilePath in xmlFiles)
+            {
+                //计数变量
+                handledCount++;
+
+                if (forcedStop)
+                {
+                    MessageUtil.DoAppendTBDetail("强制终止了插入");
+                    importSession.NOTE = "用户强制终止了本次插入";
+                    entiesContext.SaveChanges();
+                    break;
+                }
+
+                //解压当前的XML文件
+                string entryFullPath = xmlFilePath;
+
+                //S_CHINA_PATENT_BIBLIOGRAPHIC entityObject = new S_CHINA_PATENT_BIBLIOGRAPHIC() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                //dynamic entityObject = Activator.CreateInstance(entityObjectType);
+                var entityObject = new S_CHINA_PATENT_REVIEW();
+                entityObject.ID = System.Guid.NewGuid().ToString();
+
+                entityObject.IMPORT_SESSION_ID = importSession.SESSION_ID;
+                //entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                entityObject.FILE_PATH = filePath;
+                //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                //entiesContext.S_CHINA_PATENT_BIBLIOGRAPHIC.Add(entityObject);
+                entiesContext.S_CHINA_PATENT_REVIEW.Add(entityObject);
+                //entiesContext.SaveChanges();
+
+                XDocument doc = XDocument.Load(entryFullPath);
+
+                #region 具体的入库操作,EF
+                //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                //定义命名空间
+                XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                var rootElement = doc.Root;
+
+
+
+                entityObject.CN_DECISION_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-decision-number");
+                entityObject.CN_DECISION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-decision-date/date"));
+                entityObject.APPLICATION_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-patent-info/application-reference/document-id/country");
+                entityObject.APPLICATION_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-patent-info/application-reference/document-id/doc-number");
+                entityObject.APPLICATION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-patent-info/application-reference/document-id/date"));
+                entityObject.APPLICANTS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-patent-info/applicants");
+                entityObject.PUBLICATION_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-patent-info/publication-reference/document-id/country");
+                entityObject.PUBLICATION_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-patent-info/publication-reference/document-id/doc-number");
+                entityObject.PUBLICATION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-patent-info/publication-reference/document-id/date"));
+                entityObject.INVENTION_TITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-patent-info/invention-title");
+                entityObject.CLASSIFICATION_IPC = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-patent-info/classification-ipc");
+                entityObject.CN_COMPLAINANT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-parties/cn-complainant");
+                entityObject.CN_EXAMINERS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-examiners");
+                entityObject.PUBLICATION_INFO_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-publication-info/document-id/country");
+                entityObject.PUBLICATION_INFO_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-publication-info/document-id/doc-number");
+                entityObject.PUBLICATION_INFO_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-publication-info/document-id/date"));
+                entityObject.CN_PUB_VOL = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-publication-info/cn-pub-vol");
+                entityObject.CN_ACCESSORY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-accessories/cn-accessory/file-name");
+                entityObject.CN_LAW_REFERENCE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-decision-abstract/cn-legal-basis/cn-law-reference");
+                entityObject.CN_MAIN_POINT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/cn-decision-abstract/cn-main-points/cn-main-point");
+                entityObject.ABSTRACT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/abstract");
+                entityObject.KEYWORD = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-case-info/keyword");
+                entityObject.CN_BRIEF_HISTORY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-decision-detail/cn-brief-history");
+                entityObject.CN_REASONING = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-decision-detail/cn-reasoning");
+                entityObject.CN_HOLDING = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-appeal-decision/cn-decision-detail/cn-holding");
+                entityObject.PATH_XML = xmlFilePath;
+
+
+
+                var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+                try
+                {
+                    entiesContext.SaveChanges();
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+                }
+                catch (Exception ex)
+                {
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入失败!!!");
+                    throw ex;
+                }
+
+                //输出插入记录
+                #endregion
+
+                //更新进度信息
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+            }
+            #endregion 循环入库
+        }
+
         private static void parseMDB210(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession)
         {
             //SELECT 
@@ -1598,7 +1890,7 @@ namespace TheDataResourceImporter
             importSession.ZIP_ENTRIES_COUNT = archive.Entries.Count(); ;
             entiesContext.SaveChanges();
 
-            
+
             #region 检查目录内无XML的情况 并入库
             var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
                                      where entry.IsDirectory && CompressUtil.getEntryDepth(entry.Key) == 2
@@ -1649,7 +1941,7 @@ namespace TheDataResourceImporter
 
 
                     //是否存在PDF文件
-                    if(null == childPdfEntry)
+                    if (null == childPdfEntry)
                     {
                         entityObject.EXIST_PDF = "0";
                     }
@@ -1741,119 +2033,119 @@ namespace TheDataResourceImporter
                     XDocument doc = XDocument.Load(xmlReader);
 
                     #region 具体的入库操作,EF
-                //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+                    //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
 
-                //定义命名空间
-                XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
-                namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
-                namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
-                //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
-                //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+                    //定义命名空间
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                    namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                    namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                    //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                    //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
 
-                var rootElement = doc.Root;
+                    var rootElement = doc.Root;
 
-                //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
-                entityObject.PN = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/PN");
+                    //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
+                    entityObject.PN = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/PN");
 
-                entityObject.C_ID = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_ID");
+                    entityObject.C_ID = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_ID");
 
-                entityObject.C_LEGAL_NUM = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_LEGAL_NUM");
-                entityObject.C_YEAR = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_YEAR");
-                entityObject.C_VERDICTTYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_VERDICTTYPE");
-                entityObject.C_TITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_TITLE");
-                entityObject.C_NAME = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_NAME");
-                entityObject.C_ORIGIN_PASS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_ORIGIN_PASS");
-
-
-                entityObject.C_IP_TYPES = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/CASE/C_IP_TYPES/C_IP_TYPE");
+                    entityObject.C_LEGAL_NUM = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_LEGAL_NUM");
+                    entityObject.C_YEAR = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_YEAR");
+                    entityObject.C_VERDICTTYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_VERDICTTYPE");
+                    entityObject.C_TITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_TITLE");
+                    entityObject.C_NAME = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_NAME");
+                    entityObject.C_ORIGIN_PASS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_ORIGIN_PASS");
 
 
-                entityObject.C_COURT_NAME = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_NAME");
-                entityObject.C_COURT_PROVINCE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_PROVINCE");
-                entityObject.C_COURT_CITY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_CITY");
-                entityObject.C_COURT_CODE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_CODE");
-                entityObject.C_COURT_LEVEL = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_LEVEL");
-                entityObject.C_COURT_NUM = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_NUM");
-                entityObject.C_CASETYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_CASETYPE");
-                entityObject.C_SUBBRANCH = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_SUBBRANCH");
-                entityObject.C_VERDICTRESULT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_VERDICTRESULT");
-                entityObject.C_APPELLENTINFOS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_APPELLENTINFOS");
-                entityObject.C_PLAINTIFF_PRES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PLAINTIFF_PRES");
-                entityObject.C_PLAINTIFF_AGENT_NAMES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PLAINTIFF_AGENT_NAMES");
-                entityObject.C_PLAINTIFF_AGENT_ORGS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PLAINTIFF_AGENT_ORGS");
-                entityObject.C_APPELLEEINFOS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_APPELLEEINFOS");
-                entityObject.C_DEFENDENT_PRES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_DEFENDENT_PRES");
-                entityObject.C_DEFENDENT_AGENT_NAMES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_DEFENDENT_AGENT_NAMES");
-                entityObject.C_DEFENDENT_AGENT_ORGS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_DEFENDENT_AGENT_ORGS");
-                entityObject.C_THIRD_PERSONINFOS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_THIRD_PERSONINFOS");
-                entityObject.C_THIRD_PERSON_PRES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_THIRD_PERSON_PRES");
-                entityObject.C_THIRD_PERSON_AGENT_NAMES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_THIRD_PERSON_AGENT_NAMES");
-                entityObject.C_THIRD_PERSON_AGENT_ORGS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_THIRD_PERSON_AGENT_ORGS");
-                entityObject.C_LEGALNUMBER_SUPERIORS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_LEGALNUMBER_SUPERIORS");
+                    entityObject.C_IP_TYPES = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/CASE/C_IP_TYPES/C_IP_TYPE");
 
 
-                entityObject.C_STARTDATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_STARTDATE"));
+                    entityObject.C_COURT_NAME = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_NAME");
+                    entityObject.C_COURT_PROVINCE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_PROVINCE");
+                    entityObject.C_COURT_CITY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_CITY");
+                    entityObject.C_COURT_CODE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_CODE");
+                    entityObject.C_COURT_LEVEL = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_LEVEL");
+                    entityObject.C_COURT_NUM = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_COURT_NUM");
+                    entityObject.C_CASETYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_CASETYPE");
+                    entityObject.C_SUBBRANCH = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_SUBBRANCH");
+                    entityObject.C_VERDICTRESULT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_VERDICTRESULT");
+                    entityObject.C_APPELLENTINFOS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_APPELLENTINFOS");
+                    entityObject.C_PLAINTIFF_PRES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PLAINTIFF_PRES");
+                    entityObject.C_PLAINTIFF_AGENT_NAMES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PLAINTIFF_AGENT_NAMES");
+                    entityObject.C_PLAINTIFF_AGENT_ORGS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PLAINTIFF_AGENT_ORGS");
+                    entityObject.C_APPELLEEINFOS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_APPELLEEINFOS");
+                    entityObject.C_DEFENDENT_PRES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_DEFENDENT_PRES");
+                    entityObject.C_DEFENDENT_AGENT_NAMES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_DEFENDENT_AGENT_NAMES");
+                    entityObject.C_DEFENDENT_AGENT_ORGS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_DEFENDENT_AGENT_ORGS");
+                    entityObject.C_THIRD_PERSONINFOS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_THIRD_PERSONINFOS");
+                    entityObject.C_THIRD_PERSON_PRES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_THIRD_PERSON_PRES");
+                    entityObject.C_THIRD_PERSON_AGENT_NAMES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_THIRD_PERSON_AGENT_NAMES");
+                    entityObject.C_THIRD_PERSON_AGENT_ORGS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_THIRD_PERSON_AGENT_ORGS");
+                    entityObject.C_LEGALNUMBER_SUPERIORS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_LEGALNUMBER_SUPERIORS");
 
 
-                entityObject.C_APPLYCOST = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_APPLYCOST");
-                entityObject.C_JUDGECOST = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_JUDGECOST");
+                    entityObject.C_STARTDATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_STARTDATE"));
 
 
-                entityObject.C_PT_NS = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/CASE/C_PT_NS");
-                entityObject.C_PL_NS = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/CASE/C_PL_NS");
-                entityObject.C_TR_NS = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/CASE/C_TR_NS/C_TR_N");
+                    entityObject.C_APPLYCOST = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_APPLYCOST");
+                    entityObject.C_JUDGECOST = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_JUDGECOST");
 
 
-                entityObject.C_VD_IVFO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_VD_IVFO");
-                entityObject.C_PRE_JUDGE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PRE_JUDGE");
-                entityObject.C_PROXY_PRE_JUDGE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PROXY_PRE_JUDGE");
-                entityObject.C_JUDGE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_JUDGE");
-                entityObject.C_PROXY_JUDGE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PROXY_JUDGE");
-                entityObject.C_JURY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_JURY");
-                entityObject.C_CLERK = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_CLERK");
+                    entityObject.C_PT_NS = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/CASE/C_PT_NS");
+                    entityObject.C_PL_NS = MiscUtil.getXElementInnerXMLByXPath(rootElement, "/CASE/C_PL_NS");
+                    entityObject.C_TR_NS = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/CASE/C_TR_NS/C_TR_N");
 
 
-                entityObject.C_VERDICTDATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_VERDICTDATE"));
+                    entityObject.C_VD_IVFO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_VD_IVFO");
+                    entityObject.C_PRE_JUDGE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PRE_JUDGE");
+                    entityObject.C_PROXY_PRE_JUDGE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PROXY_PRE_JUDGE");
+                    entityObject.C_JUDGE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_JUDGE");
+                    entityObject.C_PROXY_JUDGE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PROXY_JUDGE");
+                    entityObject.C_JURY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_JURY");
+                    entityObject.C_CLERK = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_CLERK");
 
 
-                entityObject.S_YEAR = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/S_YEAR");
-                entityObject.HOLDINGTYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/HOLDINGTYPE");
-                entityObject.LAWREFERENCES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/LAWREFERENCES");
-                entityObject.EVIDENCES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/EVIDENCES");
-                entityObject.C_PL_N_KEY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PL_N_KEY");
-                entityObject.C_PL_N_KEY_STANDARD = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PL_N_KEY_STANDARD");
-                entityObject.ALLTEXT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/ALLTEXT");
-                entityObject.CASEFAMILY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/CASEFAMILYS");
-
-                entityObject.EXIST_XML = "1";
-
-                var childPdfEntry = CompressUtil.getChildEntryWhithSuffix(archive, CompressUtil.getFileEntryParentPath(entry.Key), ".PDF");
-
-                //是否存在PDF文件
-                if (null == childPdfEntry)
-                {
-                    entityObject.EXIST_PDF = "0";
-                }
-                else
-                {
-                    entityObject.EXIST_PDF = "1";
-                    entityObject.PATH_PDF = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + childPdfEntry.Key;
-                }
-
-                entityObject.IMPORT_TIME = System.DateTime.Now;
+                    entityObject.C_VERDICTDATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_VERDICTDATE"));
 
 
-                
+                    entityObject.S_YEAR = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/S_YEAR");
+                    entityObject.HOLDINGTYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/HOLDINGTYPE");
+                    entityObject.LAWREFERENCES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/LAWREFERENCES");
+                    entityObject.EVIDENCES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/EVIDENCES");
+                    entityObject.C_PL_N_KEY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PL_N_KEY");
+                    entityObject.C_PL_N_KEY_STANDARD = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/C_PL_N_KEY_STANDARD");
+                    entityObject.ALLTEXT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/ALLTEXT");
+                    entityObject.CASEFAMILY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/CASE/CASEFAMILYS");
 
-                entiesContext.SaveChanges();
+                    entityObject.EXIST_XML = "1";
+
+                    var childPdfEntry = CompressUtil.getChildEntryWhithSuffix(archive, CompressUtil.getFileEntryParentPath(entry.Key), ".PDF");
+
+                    //是否存在PDF文件
+                    if (null == childPdfEntry)
+                    {
+                        entityObject.EXIST_PDF = "0";
+                    }
+                    else
+                    {
+                        entityObject.EXIST_PDF = "1";
+                        entityObject.PATH_PDF = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + childPdfEntry.Key;
+                    }
+
+                    entityObject.IMPORT_TIME = System.DateTime.Now;
 
 
 
 
-                //输出插入记录
-                var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+                    entiesContext.SaveChanges();
 
-                MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+
+
+
+                    //输出插入记录
+                    var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
 
 
 
@@ -2045,8 +2337,198 @@ namespace TheDataResourceImporter
             entiesContext.SaveChanges();
         }
 
+        private static void parseTarGz186(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession, string tableName, string dataResChineseName)
+        {
+            handledCount = 0;
+            importStartTime = importSession.START_TIME.Value;
+
+            importSession.TABLENAME = tableName;//设置表名
+            entiesContext.SaveChanges();
+
+            SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+            IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+            //总条目数
+            importSession.IS_ZIP = "Y";
+            totalCount = archive.Entries.Count();
+            importSession.ZIP_ENTRIES_COUNT = totalCount;
+            entiesContext.SaveChanges();
+
+            /**
+            #region 检查目录内无XML的情况
+            var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                     where entry.IsDirectory && CompressUtil.getEntryDepth(entry.Key) == 2
+                                     select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+            //排除压缩包中无关XML
+            var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                            where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getEntryDepth(entry.Key) == 3
+                                            select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+            var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+            //发现存在XML不存在的情况
+            if (dirEntriesWithoutXML.Count() > 0)
+            {
+                string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                MessageUtil.DoAppendTBDetail(msg);
+                LogHelper.WriteErrorLog(msg);
+
+                foreach (string entryKey in dirEntriesWithoutXML)
+                {
+                    importSession.HAS_ERROR = "Y";
+                    IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                    importSession.FAILED_COUNT++;
+                    entiesContext.IMPORT_ERROR.Add(importError);
+                    entiesContext.SaveChanges();
+                }
+            }
+            #endregion
+            **/
+
+            MessageUtil.DoAppendTBDetail($"开始寻找'{dataResChineseName}'XML文件：");
+
+            var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getEntryDepth(entry.Key) == 3
+                                select entry;
+
+            totalCount = allXMLEntires.Count();
+
+            MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+            //已处理计数清零
+            handledCount = 0;
+            if (0 == allXMLEntires.Count())
+            {
+                MessageUtil.DoAppendTBDetail("没有找到XML");
+                importSession.NOTE = "没有找到XML";
+                //添加错误信息
+                entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                entiesContext.SaveChanges();
+            }
+            #region 循环入库
+            foreach (IArchiveEntry entry in allXMLEntires)
+            {
+                //计数变量
+                handledCount++;
+
+                if (forcedStop)
+                {
+                    MessageUtil.DoAppendTBDetail("强制终止了插入");
+                    importSession.NOTE = "用户强制终止了本次插入";
+                    entiesContext.SaveChanges();
+                    break;
+                }
+
+                var keyTemp = entry.Key;
+
+                //解压当前的XML文件
+                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                if ("" == entryFullPath.Trim())
+                {
+                    MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                    LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                    importSession.FAILED_COUNT++;
+                    IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                    entiesContext.IMPORT_ERROR.Add(errorTemp);
+                    entiesContext.SaveChanges();
+                    continue;
+                }
+
+                //S_CHINA_PATENT_BIBLIOGRAPHIC entityObject = new S_CHINA_PATENT_BIBLIOGRAPHIC() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                //dynamic entityObject = Activator.CreateInstance(entityObjectType);
+                var entityObject = new S_FOREIGN_PATENT_SEQUENCE();
+                entityObject.ID = System.Guid.NewGuid().ToString();
+
+                entityObject.IMPORT_SESSION_ID = importSession.SESSION_ID;
+                entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                entityObject.FILE_PATH = filePath;
+                //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                //entiesContext.S_CHINA_PATENT_BIBLIOGRAPHIC.Add(entityObject);
+                entiesContext.S_FOREIGN_PATENT_SEQUENCE.Add(entityObject);
+                //entiesContext.SaveChanges();
+
+                XDocument doc = XDocument.Load(entryFullPath);
+
+                #region 具体的入库操作,EF
+                //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                //定义命名空间
+                XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                var rootElement = doc.Root;
+
+                entityObject.FILENAME = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content", "file");
+                entityObject.DATEEXCHANGE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/content", "dateExchange"));
+                entityObject.DATEPRODUCED = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/content", "dateProduced"));
+                entityObject.PATCNT = MiscUtil.tryParseDecimalNullable(MiscUtil.getXElementSingleValueByXPath(rootElement, "/content", "patcnt"));
+                entityObject.FILECNT = MiscUtil.tryParseDecimalNullable(MiscUtil.getXElementSingleValueByXPath(rootElement, "/content", "filecnt"));
+                entityObject.DATASIZE = MiscUtil.tryParseDecimalNullable(MiscUtil.getXElementSingleValueByXPath(rootElement, "/content", "size"));
+                entityObject.MD5 = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content", "md5");
+                entityObject.STATUS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content", "status");
+                entityObject.DOCLIST_TOPIC = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist", "topic");
+                entityObject.DOCLIST_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist", "country");
+                entityObject.DOCLIST_DOCNUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist", "docNumber");
+                entityObject.DOCLIST_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist", "kind");
+                entityObject.DOCLIST_PNO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist", "PNO");
+                entityObject.DOCLIST_PNS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist", "PNS");
+                entityObject.DOCLIST_DATEPUBLICATION = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist", "datePublication"));
+                entityObject.DOCLIST_FORMAT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist", "Format");
+                entityObject.DOCLIST_PATH = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist", "path");
+                entityObject.DOCLIST_STATUS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist", "status");
+
+
+                entityObject.DOCLIST_FILENAME = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist/file", "filename");
+                entityObject.DOCLIST_FILETYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist/file", "filetype");
+                entityObject.DOCLIST_SECTION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist/file", "section");
+                entityObject.DOCLIST_SEQLIST_AMOUNT = MiscUtil.tryParseIntNullable(MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist/file/seqlist", "amount"));
+
+
+
+                /*
+                entityObject.DOCLIST_SEQLIST_SEQ_ID = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/content/doclist/file/seqlist/seq", "id");
+                entityObject.DOCLIST_SEQLIST_SEQ_LENGTH = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist/file/seqlist/seq/length");
+                entityObject.DOCLIST_SEQLIST_SEQ_TYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist/file/seqlist/seq/type");
+                entityObject.DOCLIST_SEQLIST_SEQ_GN = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist/file/seqlist/seq/gn");
+                entityObject.DOCLIST_SEQLIST_SEQ_OG = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist/file/seqlist/seq/og");
+                entityObject.DOCLIST_SEQLIST_SEQ_ORGANISM = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist/file/seqlist/seq/organism");
+                entityObject.DOCLIST_SEQLIST_SEQ_FEATURES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/content/doclist/file/seqlist/seq/features/feature/sequence");
+                */
+
+                var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+                try
+                {
+                    entiesContext.SaveChanges();
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+                }
+                catch (Exception ex)
+                {
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入失败!!!");
+                    throw ex;
+                }
+
+                //输出插入记录
+                #endregion
+
+                //更新进度信息
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+            }
+            #endregion 循环入库
+        }
+
 
         #region 商标相关
+
+
+
+
         private static void parseZip172(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession, string tableName, string dataResChineseName)
         {
             handledCount = 0;
@@ -3510,7 +3992,7 @@ namespace TheDataResourceImporter
                 entityObject.BASEINFO_APPLICATION_NO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/TRADEMARK/BASEINFO/APPLICATION-NO");
 
                 var icn = MiscUtil.getXElementSingleValueByXPath(rootElement, "/TRADEMARK/BASEINFO/ICN");
-                if(!string.IsNullOrEmpty(icn.Trim()))
+                if (!string.IsNullOrEmpty(icn.Trim()))
                 {
                     try
                     {

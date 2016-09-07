@@ -18,9 +18,9 @@ namespace TheDataResourceImporter
         public string FILENAME { get; set; }
         public Nullable<System.DateTime> DATEEXCHANGE { get; set; }
         public Nullable<System.DateTime> DATEPRODUCED { get; set; }
-        public Nullable<int> PATCNT { get; set; }
-        public Nullable<int> FILECNT { get; set; }
-        public Nullable<int> DATASIZE { get; set; }
+        public Nullable<decimal> PATCNT { get; set; }
+        public Nullable<decimal> FILECNT { get; set; }
+        public Nullable<decimal> DATASIZE { get; set; }
         public string MD5 { get; set; }
         public string STATUS { get; set; }
         public string DOCLIST_TOPIC { get; set; }
