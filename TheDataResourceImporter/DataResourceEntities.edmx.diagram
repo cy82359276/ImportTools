@@ -61,7 +61,6 @@
         <EntityTypeShape EntityType="Model.S_JAPAN_DESIGN_PATENT" Width="1.5" PointX="30.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_JAPAN_PATENT_ABSTRACTS" Width="1.5" PointX="0.75" PointY="30.75" />
         <EntityTypeShape EntityType="Model.S_JAPAN_PATENT_FULLTEXTCODE" Width="1.5" PointX="30.75" PointY="9.75" />
-        <EntityTypeShape EntityType="Model.S_JOURNAL_PROJECT_ABSTRACT" Width="1.5" PointX="30.75" PointY="18.75" />
         <EntityTypeShape EntityType="Model.S_KOREA_DESIGN_PATENT" Width="1.5" PointX="12.75" PointY="31.75" />
         <EntityTypeShape EntityType="Model.S_KOREA_PATENT_ABSTRACTS" Width="1.5" PointX="14.75" PointY="31.75" />
         <EntityTypeShape EntityType="Model.S_KOREAN_PATENT_FULLTEXTCODE" Width="1.5" PointX="32.75" PointY="0.75" />
@@ -90,6 +89,7 @@
         <EntityTypeShape EntityType="Model.S_FOREIGN_PATENT_SEQUENCE" Width="1.5" PointX="37.375" PointY="32.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_REVIEW" Width="1.5" PointX="39.375" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_JUDGMENT" Width="1.5" PointX="27.375" PointY="38.75" />
+        <EntityTypeShape EntityType="Model.S_JOURNAL_PROJECT_ABSTRACT" Width="1.5" PointX="31.375" PointY="18.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

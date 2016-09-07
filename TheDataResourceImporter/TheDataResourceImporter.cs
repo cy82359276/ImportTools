@@ -314,6 +314,8 @@ namespace TheDataResourceImporter
                 //parse06(filePath, entiesContext, importSession);
                 parseZipUniversalSTA(filePath, entiesContext, importSession, entiesContext.S_CHINA_PATENT_BIBLIOGRAPHIC, typeof(S_CHINA_PATENT_BIBLIOGRAPHIC));
             }
+
+
             #endregion
             #region 10 中国专利数据法律状态数据 TRS
             else if (fileType == "中国专利法律状态数据")
@@ -669,10 +671,9 @@ namespace TheDataResourceImporter
 
             }
             #endregion
-            #region
+            #region 121 中国专利全文数据PDF（DI）
             else if (fileType == "中国专利全文数据PDF（DI）")
             {
-
 
             }
             #endregion
@@ -765,8 +766,7 @@ namespace TheDataResourceImporter
             #region 153 中外期刊的著录项目与文摘数据 XML
             else if (fileType == "中外期刊的著录项目与文摘数据")
             {
-
-
+                parseZip153(filePath, entiesContext, importSession, "S_JOURNAL_PROJECT_ABSTRACT", fileType);
             }
             #endregion
             #region 162 中国法院判例初加工数据 XML
@@ -1677,7 +1677,6 @@ namespace TheDataResourceImporter
             #endregion 循环入库
         }
 
-
         private static void parseXML194(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession, string tableName, string dataResChineseName)
         {
             handledCount = 0;
@@ -2178,6 +2177,217 @@ namespace TheDataResourceImporter
             #endregion 循环入库
         }
 
+        private static void parseZip153(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession, string tableName, string dataResChineseName)
+        {
+            handledCount = 0;
+            importStartTime = importSession.START_TIME.Value;
+
+            importSession.TABLENAME = tableName;//设置表名
+            entiesContext.SaveChanges();
+
+            SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+            IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+            //总条目数
+            importSession.IS_ZIP = "Y";
+            totalCount = archive.Entries.Count();
+            importSession.ZIP_ENTRIES_COUNT = totalCount;
+            entiesContext.SaveChanges();
+
+            /**
+            #region 检查目录内无XML的情况
+            var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                     where entry.IsDirectory && CompressUtil.getEntryDepth(entry.Key) == 2
+                                     select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+            //排除压缩包中无关XML
+            var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                            where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getEntryDepth(entry.Key) == 3
+                                            select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+            var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+            //发现存在XML不存在的情况
+            if (dirEntriesWithoutXML.Count() > 0)
+            {
+                string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                MessageUtil.DoAppendTBDetail(msg);
+                LogHelper.WriteErrorLog(msg);
+
+                foreach (string entryKey in dirEntriesWithoutXML)
+                {
+                    importSession.HAS_ERROR = "Y";
+                    IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                    importSession.FAILED_COUNT++;
+                    entiesContext.IMPORT_ERROR.Add(importError);
+                    entiesContext.SaveChanges();
+                }
+            }
+            #endregion
+
+            **/
+
+
+            MessageUtil.DoAppendTBDetail($"开始寻找'{dataResChineseName}'XML文件：");
+
+            var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getEntryDepth(entry.Key) == 3
+                                select entry;
+
+            totalCount = allXMLEntires.Count();
+
+            MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+            //已处理计数清零
+            handledCount = 0;
+            if (0 == allXMLEntires.Count())
+            {
+                MessageUtil.DoAppendTBDetail("没有找到XML");
+                importSession.NOTE = "没有找到XML";
+                //添加错误信息
+                entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                entiesContext.SaveChanges();
+            }
+            #region 循环入库
+            foreach (IArchiveEntry entry in allXMLEntires)
+            {
+                //计数变量
+                handledCount++;
+
+                if (forcedStop)
+                {
+                    MessageUtil.DoAppendTBDetail("强制终止了插入");
+                    importSession.NOTE = "用户强制终止了本次插入";
+                    entiesContext.SaveChanges();
+                    break;
+                }
+
+                var keyTemp = entry.Key;
+
+                //解压当前的XML文件
+                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                if ("" == entryFullPath.Trim())
+                {
+                    MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                    LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                    importSession.FAILED_COUNT++;
+                    IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                    entiesContext.IMPORT_ERROR.Add(errorTemp);
+                    entiesContext.SaveChanges();
+                    continue;
+                }
+
+                //S_CHINA_PATENT_BIBLIOGRAPHIC entityObject = new S_CHINA_PATENT_BIBLIOGRAPHIC() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                //dynamic entityObject = Activator.CreateInstance(entityObjectType);
+                var entityObject = new S_JOURNAL_PROJECT_ABSTRACT();
+                entityObject.ID = System.Guid.NewGuid().ToString();
+
+                entityObject.IMPORT_SESSION_ID = importSession.SESSION_ID;
+                entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                entityObject.FILE_PATH = filePath;
+                //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                //entiesContext.S_CHINA_PATENT_BIBLIOGRAPHIC.Add(entityObject);
+                entiesContext.S_JOURNAL_PROJECT_ABSTRACT.Add(entityObject);
+                //entiesContext.SaveChanges();
+
+                XDocument doc = XDocument.Load(entryFullPath);
+
+                #region 具体的入库操作,EF
+                //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                //定义命名空间
+                XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                var rootElement = doc.Root;
+
+                entityObject.SYSTEM_FIELD_RID = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/system_field/rid");
+                entityObject.CLASS_INFO_CLASS_CODE = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/class_info/class_code");
+                entityObject.CLASS_INFO_SUBJECT_ALL = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/class_info/subject_all");
+                entityObject.CLASS_INFO_ASJC = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/class_info/asjc");
+                entityObject.CLASS_INFO_CJCR = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/class_info/cjcr");
+                entityObject.CLASS_INFO_CSSCI = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/class_info/cssci");
+                entityObject.CLASS_INFO_JCR = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/class_info/jcr");
+                entityObject.CLASS_INFO_PKU = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/class_info/pku");
+                entityObject.CLASS_INFO_SFX = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/class_info/sfx");
+                entityObject.CLASS_INFO_INDEXBY = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/class_info/indexby");
+                entityObject.ARTICLE_INFO_TITLE_SOURCE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/article_info/title_source");
+                entityObject.ARTICLE_INFO_TITLE_CN = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/article_info/title_cn");
+                entityObject.ARTICLE_INFO_TITLE_EN = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/article_info/title_en");
+                entityObject.ARTICLE_INFO_VENDOR = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/article_info/vendor");
+                entityObject.ARTICLE_INFO_COUNTRY = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/article_info/country");
+                entityObject.ARTICLE_INFO_LANGUAGE = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/article_info/language");
+                entityObject.ARTICLE_INFO_KEYWORDS_ALL = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/article_info/keywords_all");
+                entityObject.ARTICLE_INFO_KEYWORDS_SOURCE = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/article_info/keywords_source");
+                entityObject.ARTICLE_INFO_KEYWORDS_CN = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/article_info/keywords_cn");
+                entityObject.ARTICLE_INFO_KEYWORDS_EN = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/article_info/keywords_en");
+                entityObject.ARTICLE_INFO_ABSTRACT_ALL = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/article_info/abstract_all");
+                entityObject.ARTICLE_INFO_ABSTRACT_SOURCE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/article_info/abstract_source");
+                entityObject.ARTICLE_INFO_ABSTRACT_CN = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/article_info/abstract_cn");
+                entityObject.ARTICLE_INFO_ABSTRACT_EN = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/article_info/abstract_en");
+                entityObject.ARTICLE_INFO_FUND = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/article_info/fund");
+                entityObject.ARTICLE_INFO_SYS_SCORE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/article_info/sys_score");
+                entityObject.ARTICLE_INFO_PAGE_COUNT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/article_info/page_count");
+                entityObject.ARTICLE_INFO_PAGES = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/article_info/pages");
+                entityObject.RESOURCE_INFO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/resource_info");
+                entityObject.FIRST_AUTHOR_SOURCE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/first_author/first_author_source");
+                entityObject.FIRST_AUTHOR_CN = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/first_author/first_author_cn");
+                entityObject.FIRST_AUTHOR_EN = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/first_author/first_author_en");
+                entityObject.AUTHOR_SOURCE = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/author/author_source");
+                entityObject.AUTHOR_CN = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/author/author_cn");
+                entityObject.AUTHOR_EN = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/cauthor/author_en");
+                entityObject.ORG_SOURCE = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/org/org_source");
+                entityObject.ORG_CN = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/org/org_cn");
+                entityObject.ORG_EN = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/org/org_en");
+                entityObject.JOURNAL_INFO_JID = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/journal_information/jid");
+                entityObject.JOURNAL_INFO_LITERATURE_ALL = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/journal_information/literature_all");
+                entityObject.JOURNAL_INFO_LITERATURE_SOURCE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/journal_information/literature_sources");
+                entityObject.JOURNAL_INFO_LITERATURE_CN = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/journal_information/literature_cn");
+                entityObject.JOURNAL_INFO_LITERATURE_EN = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/journal_information/literature_en");
+                entityObject.JOURNAL_INFO_DOI = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/journal_information/doi");
+                entityObject.JOURNAL_INFO_ISSN = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/journal_information/issn");
+                entityObject.JOURNAL_INFO_CN = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/journal_information/cn");
+                entityObject.JOURNAL_INFO_EISSN = MiscUtil.getXElementMultiValueByXPathSepratedByDoubleColon(rootElement, "/root/journals/journal_information/eissn");
+                entityObject.JOURNAL_INFO_VOLUME = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/journal_information/volume");
+                entityObject.JOURNAL_INFO_ISSUE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/journal_information/issue");
+                entityObject.JOURNAL_INFO_MONTH = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/journal_information/month");
+                entityObject.JOURNAL_INFO_YEAR = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/journal_information/year");
+                entityObject.JOURNAL_INFO_PUB_DATE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/journal_information/pub_date");
+                entityObject.DOCUMENT_TYPE_SCHOLARLY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/document_type_info/scholarly");
+                entityObject.DOCUMENT_TYPE_CORE_JOURNAL = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/document_type_info/core_journal");
+                entityObject.DOCUMENT_TYPE_OPEN_ACCESS = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/document_type_info/open_access");
+                entityObject.DOCUMENT_TYPE_PEER_REVIEW = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/document_type_info/peer_review");
+                entityObject.DOCUMENT_TYPE_FREE_CONTENT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/document_type_info/free_content");
+                entityObject.DOCUMENT_TYPE_FUND_SUPPORT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/document_type_info/fund_support");
+                entityObject.DOCUMENT_TYPE_DOC_TYPE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/root/journals/document_type_info/doc_type");
+
+                var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+                try
+                {
+                    entiesContext.SaveChanges();
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+                }
+                catch (Exception ex)
+                {
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入失败!!!");
+                    throw ex;
+                }
+
+                //输出插入记录
+                #endregion
+
+                //更新进度信息
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+            }
+            #endregion 循环入库
+        }
+
         private static void parseTRS14(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession)
         {
             MessageUtil.DoAppendTBDetail($"正在解析TRS文件");
@@ -2529,12 +2739,7 @@ namespace TheDataResourceImporter
             #endregion 循环入库
         }
 
-
         #region 商标相关
-
-
-
-
         private static void parseZip172(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession, string tableName, string dataResChineseName)
         {
             handledCount = 0;

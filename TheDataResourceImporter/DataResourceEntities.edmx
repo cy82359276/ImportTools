@@ -2155,70 +2155,70 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar2" MaxLength="30" Nullable="false" />
-          <Property Name="SYSTEM_FIELD_RID" Type="varchar2" MaxLength="100" />
-          <Property Name="CLASS_INFO_CLASS_CODE" Type="varchar2" MaxLength="1000" />
-          <Property Name="CLASS_INFO_SUBJECT_ALL" Type="varchar2" MaxLength="1000" />
-          <Property Name="CLASS_INFO_ASJC" Type="varchar2" MaxLength="200" />
-          <Property Name="CLASS_INFO_CJCR" Type="varchar2" MaxLength="200" />
-          <Property Name="CLASS_INFO_CSSCI" Type="varchar2" MaxLength="200" />
-          <Property Name="CLASS_INFO_JCR" Type="varchar2" MaxLength="200" />
-          <Property Name="CLASS_INFO_PKU" Type="varchar2" MaxLength="200" />
-          <Property Name="CLASS_INFO_SFX" Type="varchar2" MaxLength="200" />
-          <Property Name="CLASS_INFO_INDEXBY" Type="varchar2" MaxLength="1000" />
-          <Property Name="ARTICLE_INFO_TITLE_SOURCE" Type="varchar2" MaxLength="300" />
-          <Property Name="ARTICLE_INFO_TITLE_CN" Type="varchar2" MaxLength="300" />
-          <Property Name="ARTICLE_INFO_TITLE_EN" Type="varchar2" MaxLength="300" />
-          <Property Name="ARTICLE_INFO_VENDOR" Type="varchar2" MaxLength="200" />
-          <Property Name="ARTICLE_INFO_COUNTRY" Type="varchar2" MaxLength="30" />
-          <Property Name="ARTICLE_INFO_LANGUAGE" Type="varchar2" MaxLength="100" />
-          <Property Name="ARTICLE_INFO_KEYWORDS_ALL" Type="varchar2" MaxLength="1000" />
-          <Property Name="ARTICLE_INFO_KEYWORDS_SOURCE" Type="varchar2" MaxLength="1000" />
-          <Property Name="ARTICLE_INFO_KEYWORDS_CN" Type="varchar2" MaxLength="1000" />
-          <Property Name="ARTICLE_INFO_KEYWORDS_EN" Type="varchar2" MaxLength="1000" />
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="SYSTEM_FIELD_RID" Type="varchar2" MaxLength="1000" />
+          <Property Name="CLASS_INFO_CLASS_CODE" Type="clob" />
+          <Property Name="CLASS_INFO_SUBJECT_ALL" Type="clob" />
+          <Property Name="CLASS_INFO_ASJC" Type="clob" />
+          <Property Name="CLASS_INFO_CJCR" Type="clob" />
+          <Property Name="CLASS_INFO_CSSCI" Type="clob" />
+          <Property Name="CLASS_INFO_JCR" Type="clob" />
+          <Property Name="CLASS_INFO_PKU" Type="clob" />
+          <Property Name="CLASS_INFO_SFX" Type="clob" />
+          <Property Name="CLASS_INFO_INDEXBY" Type="clob" />
+          <Property Name="ARTICLE_INFO_TITLE_SOURCE" Type="clob" />
+          <Property Name="ARTICLE_INFO_TITLE_CN" Type="clob" />
+          <Property Name="ARTICLE_INFO_TITLE_EN" Type="clob" />
+          <Property Name="ARTICLE_INFO_VENDOR" Type="clob" />
+          <Property Name="ARTICLE_INFO_COUNTRY" Type="clob" />
+          <Property Name="ARTICLE_INFO_LANGUAGE" Type="clob" />
+          <Property Name="ARTICLE_INFO_KEYWORDS_ALL" Type="clob" />
+          <Property Name="ARTICLE_INFO_KEYWORDS_SOURCE" Type="clob" />
+          <Property Name="ARTICLE_INFO_KEYWORDS_CN" Type="clob" />
+          <Property Name="ARTICLE_INFO_KEYWORDS_EN" Type="clob" />
           <Property Name="ARTICLE_INFO_ABSTRACT_ALL" Type="clob" />
           <Property Name="ARTICLE_INFO_ABSTRACT_SOURCE" Type="clob" />
           <Property Name="ARTICLE_INFO_ABSTRACT_CN" Type="clob" />
           <Property Name="ARTICLE_INFO_ABSTRACT_EN" Type="clob" />
-          <Property Name="ARTICLE_INFO_FUND" Type="varchar2" MaxLength="200" />
-          <Property Name="ARTICLE_INFO_SYS_SCORE" Type="varchar2" MaxLength="50" />
-          <Property Name="ARTICLE_INFO_PAGE_COUNT" Type="varchar2" MaxLength="50" />
-          <Property Name="ARTICLE_INFO_PAGES" Type="varchar2" MaxLength="50" />
+          <Property Name="ARTICLE_INFO_FUND" Type="clob" />
+          <Property Name="ARTICLE_INFO_SYS_SCORE" Type="clob" />
+          <Property Name="ARTICLE_INFO_PAGE_COUNT" Type="clob" />
+          <Property Name="ARTICLE_INFO_PAGES" Type="clob" />
           <Property Name="RESOURCE_INFO" Type="clob" />
-          <Property Name="FIRST_AUTHOR_SOURCE" Type="varchar2" MaxLength="50" />
-          <Property Name="FIRST_AUTHOR_CN" Type="varchar2" MaxLength="50" />
-          <Property Name="FIRST_AUTHOR_EN" Type="varchar2" MaxLength="50" />
-          <Property Name="AUTHOR_SOURCE" Type="varchar2" MaxLength="500" />
-          <Property Name="AUTHOR_CN" Type="varchar2" MaxLength="500" />
-          <Property Name="AUTHOR_EN" Type="varchar2" MaxLength="500" />
-          <Property Name="ORG_SOURCE" Type="varchar2" MaxLength="200" />
-          <Property Name="ORG_CN" Type="varchar2" MaxLength="200" />
-          <Property Name="ORG_EN" Type="varchar2" MaxLength="200" />
-          <Property Name="JOURNAL_INFO_JID" Type="varchar2" MaxLength="200" />
-          <Property Name="JOURNAL_INFO_LITERATURE_ALL" Type="varchar2" MaxLength="1000" />
-          <Property Name="JOURNAL_INFO_LITERATURE_SOURCE" Type="varchar2" MaxLength="1000" />
-          <Property Name="JOURNAL_INFO_LITERATURE_CN" Type="varchar2" MaxLength="1000" />
-          <Property Name="JOURNAL_INFO_LITERATURE_EN" Type="varchar2" MaxLength="1000" />
-          <Property Name="JOURNAL_INFO_DOI" Type="varchar2" MaxLength="200" />
-          <Property Name="JOURNAL_INFO_ISSN" Type="varchar2" MaxLength="200" />
-          <Property Name="JOURNAL_INFO_CN" Type="varchar2" MaxLength="200" />
-          <Property Name="JOURNAL_INFO_EISSN" Type="varchar2" MaxLength="200" />
-          <Property Name="JOURNAL_INFO_VOLUME" Type="varchar2" MaxLength="20" />
-          <Property Name="JOURNAL_INFO_ISSUE" Type="varchar2" MaxLength="20" />
-          <Property Name="JOURNAL_INFO_MONTH" Type="varchar2" MaxLength="20" />
-          <Property Name="JOURNAL_INFO_YEAR" Type="varchar2" MaxLength="20" />
-          <Property Name="JOURNAL_INFO_PUB_DATE" Type="varchar2" MaxLength="20" />
-          <Property Name="DOCUMENT_TYPE_SCHOLARLY" Type="varchar2" MaxLength="20" />
-          <Property Name="DOCUMENT_TYPE_CORE_JOURNAL" Type="varchar2" MaxLength="20" />
-          <Property Name="DOCUMENT_TYPE_OPEN_ACCESS" Type="varchar2" MaxLength="20" />
-          <Property Name="DOCUMENT_TYPE_PEER_REVIEW" Type="varchar2" MaxLength="20" />
-          <Property Name="DOCUMENT_TYPE_FREE_CONTENT" Type="varchar2" MaxLength="20" />
-          <Property Name="DOCUMENT_TYPE_FUND_SUPPORT" Type="varchar2" MaxLength="20" />
-          <Property Name="DOCUMENT_TYPE_DOC_TYPE" Type="varchar2" MaxLength="20" />
+          <Property Name="FIRST_AUTHOR_SOURCE" Type="clob" />
+          <Property Name="FIRST_AUTHOR_CN" Type="clob" />
+          <Property Name="FIRST_AUTHOR_EN" Type="clob" />
+          <Property Name="AUTHOR_SOURCE" Type="clob" />
+          <Property Name="AUTHOR_CN" Type="clob" />
+          <Property Name="AUTHOR_EN" Type="clob" />
+          <Property Name="ORG_SOURCE" Type="clob" />
+          <Property Name="ORG_CN" Type="clob" />
+          <Property Name="ORG_EN" Type="clob" />
+          <Property Name="JOURNAL_INFO_JID" Type="clob" />
+          <Property Name="JOURNAL_INFO_LITERATURE_ALL" Type="clob" />
+          <Property Name="JOURNAL_INFO_LITERATURE_SOURCE" Type="clob" />
+          <Property Name="JOURNAL_INFO_LITERATURE_CN" Type="clob" />
+          <Property Name="JOURNAL_INFO_LITERATURE_EN" Type="clob" />
+          <Property Name="JOURNAL_INFO_DOI" Type="clob" />
+          <Property Name="JOURNAL_INFO_ISSN" Type="clob" />
+          <Property Name="JOURNAL_INFO_CN" Type="clob" />
+          <Property Name="JOURNAL_INFO_EISSN" Type="clob" />
+          <Property Name="JOURNAL_INFO_VOLUME" Type="clob" />
+          <Property Name="JOURNAL_INFO_ISSUE" Type="clob" />
+          <Property Name="JOURNAL_INFO_MONTH" Type="clob" />
+          <Property Name="JOURNAL_INFO_YEAR" Type="clob" />
+          <Property Name="JOURNAL_INFO_PUB_DATE" Type="clob" />
+          <Property Name="DOCUMENT_TYPE_SCHOLARLY" Type="clob" />
+          <Property Name="DOCUMENT_TYPE_CORE_JOURNAL" Type="clob" />
+          <Property Name="DOCUMENT_TYPE_OPEN_ACCESS" Type="clob" />
+          <Property Name="DOCUMENT_TYPE_PEER_REVIEW" Type="clob" />
+          <Property Name="DOCUMENT_TYPE_FREE_CONTENT" Type="clob" />
+          <Property Name="DOCUMENT_TYPE_FUND_SUPPORT" Type="clob" />
+          <Property Name="DOCUMENT_TYPE_DOC_TYPE" Type="clob" />
           <Property Name="IMPORT_SESSION_ID" Type="nvarchar2" MaxLength="100" />
           <Property Name="IMPORT_TIME" Type="date" />
-          <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="1000" />
-          <Property Name="FILE_PATH" Type="varchar2" MaxLength="1000" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="varchar2" MaxLength="500" />
+          <Property Name="FILE_PATH" Type="varchar2" MaxLength="500" />
           <Property Name="SESSION_INDEX" Type="number" Precision="38" Scale="0" />
         </EntityType>
         <EntityType Name="S_KOREA_DESIGN_PATENT">
@@ -3088,7 +3088,6 @@
           <EntitySet Name="S_JAPAN_DESIGN_PATENT" EntityType="Model.S_JAPAN_DESIGN_PATENT" />
           <EntitySet Name="S_JAPAN_PATENT_ABSTRACTS" EntityType="Model.S_JAPAN_PATENT_ABSTRACTS" />
           <EntitySet Name="S_JAPAN_PATENT_FULLTEXTCODE" EntityType="Model.S_JAPAN_PATENT_FULLTEXTCODE" />
-          <EntitySet Name="S_JOURNAL_PROJECT_ABSTRACT" EntityType="Model.S_JOURNAL_PROJECT_ABSTRACT" />
           <EntitySet Name="S_KOREA_DESIGN_PATENT" EntityType="Model.S_KOREA_DESIGN_PATENT" />
           <EntitySet Name="S_KOREA_PATENT_ABSTRACTS" EntityType="Model.S_KOREA_PATENT_ABSTRACTS" />
           <EntitySet Name="S_KOREAN_PATENT_FULLTEXTCODE" EntityType="Model.S_KOREAN_PATENT_FULLTEXTCODE" />
@@ -3117,6 +3116,7 @@
           <EntitySet Name="S_FOREIGN_PATENT_SEQUENCE" EntityType="Model.S_FOREIGN_PATENT_SEQUENCE" />
           <EntitySet Name="S_CHINA_PATENT_REVIEW" EntityType="Model.S_CHINA_PATENT_REVIEW" />
           <EntitySet Name="S_CHINA_PATENT_JUDGMENT" EntityType="Model.S_CHINA_PATENT_JUDGMENT" />
+          <EntitySet Name="S_JOURNAL_PROJECT_ABSTRACT" EntityType="Model.S_JOURNAL_PROJECT_ABSTRACT" />
         </EntityContainer>
         <EntityType Name="IMPORT_ERROR">
           <Key>
@@ -4990,76 +4990,6 @@
           <Property Name="ABSTRACT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="DESIGNBRIEFEXPLANATION" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
         </EntityType>
-        <EntityType Name="S_JOURNAL_PROJECT_ABSTRACT">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="SYSTEM_FIELD_RID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="CLASS_INFO_CLASS_CODE" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="CLASS_INFO_SUBJECT_ALL" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="CLASS_INFO_ASJC" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="CLASS_INFO_CJCR" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="CLASS_INFO_CSSCI" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="CLASS_INFO_JCR" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="CLASS_INFO_PKU" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="CLASS_INFO_SFX" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="CLASS_INFO_INDEXBY" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_TITLE_SOURCE" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_TITLE_CN" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_TITLE_EN" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_VENDOR" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_COUNTRY" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_LANGUAGE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_KEYWORDS_ALL" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_KEYWORDS_SOURCE" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_KEYWORDS_CN" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_KEYWORDS_EN" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_ABSTRACT_ALL" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_ABSTRACT_SOURCE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_ABSTRACT_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_ABSTRACT_EN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_FUND" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_SYS_SCORE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_PAGE_COUNT" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ARTICLE_INFO_PAGES" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="RESOURCE_INFO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="FIRST_AUTHOR_SOURCE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="FIRST_AUTHOR_CN" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="FIRST_AUTHOR_EN" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="AUTHOR_SOURCE" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="AUTHOR_CN" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="AUTHOR_EN" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="ORG_SOURCE" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="ORG_CN" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="ORG_EN" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="JOURNAL_INFO_JID" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="JOURNAL_INFO_LITERATURE_ALL" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="JOURNAL_INFO_LITERATURE_SOURCE" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="JOURNAL_INFO_LITERATURE_CN" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="JOURNAL_INFO_LITERATURE_EN" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="JOURNAL_INFO_DOI" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="JOURNAL_INFO_ISSN" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="JOURNAL_INFO_CN" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="JOURNAL_INFO_EISSN" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="JOURNAL_INFO_VOLUME" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="JOURNAL_INFO_ISSUE" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="JOURNAL_INFO_MONTH" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="JOURNAL_INFO_YEAR" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="JOURNAL_INFO_PUB_DATE" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="DOCUMENT_TYPE_SCHOLARLY" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="DOCUMENT_TYPE_CORE_JOURNAL" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="DOCUMENT_TYPE_OPEN_ACCESS" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="DOCUMENT_TYPE_PEER_REVIEW" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="DOCUMENT_TYPE_FREE_CONTENT" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="DOCUMENT_TYPE_FUND_SUPPORT" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="DOCUMENT_TYPE_DOC_TYPE" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="IMPORT_TIME" Type="DateTime" />
-          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
-        </EntityType>
         <EntityType Name="S_KOREA_DESIGN_PATENT">
           <Key>
             <PropertyRef Name="ID" />
@@ -6051,6 +5981,76 @@
           <Property Name="IMPORT_TIME" Type="DateTime" />
           <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
+        </EntityType>
+        <EntityType Name="S_JOURNAL_PROJECT_ABSTRACT">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="SYSTEM_FIELD_RID" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="CLASS_INFO_CLASS_CODE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CLASS_INFO_SUBJECT_ALL" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CLASS_INFO_ASJC" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CLASS_INFO_CJCR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CLASS_INFO_CSSCI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CLASS_INFO_JCR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CLASS_INFO_PKU" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CLASS_INFO_SFX" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CLASS_INFO_INDEXBY" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_TITLE_SOURCE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_TITLE_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_TITLE_EN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_VENDOR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_COUNTRY" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_LANGUAGE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_KEYWORDS_ALL" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_KEYWORDS_SOURCE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_KEYWORDS_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_KEYWORDS_EN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_ABSTRACT_ALL" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_ABSTRACT_SOURCE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_ABSTRACT_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_ABSTRACT_EN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_FUND" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_SYS_SCORE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_PAGE_COUNT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ARTICLE_INFO_PAGES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="RESOURCE_INFO" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="FIRST_AUTHOR_SOURCE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="FIRST_AUTHOR_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="FIRST_AUTHOR_EN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="AUTHOR_SOURCE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="AUTHOR_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="AUTHOR_EN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ORG_SOURCE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ORG_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ORG_EN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="JOURNAL_INFO_JID" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="JOURNAL_INFO_LITERATURE_ALL" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="JOURNAL_INFO_LITERATURE_SOURCE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="JOURNAL_INFO_LITERATURE_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="JOURNAL_INFO_LITERATURE_EN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="JOURNAL_INFO_DOI" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="JOURNAL_INFO_ISSN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="JOURNAL_INFO_CN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="JOURNAL_INFO_EISSN" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="JOURNAL_INFO_VOLUME" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="JOURNAL_INFO_ISSUE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="JOURNAL_INFO_MONTH" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="JOURNAL_INFO_YEAR" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="JOURNAL_INFO_PUB_DATE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="DOCUMENT_TYPE_SCHOLARLY" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="DOCUMENT_TYPE_CORE_JOURNAL" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="DOCUMENT_TYPE_OPEN_ACCESS" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="DOCUMENT_TYPE_PEER_REVIEW" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="DOCUMENT_TYPE_FREE_CONTENT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="DOCUMENT_TYPE_FUND_SUPPORT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="DOCUMENT_TYPE_DOC_TYPE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
           <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
         </EntityType>
         </Schema>
@@ -7987,77 +7987,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="S_JOURNAL_PROJECT_ABSTRACT">
-            <EntityTypeMapping TypeName="Model.S_JOURNAL_PROJECT_ABSTRACT">
-              <MappingFragment StoreEntitySet="S_JOURNAL_PROJECT_ABSTRACT">
-                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
-                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
-                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
-                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
-                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
-                <ScalarProperty Name="DOCUMENT_TYPE_DOC_TYPE" ColumnName="DOCUMENT_TYPE_DOC_TYPE" />
-                <ScalarProperty Name="DOCUMENT_TYPE_FUND_SUPPORT" ColumnName="DOCUMENT_TYPE_FUND_SUPPORT" />
-                <ScalarProperty Name="DOCUMENT_TYPE_FREE_CONTENT" ColumnName="DOCUMENT_TYPE_FREE_CONTENT" />
-                <ScalarProperty Name="DOCUMENT_TYPE_PEER_REVIEW" ColumnName="DOCUMENT_TYPE_PEER_REVIEW" />
-                <ScalarProperty Name="DOCUMENT_TYPE_OPEN_ACCESS" ColumnName="DOCUMENT_TYPE_OPEN_ACCESS" />
-                <ScalarProperty Name="DOCUMENT_TYPE_CORE_JOURNAL" ColumnName="DOCUMENT_TYPE_CORE_JOURNAL" />
-                <ScalarProperty Name="DOCUMENT_TYPE_SCHOLARLY" ColumnName="DOCUMENT_TYPE_SCHOLARLY" />
-                <ScalarProperty Name="JOURNAL_INFO_PUB_DATE" ColumnName="JOURNAL_INFO_PUB_DATE" />
-                <ScalarProperty Name="JOURNAL_INFO_YEAR" ColumnName="JOURNAL_INFO_YEAR" />
-                <ScalarProperty Name="JOURNAL_INFO_MONTH" ColumnName="JOURNAL_INFO_MONTH" />
-                <ScalarProperty Name="JOURNAL_INFO_ISSUE" ColumnName="JOURNAL_INFO_ISSUE" />
-                <ScalarProperty Name="JOURNAL_INFO_VOLUME" ColumnName="JOURNAL_INFO_VOLUME" />
-                <ScalarProperty Name="JOURNAL_INFO_EISSN" ColumnName="JOURNAL_INFO_EISSN" />
-                <ScalarProperty Name="JOURNAL_INFO_CN" ColumnName="JOURNAL_INFO_CN" />
-                <ScalarProperty Name="JOURNAL_INFO_ISSN" ColumnName="JOURNAL_INFO_ISSN" />
-                <ScalarProperty Name="JOURNAL_INFO_DOI" ColumnName="JOURNAL_INFO_DOI" />
-                <ScalarProperty Name="JOURNAL_INFO_LITERATURE_EN" ColumnName="JOURNAL_INFO_LITERATURE_EN" />
-                <ScalarProperty Name="JOURNAL_INFO_LITERATURE_CN" ColumnName="JOURNAL_INFO_LITERATURE_CN" />
-                <ScalarProperty Name="JOURNAL_INFO_LITERATURE_SOURCE" ColumnName="JOURNAL_INFO_LITERATURE_SOURCE" />
-                <ScalarProperty Name="JOURNAL_INFO_LITERATURE_ALL" ColumnName="JOURNAL_INFO_LITERATURE_ALL" />
-                <ScalarProperty Name="JOURNAL_INFO_JID" ColumnName="JOURNAL_INFO_JID" />
-                <ScalarProperty Name="ORG_EN" ColumnName="ORG_EN" />
-                <ScalarProperty Name="ORG_CN" ColumnName="ORG_CN" />
-                <ScalarProperty Name="ORG_SOURCE" ColumnName="ORG_SOURCE" />
-                <ScalarProperty Name="AUTHOR_EN" ColumnName="AUTHOR_EN" />
-                <ScalarProperty Name="AUTHOR_CN" ColumnName="AUTHOR_CN" />
-                <ScalarProperty Name="AUTHOR_SOURCE" ColumnName="AUTHOR_SOURCE" />
-                <ScalarProperty Name="FIRST_AUTHOR_EN" ColumnName="FIRST_AUTHOR_EN" />
-                <ScalarProperty Name="FIRST_AUTHOR_CN" ColumnName="FIRST_AUTHOR_CN" />
-                <ScalarProperty Name="FIRST_AUTHOR_SOURCE" ColumnName="FIRST_AUTHOR_SOURCE" />
-                <ScalarProperty Name="RESOURCE_INFO" ColumnName="RESOURCE_INFO" />
-                <ScalarProperty Name="ARTICLE_INFO_PAGES" ColumnName="ARTICLE_INFO_PAGES" />
-                <ScalarProperty Name="ARTICLE_INFO_PAGE_COUNT" ColumnName="ARTICLE_INFO_PAGE_COUNT" />
-                <ScalarProperty Name="ARTICLE_INFO_SYS_SCORE" ColumnName="ARTICLE_INFO_SYS_SCORE" />
-                <ScalarProperty Name="ARTICLE_INFO_FUND" ColumnName="ARTICLE_INFO_FUND" />
-                <ScalarProperty Name="ARTICLE_INFO_ABSTRACT_EN" ColumnName="ARTICLE_INFO_ABSTRACT_EN" />
-                <ScalarProperty Name="ARTICLE_INFO_ABSTRACT_CN" ColumnName="ARTICLE_INFO_ABSTRACT_CN" />
-                <ScalarProperty Name="ARTICLE_INFO_ABSTRACT_SOURCE" ColumnName="ARTICLE_INFO_ABSTRACT_SOURCE" />
-                <ScalarProperty Name="ARTICLE_INFO_ABSTRACT_ALL" ColumnName="ARTICLE_INFO_ABSTRACT_ALL" />
-                <ScalarProperty Name="ARTICLE_INFO_KEYWORDS_EN" ColumnName="ARTICLE_INFO_KEYWORDS_EN" />
-                <ScalarProperty Name="ARTICLE_INFO_KEYWORDS_CN" ColumnName="ARTICLE_INFO_KEYWORDS_CN" />
-                <ScalarProperty Name="ARTICLE_INFO_KEYWORDS_SOURCE" ColumnName="ARTICLE_INFO_KEYWORDS_SOURCE" />
-                <ScalarProperty Name="ARTICLE_INFO_KEYWORDS_ALL" ColumnName="ARTICLE_INFO_KEYWORDS_ALL" />
-                <ScalarProperty Name="ARTICLE_INFO_LANGUAGE" ColumnName="ARTICLE_INFO_LANGUAGE" />
-                <ScalarProperty Name="ARTICLE_INFO_COUNTRY" ColumnName="ARTICLE_INFO_COUNTRY" />
-                <ScalarProperty Name="ARTICLE_INFO_VENDOR" ColumnName="ARTICLE_INFO_VENDOR" />
-                <ScalarProperty Name="ARTICLE_INFO_TITLE_EN" ColumnName="ARTICLE_INFO_TITLE_EN" />
-                <ScalarProperty Name="ARTICLE_INFO_TITLE_CN" ColumnName="ARTICLE_INFO_TITLE_CN" />
-                <ScalarProperty Name="ARTICLE_INFO_TITLE_SOURCE" ColumnName="ARTICLE_INFO_TITLE_SOURCE" />
-                <ScalarProperty Name="CLASS_INFO_INDEXBY" ColumnName="CLASS_INFO_INDEXBY" />
-                <ScalarProperty Name="CLASS_INFO_SFX" ColumnName="CLASS_INFO_SFX" />
-                <ScalarProperty Name="CLASS_INFO_PKU" ColumnName="CLASS_INFO_PKU" />
-                <ScalarProperty Name="CLASS_INFO_JCR" ColumnName="CLASS_INFO_JCR" />
-                <ScalarProperty Name="CLASS_INFO_CSSCI" ColumnName="CLASS_INFO_CSSCI" />
-                <ScalarProperty Name="CLASS_INFO_CJCR" ColumnName="CLASS_INFO_CJCR" />
-                <ScalarProperty Name="CLASS_INFO_ASJC" ColumnName="CLASS_INFO_ASJC" />
-                <ScalarProperty Name="CLASS_INFO_SUBJECT_ALL" ColumnName="CLASS_INFO_SUBJECT_ALL" />
-                <ScalarProperty Name="CLASS_INFO_CLASS_CODE" ColumnName="CLASS_INFO_CLASS_CODE" />
-                <ScalarProperty Name="SYSTEM_FIELD_RID" ColumnName="SYSTEM_FIELD_RID" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="S_KOREA_DESIGN_PATENT">
             <EntityTypeMapping TypeName="Model.S_KOREA_DESIGN_PATENT">
               <MappingFragment StoreEntitySet="S_KOREA_DESIGN_PATENT">
@@ -9075,6 +9004,77 @@
                 <ScalarProperty Name="ASSIGNEES" ColumnName="ASSIGNEES" />
                 <ScalarProperty Name="CN_DECISION_NUMBER" ColumnName="CN_DECISION_NUMBER" />
                 <ScalarProperty Name="CN_COURT" ColumnName="CN_COURT" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_JOURNAL_PROJECT_ABSTRACT">
+            <EntityTypeMapping TypeName="Model.S_JOURNAL_PROJECT_ABSTRACT">
+              <MappingFragment StoreEntitySet="S_JOURNAL_PROJECT_ABSTRACT">
+                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="DOCUMENT_TYPE_DOC_TYPE" ColumnName="DOCUMENT_TYPE_DOC_TYPE" />
+                <ScalarProperty Name="DOCUMENT_TYPE_FUND_SUPPORT" ColumnName="DOCUMENT_TYPE_FUND_SUPPORT" />
+                <ScalarProperty Name="DOCUMENT_TYPE_FREE_CONTENT" ColumnName="DOCUMENT_TYPE_FREE_CONTENT" />
+                <ScalarProperty Name="DOCUMENT_TYPE_PEER_REVIEW" ColumnName="DOCUMENT_TYPE_PEER_REVIEW" />
+                <ScalarProperty Name="DOCUMENT_TYPE_OPEN_ACCESS" ColumnName="DOCUMENT_TYPE_OPEN_ACCESS" />
+                <ScalarProperty Name="DOCUMENT_TYPE_CORE_JOURNAL" ColumnName="DOCUMENT_TYPE_CORE_JOURNAL" />
+                <ScalarProperty Name="DOCUMENT_TYPE_SCHOLARLY" ColumnName="DOCUMENT_TYPE_SCHOLARLY" />
+                <ScalarProperty Name="JOURNAL_INFO_PUB_DATE" ColumnName="JOURNAL_INFO_PUB_DATE" />
+                <ScalarProperty Name="JOURNAL_INFO_YEAR" ColumnName="JOURNAL_INFO_YEAR" />
+                <ScalarProperty Name="JOURNAL_INFO_MONTH" ColumnName="JOURNAL_INFO_MONTH" />
+                <ScalarProperty Name="JOURNAL_INFO_ISSUE" ColumnName="JOURNAL_INFO_ISSUE" />
+                <ScalarProperty Name="JOURNAL_INFO_VOLUME" ColumnName="JOURNAL_INFO_VOLUME" />
+                <ScalarProperty Name="JOURNAL_INFO_EISSN" ColumnName="JOURNAL_INFO_EISSN" />
+                <ScalarProperty Name="JOURNAL_INFO_CN" ColumnName="JOURNAL_INFO_CN" />
+                <ScalarProperty Name="JOURNAL_INFO_ISSN" ColumnName="JOURNAL_INFO_ISSN" />
+                <ScalarProperty Name="JOURNAL_INFO_DOI" ColumnName="JOURNAL_INFO_DOI" />
+                <ScalarProperty Name="JOURNAL_INFO_LITERATURE_EN" ColumnName="JOURNAL_INFO_LITERATURE_EN" />
+                <ScalarProperty Name="JOURNAL_INFO_LITERATURE_CN" ColumnName="JOURNAL_INFO_LITERATURE_CN" />
+                <ScalarProperty Name="JOURNAL_INFO_LITERATURE_SOURCE" ColumnName="JOURNAL_INFO_LITERATURE_SOURCE" />
+                <ScalarProperty Name="JOURNAL_INFO_LITERATURE_ALL" ColumnName="JOURNAL_INFO_LITERATURE_ALL" />
+                <ScalarProperty Name="JOURNAL_INFO_JID" ColumnName="JOURNAL_INFO_JID" />
+                <ScalarProperty Name="ORG_EN" ColumnName="ORG_EN" />
+                <ScalarProperty Name="ORG_CN" ColumnName="ORG_CN" />
+                <ScalarProperty Name="ORG_SOURCE" ColumnName="ORG_SOURCE" />
+                <ScalarProperty Name="AUTHOR_EN" ColumnName="AUTHOR_EN" />
+                <ScalarProperty Name="AUTHOR_CN" ColumnName="AUTHOR_CN" />
+                <ScalarProperty Name="AUTHOR_SOURCE" ColumnName="AUTHOR_SOURCE" />
+                <ScalarProperty Name="FIRST_AUTHOR_EN" ColumnName="FIRST_AUTHOR_EN" />
+                <ScalarProperty Name="FIRST_AUTHOR_CN" ColumnName="FIRST_AUTHOR_CN" />
+                <ScalarProperty Name="FIRST_AUTHOR_SOURCE" ColumnName="FIRST_AUTHOR_SOURCE" />
+                <ScalarProperty Name="RESOURCE_INFO" ColumnName="RESOURCE_INFO" />
+                <ScalarProperty Name="ARTICLE_INFO_PAGES" ColumnName="ARTICLE_INFO_PAGES" />
+                <ScalarProperty Name="ARTICLE_INFO_PAGE_COUNT" ColumnName="ARTICLE_INFO_PAGE_COUNT" />
+                <ScalarProperty Name="ARTICLE_INFO_SYS_SCORE" ColumnName="ARTICLE_INFO_SYS_SCORE" />
+                <ScalarProperty Name="ARTICLE_INFO_FUND" ColumnName="ARTICLE_INFO_FUND" />
+                <ScalarProperty Name="ARTICLE_INFO_ABSTRACT_EN" ColumnName="ARTICLE_INFO_ABSTRACT_EN" />
+                <ScalarProperty Name="ARTICLE_INFO_ABSTRACT_CN" ColumnName="ARTICLE_INFO_ABSTRACT_CN" />
+                <ScalarProperty Name="ARTICLE_INFO_ABSTRACT_SOURCE" ColumnName="ARTICLE_INFO_ABSTRACT_SOURCE" />
+                <ScalarProperty Name="ARTICLE_INFO_ABSTRACT_ALL" ColumnName="ARTICLE_INFO_ABSTRACT_ALL" />
+                <ScalarProperty Name="ARTICLE_INFO_KEYWORDS_EN" ColumnName="ARTICLE_INFO_KEYWORDS_EN" />
+                <ScalarProperty Name="ARTICLE_INFO_KEYWORDS_CN" ColumnName="ARTICLE_INFO_KEYWORDS_CN" />
+                <ScalarProperty Name="ARTICLE_INFO_KEYWORDS_SOURCE" ColumnName="ARTICLE_INFO_KEYWORDS_SOURCE" />
+                <ScalarProperty Name="ARTICLE_INFO_KEYWORDS_ALL" ColumnName="ARTICLE_INFO_KEYWORDS_ALL" />
+                <ScalarProperty Name="ARTICLE_INFO_LANGUAGE" ColumnName="ARTICLE_INFO_LANGUAGE" />
+                <ScalarProperty Name="ARTICLE_INFO_COUNTRY" ColumnName="ARTICLE_INFO_COUNTRY" />
+                <ScalarProperty Name="ARTICLE_INFO_VENDOR" ColumnName="ARTICLE_INFO_VENDOR" />
+                <ScalarProperty Name="ARTICLE_INFO_TITLE_EN" ColumnName="ARTICLE_INFO_TITLE_EN" />
+                <ScalarProperty Name="ARTICLE_INFO_TITLE_CN" ColumnName="ARTICLE_INFO_TITLE_CN" />
+                <ScalarProperty Name="ARTICLE_INFO_TITLE_SOURCE" ColumnName="ARTICLE_INFO_TITLE_SOURCE" />
+                <ScalarProperty Name="CLASS_INFO_INDEXBY" ColumnName="CLASS_INFO_INDEXBY" />
+                <ScalarProperty Name="CLASS_INFO_SFX" ColumnName="CLASS_INFO_SFX" />
+                <ScalarProperty Name="CLASS_INFO_PKU" ColumnName="CLASS_INFO_PKU" />
+                <ScalarProperty Name="CLASS_INFO_JCR" ColumnName="CLASS_INFO_JCR" />
+                <ScalarProperty Name="CLASS_INFO_CSSCI" ColumnName="CLASS_INFO_CSSCI" />
+                <ScalarProperty Name="CLASS_INFO_CJCR" ColumnName="CLASS_INFO_CJCR" />
+                <ScalarProperty Name="CLASS_INFO_ASJC" ColumnName="CLASS_INFO_ASJC" />
+                <ScalarProperty Name="CLASS_INFO_SUBJECT_ALL" ColumnName="CLASS_INFO_SUBJECT_ALL" />
+                <ScalarProperty Name="CLASS_INFO_CLASS_CODE" ColumnName="CLASS_INFO_CLASS_CODE" />
+                <ScalarProperty Name="SYSTEM_FIELD_RID" ColumnName="SYSTEM_FIELD_RID" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>

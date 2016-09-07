@@ -81,7 +81,6 @@ namespace TheDataResourceImporter
         public DbSet<S_JAPAN_DESIGN_PATENT> S_JAPAN_DESIGN_PATENT { get; set; }
         public DbSet<S_JAPAN_PATENT_ABSTRACTS> S_JAPAN_PATENT_ABSTRACTS { get; set; }
         public DbSet<S_JAPAN_PATENT_FULLTEXTCODE> S_JAPAN_PATENT_FULLTEXTCODE { get; set; }
-        public DbSet<S_JOURNAL_PROJECT_ABSTRACT> S_JOURNAL_PROJECT_ABSTRACT { get; set; }
         public DbSet<S_KOREA_DESIGN_PATENT> S_KOREA_DESIGN_PATENT { get; set; }
         public DbSet<S_KOREA_PATENT_ABSTRACTS> S_KOREA_PATENT_ABSTRACTS { get; set; }
         public DbSet<S_KOREAN_PATENT_FULLTEXTCODE> S_KOREAN_PATENT_FULLTEXTCODE { get; set; }
@@ -110,5 +109,6 @@ namespace TheDataResourceImporter
         public DbSet<S_FOREIGN_PATENT_SEQUENCE> S_FOREIGN_PATENT_SEQUENCE { get; set; }
         public DbSet<S_CHINA_PATENT_REVIEW> S_CHINA_PATENT_REVIEW { get; set; }
         public DbSet<S_CHINA_PATENT_JUDGMENT> S_CHINA_PATENT_JUDGMENT { get; set; }
+        public DbSet<S_JOURNAL_PROJECT_ABSTRACT> S_JOURNAL_PROJECT_ABSTRACT { get; set; }
     }
 }
