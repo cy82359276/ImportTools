@@ -33,7 +33,6 @@
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_FULLTEXT_PDF" Width="1.5" PointX="18.75" PointY="19.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_GAZETTE" Width="1.5" PointX="20.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_INVALID" Width="1.5" PointX="20.75" PointY="4.75" />
-        <EntityTypeShape EntityType="Model.S_CHINA_PATENT_LAWSPROCESS" Width="1.5" PointX="20.75" PointY="20.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_LAWSTATE" Width="1.5" PointX="22.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_LAWSTATE_CHANGE" Width="1.5" PointX="22.75" PointY="4.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_NOTICES" Width="1.5" PointX="22.75" PointY="8.75" />
@@ -90,6 +89,7 @@
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_REVIEW" Width="1.5" PointX="39.375" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_JUDGMENT" Width="1.5" PointX="27.375" PointY="38.75" />
         <EntityTypeShape EntityType="Model.S_JOURNAL_PROJECT_ABSTRACT" Width="1.5" PointX="31.375" PointY="18.75" />
+        <EntityTypeShape EntityType="Model.S_CHINA_PATENT_LAWSPROCESS" Width="1.5" PointX="21.375" PointY="13.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

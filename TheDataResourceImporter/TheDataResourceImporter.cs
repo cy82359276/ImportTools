@@ -949,7 +949,7 @@ namespace TheDataResourceImporter
             #region 180 中国专利代理知识产权法律法规加工数据 XML
             else if (fileType == "中国专利代理知识产权法律法规加工数据")
             {
-
+                parseZip180(filePath, entiesContext, importSession, "S_CHINA_PATENT_LAWSPROCESS", fileType);
 
             }
             #endregion
@@ -1876,6 +1876,175 @@ namespace TheDataResourceImporter
 
             accUtil.Close();//关闭数据库                
         }
+
+        private static void parseZip180(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession, string tableName, string dataResChineseName)
+        {
+            handledCount = 0;
+            importStartTime = importSession.START_TIME.Value;
+
+            importSession.TABLENAME = tableName;//设置表名
+            entiesContext.SaveChanges();
+
+            SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+            IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(@filePath);
+
+            //总条目数
+            importSession.IS_ZIP = "Y";
+            totalCount = archive.Entries.Count();
+            importSession.ZIP_ENTRIES_COUNT = totalCount;
+            entiesContext.SaveChanges();
+
+            #region 检查目录内无XML的情况
+            var dirNameSetEntires = (from entry in archive.Entries.AsParallel()
+                                     where entry.IsDirectory && CompressUtil.getEntryDepth(entry.Key) == 2
+                                     select CompressUtil.removeDirEntrySlash(entry.Key)).Distinct();
+
+
+            //排除压缩包中无关XML
+            var xmlEntryParentDirEntries = (from entry in archive.Entries.AsParallel()
+                                            where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getEntryDepth(entry.Key) == 3
+                                            select CompressUtil.getFileEntryParentPath(entry.Key)).Distinct();
+
+            var dirEntriesWithoutXML = dirNameSetEntires.Except(xmlEntryParentDirEntries);
+
+            //发现存在XML不存在的情况
+            if (dirEntriesWithoutXML.Count() > 0)
+            {
+                string msg = "如下压缩包中的文件夹内未发现XML文件：";
+                msg += String.Join(Environment.NewLine, dirEntriesWithoutXML.ToArray());
+                MessageUtil.DoAppendTBDetail(msg);
+                LogHelper.WriteErrorLog(msg);
+
+                foreach (string entryKey in dirEntriesWithoutXML)
+                {
+                    importSession.HAS_ERROR = "Y";
+                    IMPORT_ERROR importError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), SESSION_ID = importSession.SESSION_ID, IGNORED = "N", ISZIP = "Y", POINTOR = handledCount, ZIP_OR_DIR_PATH = filePath, REIMPORTED = "N", ZIP_PATH = entryKey, OCURREDTIME = System.DateTime.Now, ERROR_MESSAGE = "文件夹中不存在XML" };
+                    importSession.FAILED_COUNT++;
+                    entiesContext.IMPORT_ERROR.Add(importError);
+                    entiesContext.SaveChanges();
+                }
+            }
+            #endregion
+
+
+            MessageUtil.DoAppendTBDetail($"开始寻找'{dataResChineseName}'XML文件：");
+
+            var allXMLEntires = from entry in archive.Entries.AsParallel()
+                                where !entry.IsDirectory && entry.Key.ToUpper().EndsWith(".XML") && CompressUtil.getEntryDepth(entry.Key) == 4
+                                select entry;
+
+            totalCount = allXMLEntires.Count();
+
+            MessageUtil.DoAppendTBDetail("在压缩包中发现" + totalCount + "个待导入XML条目");
+
+            //已处理计数清零
+            handledCount = 0;
+            if (0 == allXMLEntires.Count())
+            {
+                MessageUtil.DoAppendTBDetail("没有找到XML");
+                importSession.NOTE = "没有找到XML";
+                //添加错误信息
+                entiesContext.IMPORT_ERROR.Add(MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "N", filePath, "", ""));
+                entiesContext.SaveChanges();
+            }
+            #region 循环入库
+            foreach (IArchiveEntry entry in allXMLEntires)
+            {
+                //计数变量
+                handledCount++;
+
+                if (forcedStop)
+                {
+                    MessageUtil.DoAppendTBDetail("强制终止了插入");
+                    importSession.NOTE = "用户强制终止了本次插入";
+                    entiesContext.SaveChanges();
+                    break;
+                }
+
+                var keyTemp = entry.Key;
+
+                //解压当前的XML文件
+                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+
+                if ("" == entryFullPath.Trim())
+                {
+                    MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
+                    LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
+                    importSession.FAILED_COUNT++;
+                    IMPORT_ERROR errorTemp = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, "解压失败!");
+                    entiesContext.IMPORT_ERROR.Add(errorTemp);
+                    entiesContext.SaveChanges();
+                    continue;
+                }
+
+                //S_CHINA_PATENT_BIBLIOGRAPHIC entityObject = new S_CHINA_PATENT_BIBLIOGRAPHIC() { ID = System.Guid.NewGuid().ToString(), IMPORT_SESSION_ID = importSession.SESSION_ID };
+                //dynamic entityObject = Activator.CreateInstance(entityObjectType);
+                var entityObject = new S_CHINA_PATENT_LAWSPROCESS();
+                entityObject.ID = System.Guid.NewGuid().ToString();
+
+                entityObject.IMPORT_SESSION_ID = importSession.SESSION_ID;
+                entityObject.ARCHIVE_INNER_PATH = entry.Key;
+                entityObject.FILE_PATH = filePath;
+                //sCNPatentTextCode.SESSION_INDEX = handledCount;
+                //entiesContext.S_CHINA_PATENT_BIBLIOGRAPHIC.Add(entityObject);
+                entiesContext.S_CHINA_PATENT_LAWSPROCESS.Add(entityObject);
+                //entiesContext.SaveChanges();
+
+                XDocument doc = XDocument.Load(entryFullPath);
+
+                #region 具体的入库操作,EF
+                //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
+
+                //定义命名空间
+                XmlNamespaceManager namespaceManager = new XmlNamespaceManager(doc.CreateReader().NameTable);
+                namespaceManager.AddNamespace("base", "http://www.sipo.gov.cn/XMLSchema/base");
+                namespaceManager.AddNamespace("business", "http://www.sipo.gov.cn/XMLSchema/business");
+                //namespaceManager.AddNamespace("m", "http://www.w3.org/1998/Math/MathML");
+                //namespaceManager.AddNamespace("tbl", "http://oasis-open.org/specs/soextblx");
+
+                var rootElement = doc.Root;
+                entityObject.LAW_NO = MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/LAW_NO");
+                entityObject.LAW_TITLE_CN = MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/LAW_TITLE_CN");
+                entityObject.LAW_TITLE_EN = MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/LAW_TITLE_EN");
+                entityObject.LAW_DOC_NUM = MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/LAW_DOC_NUM");
+                entityObject.AREA_OF_LAW = MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/AREA_OF_LAW");
+                entityObject.APPROVAL_DEPARTMENT = MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/APPROVAL_DEPARTMENT");
+                entityObject.APPROVAL_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/APPROVAL_DATE"));
+                entityObject.ISSUING_AUTHORITY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/ISSUING_AUTHORITY");
+                entityObject.DATE_ISSUED = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/DATE_ISSUED"));
+                entityObject.IMPLEMENTATION_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/IMPLEMENTATION_DATE"));
+                entityObject.SIGN_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/SIGN_DATE"));
+                entityObject.EFFECTIVE_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/EFFECTIVE_DATE"));
+                entityObject.STATUS = MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/STATUS");
+                entityObject.LEVEL_OF_AUTHORITY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/LEVEL_OF_AUTHORITY");
+                entityObject.LAW_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//LAW_INFOR/LAW_COUNTRY");
+
+                entityObject.EXIST_XML = "1";
+                entityObject.PATH_XML = MiscUtil.getRelativeFilePathInclude(filePath, 2) + Path.DirectorySeparatorChar + entry.Key;
+                entityObject.IMPORT_TIME = System.DateTime.Now;
+
+                var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+                try
+                {
+                    entiesContext.SaveChanges();
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+                }
+                catch (Exception ex)
+                {
+                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入失败!!!");
+                    throw ex;
+                }
+
+                //输出插入记录
+                #endregion
+
+                //更新进度信息
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
+            }
+            #endregion 循环入库
+        }
+
+
 
         private static void parseZip162(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession)
         {
