@@ -168,6 +168,9 @@
     <Compile Include="S_BELGIAN_PATENT_FULLTEXT.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="S_BIOLOGICAL_SEQ.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="S_BRITISH_PATENT_FULLTEXTCODE.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>

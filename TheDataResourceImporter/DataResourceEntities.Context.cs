@@ -105,10 +105,11 @@ namespace TheDataResourceImporter
         public DbSet<S_CHINA_WELLKNOWN_BRAND> S_CHINA_WELLKNOWN_BRAND { get; set; }
         public DbSet<S_MADRID_BRAND_ENTER_CHINA> S_MADRID_BRAND_ENTER_CHINA { get; set; }
         public DbSet<S_MADRID_BRAND_PURCHASE> S_MADRID_BRAND_PURCHASE { get; set; }
-        public DbSet<S_FOREIGN_PATENT_SEQUENCE> S_FOREIGN_PATENT_SEQUENCE { get; set; }
         public DbSet<S_CHINA_PATENT_REVIEW> S_CHINA_PATENT_REVIEW { get; set; }
         public DbSet<S_CHINA_PATENT_JUDGMENT> S_CHINA_PATENT_JUDGMENT { get; set; }
         public DbSet<S_JOURNAL_PROJECT_ABSTRACT> S_JOURNAL_PROJECT_ABSTRACT { get; set; }
         public DbSet<S_CHINA_PATENT_LAWSPROCESS> S_CHINA_PATENT_LAWSPROCESS { get; set; }
+        public DbSet<S_BIOLOGICAL_SEQ> S_BIOLOGICAL_SEQ { get; set; }
+        public DbSet<S_FOREIGN_PATENT_SEQUENCE> S_FOREIGN_PATENT_SEQUENCE { get; set; }
     }
 }

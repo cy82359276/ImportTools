@@ -379,6 +379,18 @@
           <Property Name="ABSTRACT" Type="clob" />
           <Property Name="DESIGNBRIEFEXPLANATION" Type="clob" />
         </EntityType>
+        <EntityType Name="S_BIOLOGICAL_SEQ">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="varchar2" MaxLength="100" Nullable="false" />
+          <Property Name="LENGTH" Type="varchar2" MaxLength="1000" />
+          <Property Name="TYPE" Type="varchar2" MaxLength="1000" />
+          <Property Name="GN" Type="varchar2" MaxLength="2000" />
+          <Property Name="ORGANISM" Type="varchar2" MaxLength="2000" />
+          <Property Name="FEATURES" Type="clob" />
+          <Property Name="S_FOREIGN_PATENT_SEQ_ID" Type="varchar2" MaxLength="100" />
+        </EntityType>
         <EntityType Name="S_BRITISH_PATENT_FULLTEXTCODE">
           <Key>
             <PropertyRef Name="ID" />
@@ -1687,24 +1699,24 @@
           <Property Name="FILENAME" Type="varchar2" MaxLength="100" />
           <Property Name="DATEEXCHANGE" Type="date" />
           <Property Name="DATEPRODUCED" Type="date" />
-          <Property Name="PATCNT" Type="number" Precision="30" Scale="0" />
-          <Property Name="FILECNT" Type="number" Precision="30" Scale="0" />
-          <Property Name="DATASIZE" Type="number" Precision="30" Scale="0" />
+          <Property Name="PATCNT" Type="varchar2" MaxLength="100" />
+          <Property Name="FILECNT" Type="varchar2" MaxLength="100" />
+          <Property Name="DATASIZE" Type="varchar2" MaxLength="100" />
           <Property Name="MD5" Type="varchar2" MaxLength="500" />
-          <Property Name="STATUS" Type="varchar2" MaxLength="50" />
-          <Property Name="DOCLIST_TOPIC" Type="varchar2" MaxLength="50" />
-          <Property Name="DOCLIST_COUNTRY" Type="varchar2" MaxLength="50" />
-          <Property Name="DOCLIST_DOCNUMBER" Type="varchar2" MaxLength="50" />
-          <Property Name="DOCLIST_KIND" Type="varchar2" MaxLength="50" />
-          <Property Name="DOCLIST_PNO" Type="varchar2" MaxLength="50" />
-          <Property Name="DOCLIST_PNS" Type="varchar2" MaxLength="50" />
+          <Property Name="STATUS" Type="varchar2" MaxLength="100" />
+          <Property Name="DOCLIST_TOPIC" Type="varchar2" MaxLength="100" />
+          <Property Name="DOCLIST_COUNTRY" Type="varchar2" MaxLength="100" />
+          <Property Name="DOCLIST_DOCNUMBER" Type="varchar2" MaxLength="100" />
+          <Property Name="DOCLIST_KIND" Type="varchar2" MaxLength="100" />
+          <Property Name="DOCLIST_PNO" Type="varchar2" MaxLength="100" />
+          <Property Name="DOCLIST_PNS" Type="varchar2" MaxLength="100" />
           <Property Name="DOCLIST_DATEPUBLICATION" Type="date" />
-          <Property Name="DOCLIST_FORMAT" Type="varchar2" MaxLength="50" />
-          <Property Name="DOCLIST_PATH" Type="varchar2" MaxLength="50" />
-          <Property Name="DOCLIST_STATUS" Type="varchar2" MaxLength="50" />
-          <Property Name="DOCLIST_FILENAME" Type="varchar2" MaxLength="50" />
-          <Property Name="DOCLIST_FILETYPE" Type="varchar2" MaxLength="50" />
-          <Property Name="DOCLIST_SECTION" Type="varchar2" MaxLength="50" />
+          <Property Name="DOCLIST_FORMAT" Type="varchar2" MaxLength="100" />
+          <Property Name="DOCLIST_PATH" Type="varchar2" MaxLength="100" />
+          <Property Name="DOCLIST_STATUS" Type="varchar2" MaxLength="100" />
+          <Property Name="DOCLIST_FILENAME" Type="varchar2" MaxLength="100" />
+          <Property Name="DOCLIST_FILETYPE" Type="varchar2" MaxLength="100" />
+          <Property Name="DOCLIST_SECTION" Type="varchar2" MaxLength="100" />
           <Property Name="DOCLIST_SEQLIST_AMOUNT" Type="number" Precision="7" Scale="0" />
           <Property Name="DOCLIST_SEQLIST_SEQ_ID" Type="varchar2" MaxLength="100" />
           <Property Name="DOCLIST_SEQLIST_SEQ_LENGTH" Type="varchar2" MaxLength="50" />
@@ -2953,6 +2965,7 @@
           <EntitySet Name="S_AUSTRALIAN_PATENT_FULLTEXT" EntityType="Self.S_AUSTRALIAN_PATENT_FULLTEXT" Schema="DRMSTEST" store:Type="Tables" />
           <EntitySet Name="S_AUSTRIA_PATENT_FULLTEXT" EntityType="Self.S_AUSTRIA_PATENT_FULLTEXT" Schema="DRMSTEST" store:Type="Tables" />
           <EntitySet Name="S_BELGIAN_PATENT_FULLTEXT" EntityType="Self.S_BELGIAN_PATENT_FULLTEXT" Schema="DRMSTEST" store:Type="Tables" />
+          <EntitySet Name="S_BIOLOGICAL_SEQ" EntityType="Self.S_BIOLOGICAL_SEQ" Schema="DRMSTEST" store:Type="Tables" />
           <EntitySet Name="S_BRITISH_PATENT_FULLTEXTCODE" EntityType="Self.S_BRITISH_PATENT_FULLTEXTCODE" Schema="DRMSTEST" store:Type="Tables" />
           <EntitySet Name="S_CANADIAN_PATENT_DESCRIPTION" EntityType="Self.S_CANADIAN_PATENT_DESCRIPTION" Schema="DRMSTEST" store:Type="Tables" />
           <EntitySet Name="S_CHINA_BIOLOGICAL_PROCESS" EntityType="Self.S_CHINA_BIOLOGICAL_PROCESS" Schema="DRMSTEST" store:Type="Tables" />
@@ -3112,11 +3125,12 @@
           <EntitySet Name="S_CHINA_WELLKNOWN_BRAND" EntityType="Model.S_CHINA_WELLKNOWN_BRAND" />
           <EntitySet Name="S_MADRID_BRAND_ENTER_CHINA" EntityType="Model.S_MADRID_BRAND_ENTER_CHINA" />
           <EntitySet Name="S_MADRID_BRAND_PURCHASE" EntityType="Model.S_MADRID_BRAND_PURCHASE" />
-          <EntitySet Name="S_FOREIGN_PATENT_SEQUENCE" EntityType="Model.S_FOREIGN_PATENT_SEQUENCE" />
           <EntitySet Name="S_CHINA_PATENT_REVIEW" EntityType="Model.S_CHINA_PATENT_REVIEW" />
           <EntitySet Name="S_CHINA_PATENT_JUDGMENT" EntityType="Model.S_CHINA_PATENT_JUDGMENT" />
           <EntitySet Name="S_JOURNAL_PROJECT_ABSTRACT" EntityType="Model.S_JOURNAL_PROJECT_ABSTRACT" />
           <EntitySet Name="S_CHINA_PATENT_LAWSPROCESS" EntityType="Model.S_CHINA_PATENT_LAWSPROCESS" />
+          <EntitySet Name="S_BIOLOGICAL_SEQ" EntityType="Model.S_BIOLOGICAL_SEQ" />
+          <EntitySet Name="S_FOREIGN_PATENT_SEQUENCE" EntityType="Model.S_FOREIGN_PATENT_SEQUENCE" />
         </EntityContainer>
         <EntityType Name="IMPORT_ERROR">
           <Key>
@@ -5843,46 +5857,6 @@
           <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
         </EntityType>
-        <EntityType Name="S_FOREIGN_PATENT_SEQUENCE">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="FILENAME" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="DATEEXCHANGE" Type="DateTime" />
-          <Property Name="DATEPRODUCED" Type="DateTime" />
-          <Property Name="PATCNT" Type="Decimal" Precision="30" Scale="0" />
-          <Property Name="FILECNT" Type="Decimal" Precision="30" Scale="0" />
-          <Property Name="DATASIZE" Type="Decimal" Precision="30" Scale="0" />
-          <Property Name="MD5" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="STATUS" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_TOPIC" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_COUNTRY" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_DOCNUMBER" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_KIND" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_PNO" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_PNS" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_DATEPUBLICATION" Type="DateTime" />
-          <Property Name="DOCLIST_FORMAT" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_PATH" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_STATUS" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_FILENAME" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_FILETYPE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_SECTION" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_SEQLIST_AMOUNT" Type="Int32" />
-          <Property Name="DOCLIST_SEQLIST_SEQ_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_SEQLIST_SEQ_LENGTH" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_SEQLIST_SEQ_TYPE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_SEQLIST_SEQ_GN" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_SEQLIST_SEQ_OG" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_SEQLIST_SEQ_ORGANISM" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="DOCLIST_SEQLIST_SEQ_FEATURES" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="IMPORT_TIME" Type="DateTime" />
-          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
-          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
-        </EntityType>
         <EntityType Name="S_CHINA_PATENT_REVIEW">
           <Key>
             <PropertyRef Name="ID" />
@@ -6047,6 +6021,58 @@
           <Property Name="LAW_COUNTRY" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
           <Property Name="PATH_XML" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
           <Property Name="EXIST_XML" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IMPORT_TIME" Type="DateTime" />
+          <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FILE_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="SESSION_INDEX" Type="Decimal" Precision="38" Scale="0" />
+        </EntityType>
+        <EntityType Name="S_BIOLOGICAL_SEQ">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="LENGTH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="TYPE" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="GN" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="ORGANISM" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="FEATURES" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="S_FOREIGN_PATENT_SEQ_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="S_FOREIGN_PATENT_SEQUENCE">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="FILENAME" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DATEEXCHANGE" Type="DateTime" />
+          <Property Name="DATEPRODUCED" Type="DateTime" />
+          <Property Name="PATCNT" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="FILECNT" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DATASIZE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="MD5" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="STATUS" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_TOPIC" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_COUNTRY" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_DOCNUMBER" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_KIND" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_PNO" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_PNS" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_DATEPUBLICATION" Type="DateTime" />
+          <Property Name="DOCLIST_FORMAT" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_PATH" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_STATUS" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_FILENAME" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_FILETYPE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_SECTION" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_SEQLIST_AMOUNT" Type="Int32" />
+          <Property Name="DOCLIST_SEQLIST_SEQ_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_SEQLIST_SEQ_LENGTH" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_SEQLIST_SEQ_TYPE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_SEQLIST_SEQ_GN" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_SEQLIST_SEQ_OG" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_SEQLIST_SEQ_ORGANISM" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="DOCLIST_SEQLIST_SEQ_FEATURES" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
           <Property Name="IMPORT_SESSION_ID" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="IMPORT_TIME" Type="DateTime" />
           <Property Name="ARCHIVE_INNER_PATH" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
@@ -8864,47 +8890,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="S_FOREIGN_PATENT_SEQUENCE">
-            <EntityTypeMapping TypeName="Model.S_FOREIGN_PATENT_SEQUENCE">
-              <MappingFragment StoreEntitySet="S_FOREIGN_PATENT_SEQUENCE">
-                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
-                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
-                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
-                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
-                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
-                <ScalarProperty Name="DOCLIST_SEQLIST_SEQ_FEATURES" ColumnName="DOCLIST_SEQLIST_SEQ_FEATURES" />
-                <ScalarProperty Name="DOCLIST_SEQLIST_SEQ_ORGANISM" ColumnName="DOCLIST_SEQLIST_SEQ_ORGANISM" />
-                <ScalarProperty Name="DOCLIST_SEQLIST_SEQ_OG" ColumnName="DOCLIST_SEQLIST_SEQ_OG" />
-                <ScalarProperty Name="DOCLIST_SEQLIST_SEQ_GN" ColumnName="DOCLIST_SEQLIST_SEQ_GN" />
-                <ScalarProperty Name="DOCLIST_SEQLIST_SEQ_TYPE" ColumnName="DOCLIST_SEQLIST_SEQ_TYPE" />
-                <ScalarProperty Name="DOCLIST_SEQLIST_SEQ_LENGTH" ColumnName="DOCLIST_SEQLIST_SEQ_LENGTH" />
-                <ScalarProperty Name="DOCLIST_SEQLIST_SEQ_ID" ColumnName="DOCLIST_SEQLIST_SEQ_ID" />
-                <ScalarProperty Name="DOCLIST_SEQLIST_AMOUNT" ColumnName="DOCLIST_SEQLIST_AMOUNT" />
-                <ScalarProperty Name="DOCLIST_SECTION" ColumnName="DOCLIST_SECTION" />
-                <ScalarProperty Name="DOCLIST_FILETYPE" ColumnName="DOCLIST_FILETYPE" />
-                <ScalarProperty Name="DOCLIST_FILENAME" ColumnName="DOCLIST_FILENAME" />
-                <ScalarProperty Name="DOCLIST_STATUS" ColumnName="DOCLIST_STATUS" />
-                <ScalarProperty Name="DOCLIST_PATH" ColumnName="DOCLIST_PATH" />
-                <ScalarProperty Name="DOCLIST_FORMAT" ColumnName="DOCLIST_FORMAT" />
-                <ScalarProperty Name="DOCLIST_DATEPUBLICATION" ColumnName="DOCLIST_DATEPUBLICATION" />
-                <ScalarProperty Name="DOCLIST_PNS" ColumnName="DOCLIST_PNS" />
-                <ScalarProperty Name="DOCLIST_PNO" ColumnName="DOCLIST_PNO" />
-                <ScalarProperty Name="DOCLIST_KIND" ColumnName="DOCLIST_KIND" />
-                <ScalarProperty Name="DOCLIST_DOCNUMBER" ColumnName="DOCLIST_DOCNUMBER" />
-                <ScalarProperty Name="DOCLIST_COUNTRY" ColumnName="DOCLIST_COUNTRY" />
-                <ScalarProperty Name="DOCLIST_TOPIC" ColumnName="DOCLIST_TOPIC" />
-                <ScalarProperty Name="STATUS" ColumnName="STATUS" />
-                <ScalarProperty Name="MD5" ColumnName="MD5" />
-                <ScalarProperty Name="DATASIZE" ColumnName="DATASIZE" />
-                <ScalarProperty Name="FILECNT" ColumnName="FILECNT" />
-                <ScalarProperty Name="PATCNT" ColumnName="PATCNT" />
-                <ScalarProperty Name="DATEPRODUCED" ColumnName="DATEPRODUCED" />
-                <ScalarProperty Name="DATEEXCHANGE" ColumnName="DATEEXCHANGE" />
-                <ScalarProperty Name="FILENAME" ColumnName="FILENAME" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="S_CHINA_PATENT_REVIEW">
             <EntityTypeMapping TypeName="Model.S_CHINA_PATENT_REVIEW">
               <MappingFragment StoreEntitySet="S_CHINA_PATENT_REVIEW">
@@ -9075,6 +9060,60 @@
                 <ScalarProperty Name="LAW_TITLE_EN" ColumnName="LAW_TITLE_EN" />
                 <ScalarProperty Name="LAW_TITLE_CN" ColumnName="LAW_TITLE_CN" />
                 <ScalarProperty Name="LAW_NO" ColumnName="LAW_NO" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_BIOLOGICAL_SEQ">
+            <EntityTypeMapping TypeName="Model.S_BIOLOGICAL_SEQ">
+              <MappingFragment StoreEntitySet="S_BIOLOGICAL_SEQ">
+                <ScalarProperty Name="S_FOREIGN_PATENT_SEQ_ID" ColumnName="S_FOREIGN_PATENT_SEQ_ID" />
+                <ScalarProperty Name="FEATURES" ColumnName="FEATURES" />
+                <ScalarProperty Name="ORGANISM" ColumnName="ORGANISM" />
+                <ScalarProperty Name="GN" ColumnName="GN" />
+                <ScalarProperty Name="TYPE" ColumnName="TYPE" />
+                <ScalarProperty Name="LENGTH" ColumnName="LENGTH" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="S_FOREIGN_PATENT_SEQUENCE">
+            <EntityTypeMapping TypeName="Model.S_FOREIGN_PATENT_SEQUENCE">
+              <MappingFragment StoreEntitySet="S_FOREIGN_PATENT_SEQUENCE">
+                <ScalarProperty Name="SESSION_INDEX" ColumnName="SESSION_INDEX" />
+                <ScalarProperty Name="FILE_PATH" ColumnName="FILE_PATH" />
+                <ScalarProperty Name="ARCHIVE_INNER_PATH" ColumnName="ARCHIVE_INNER_PATH" />
+                <ScalarProperty Name="IMPORT_TIME" ColumnName="IMPORT_TIME" />
+                <ScalarProperty Name="IMPORT_SESSION_ID" ColumnName="IMPORT_SESSION_ID" />
+                <ScalarProperty Name="DOCLIST_SEQLIST_SEQ_FEATURES" ColumnName="DOCLIST_SEQLIST_SEQ_FEATURES" />
+                <ScalarProperty Name="DOCLIST_SEQLIST_SEQ_ORGANISM" ColumnName="DOCLIST_SEQLIST_SEQ_ORGANISM" />
+                <ScalarProperty Name="DOCLIST_SEQLIST_SEQ_OG" ColumnName="DOCLIST_SEQLIST_SEQ_OG" />
+                <ScalarProperty Name="DOCLIST_SEQLIST_SEQ_GN" ColumnName="DOCLIST_SEQLIST_SEQ_GN" />
+                <ScalarProperty Name="DOCLIST_SEQLIST_SEQ_TYPE" ColumnName="DOCLIST_SEQLIST_SEQ_TYPE" />
+                <ScalarProperty Name="DOCLIST_SEQLIST_SEQ_LENGTH" ColumnName="DOCLIST_SEQLIST_SEQ_LENGTH" />
+                <ScalarProperty Name="DOCLIST_SEQLIST_SEQ_ID" ColumnName="DOCLIST_SEQLIST_SEQ_ID" />
+                <ScalarProperty Name="DOCLIST_SEQLIST_AMOUNT" ColumnName="DOCLIST_SEQLIST_AMOUNT" />
+                <ScalarProperty Name="DOCLIST_SECTION" ColumnName="DOCLIST_SECTION" />
+                <ScalarProperty Name="DOCLIST_FILETYPE" ColumnName="DOCLIST_FILETYPE" />
+                <ScalarProperty Name="DOCLIST_FILENAME" ColumnName="DOCLIST_FILENAME" />
+                <ScalarProperty Name="DOCLIST_STATUS" ColumnName="DOCLIST_STATUS" />
+                <ScalarProperty Name="DOCLIST_PATH" ColumnName="DOCLIST_PATH" />
+                <ScalarProperty Name="DOCLIST_FORMAT" ColumnName="DOCLIST_FORMAT" />
+                <ScalarProperty Name="DOCLIST_DATEPUBLICATION" ColumnName="DOCLIST_DATEPUBLICATION" />
+                <ScalarProperty Name="DOCLIST_PNS" ColumnName="DOCLIST_PNS" />
+                <ScalarProperty Name="DOCLIST_PNO" ColumnName="DOCLIST_PNO" />
+                <ScalarProperty Name="DOCLIST_KIND" ColumnName="DOCLIST_KIND" />
+                <ScalarProperty Name="DOCLIST_DOCNUMBER" ColumnName="DOCLIST_DOCNUMBER" />
+                <ScalarProperty Name="DOCLIST_COUNTRY" ColumnName="DOCLIST_COUNTRY" />
+                <ScalarProperty Name="DOCLIST_TOPIC" ColumnName="DOCLIST_TOPIC" />
+                <ScalarProperty Name="STATUS" ColumnName="STATUS" />
+                <ScalarProperty Name="MD5" ColumnName="MD5" />
+                <ScalarProperty Name="DATASIZE" ColumnName="DATASIZE" />
+                <ScalarProperty Name="FILECNT" ColumnName="FILECNT" />
+                <ScalarProperty Name="PATCNT" ColumnName="PATCNT" />
+                <ScalarProperty Name="DATEPRODUCED" ColumnName="DATEPRODUCED" />
+                <ScalarProperty Name="DATEEXCHANGE" ColumnName="DATEEXCHANGE" />
+                <ScalarProperty Name="FILENAME" ColumnName="FILENAME" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>
