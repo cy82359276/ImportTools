@@ -215,6 +215,11 @@ namespace TheDataResourceImporter
                 return;
             }
 
+            if (e.ColumnIndex < 0)
+            {
+                return;
+            }
+
 
             //选中的列的 名称
             var targetColName = dataGridViewErrorList.Columns[e.ColumnIndex].Name;

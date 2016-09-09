@@ -16,8 +16,10 @@ namespace TheDataResourceImporter
         int nMax = 0;         //总记录数
         int pageCount = 0;    //页数＝总记录数/每页显示行数
         int pageCurrent = 0;   //当前页号
-        int nCurrent = 0;      //当前记录行
         string bathId = "";//批次编号
+        bool descOrder = true;
+        static Func<IMPORT_SESSION, Object> orderExpr = r => r.START_TIME;
+        static Func<IMPORT_SESSION, bool> whereExpr = r => true;//展示全部
         DataSourceEntities entitiesDataSource = new DataSourceEntities();
 
         public ImportHistoryForm()
@@ -28,7 +30,7 @@ namespace TheDataResourceImporter
             //                     orderby session.START_TIME descending
             //                     select session;
             dataGridViewImportHistory.AutoGenerateColumns = false;
-            showPage(1, entitiesDataSource);
+            showPage(1, entitiesDataSource, whereExpr, orderExpr);
         }
 
         public ImportHistoryForm(string bathID)
@@ -40,16 +42,26 @@ namespace TheDataResourceImporter
             //                     orderby session.START_TIME descending
             //                     select session;
             dataGridViewImportHistory.AutoGenerateColumns = false;
-            showPage(1, entitiesDataSource);
+            showPage(1, entitiesDataSource, whereExpr, orderExpr);
         }
 
-        public void showPage(int pageNum, DataSourceEntities entitiesDataSource)
+        public void showPage(int pageNum, DataSourceEntities entitiesDataSource, Func<IMPORT_SESSION, bool> whereExpr, Func<IMPORT_SESSION, Object> orderExpr)
         {
 
             dataGridViewImportHistory.Columns.Clear();
 
+            IEnumerable<IMPORT_SESSION> sessionArray = null;
+            //IEnumerable<IMPORT_SESSION> sessionArray = entitiesDataSource.IMPORT_SESSION.OrderByDescending(r => r.START_TIME);
+            if (!descOrder)
+            {
+                sessionArray = entitiesDataSource.IMPORT_SESSION.Where(whereExpr).OrderByDescending(orderExpr);
+            }
+            else
+            {
+                sessionArray = entitiesDataSource.IMPORT_SESSION.Where(whereExpr).OrderBy(orderExpr);
+            }
 
-            var sessionArray = entitiesDataSource.IMPORT_SESSION.OrderByDescending(r => r.START_TIME);
+
 
             //存在批次编号
             if (!string.IsNullOrEmpty(bathId))
@@ -253,12 +265,12 @@ namespace TheDataResourceImporter
 
         private void bindingNavigatorMoveFirstItem_Click(object sender, EventArgs e)
         {
-            showPage(1, entitiesDataSource);
+            showPage(1, entitiesDataSource, whereExpr, orderExpr);
         }
 
         private void bindingNavigatorMoveLastItem_Click(object sender, EventArgs e)
         {
-            showPage(pageCount, entitiesDataSource);
+            showPage(pageCount, entitiesDataSource, whereExpr, orderExpr);
         }
 
         private void bindingNavigatorMovePreviousItem_Click(object sender, EventArgs e)
@@ -276,7 +288,7 @@ namespace TheDataResourceImporter
                     currentPageTemp = currentPageTemp - 1;
                 }
             }
-            showPage(currentPageTemp, new DataSourceEntities());
+            showPage(currentPageTemp, entitiesDataSource, whereExpr, orderExpr);
         }
 
         private void bindingNavigatorMoveNextItem_Click(object sender, EventArgs e)
@@ -294,7 +306,7 @@ namespace TheDataResourceImporter
                     currentPageTemp = currentPageTemp + 1;
                 }
             }
-            showPage(currentPageTemp, new DataSourceEntities());
+            showPage(currentPageTemp, entitiesDataSource, whereExpr, orderExpr);
         }
 
         private void refreshDataGrid()
@@ -305,11 +317,22 @@ namespace TheDataResourceImporter
             {
 
             }
-            showPage(currentPageTemp, new DataSourceEntities());
+            showPage(currentPageTemp, entitiesDataSource, whereExpr, orderExpr);
         }
 
         private void dataGridViewImportHistory_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
+
+            if (e.RowIndex < 0)
+            {
+                return;
+            }
+
+            if (e.ColumnIndex < 0)
+            {
+                return;
+            }
+
             var session_Id = dataGridViewImportHistory.Rows[e.RowIndex].Cells["SESSION_ID"].Value.ToString();
             var hasError = dataGridViewImportHistory.Rows[e.RowIndex].Cells["HAS_ERROR"].Value.ToString();
 
@@ -327,19 +350,84 @@ namespace TheDataResourceImporter
 
         private void dataGridViewImportHistory_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if(e.RowIndex < 0)
+
+
+            if (e.ColumnIndex < 0)
             {
                 return;
             }
 
             //选中的列的 名称
             var targetColName = dataGridViewImportHistory.Columns[e.ColumnIndex].Name;
-            var session_Id = dataGridViewImportHistory.Rows[e.RowIndex].Cells["SESSION_ID"].Value.ToString();
-            var hasError = dataGridViewImportHistory.Rows[e.RowIndex].Cells["HAS_ERROR"].Value.ToString();
-            var selectedSession = entitiesDataSource.IMPORT_SESSION.Find(session_Id);
-            string tableName = selectedSession.TABLENAME;
+
+            if (-1 == e.RowIndex) //标题栏
+            {
+                switch (targetColName)
+                {
+                    case "DATA_RES_TYPE":
+                        descOrder = !descOrder;//更改排序方式
+                        orderExpr = r => r.DATA_RES_TYPE;
+                        showPage(1, entitiesDataSource, whereExpr, orderExpr);
+                        break;
+                    case "ZIP_OR_DIR_PATH":
+                        descOrder = !descOrder;//更改排序方式
+                        orderExpr = r => r.ZIP_OR_DIR_PATH;
+                        showPage(1, entitiesDataSource, whereExpr, orderExpr);
+                        break;
+                    case "IS_ZIP":
+                        descOrder = !descOrder;//更改排序方式
+                        orderExpr = r => r.IS_ZIP;
+                        showPage(1, entitiesDataSource, whereExpr, orderExpr);
+                        break;
+                    case "START_TIME":
+                        descOrder = !descOrder;//更改排序方式
+                        orderExpr = r => r.START_TIME;
+                        showPage(1, entitiesDataSource, whereExpr, orderExpr);
+                        break;
+                    case "LAST_TIME":
+                        descOrder = !descOrder;//更改排序方式
+                        orderExpr = r => r.LAST_TIME;
+                        showPage(1, entitiesDataSource, whereExpr, orderExpr);
+                        break;
+                    case "COMPLETED":
+                        descOrder = !descOrder;//更改排序方式
+                        orderExpr = r => r.COMPLETED;
+                        showPage(1, entitiesDataSource, whereExpr, orderExpr);
+                        break;
+                    case "TOTAL_ITEM":
+                        descOrder = !descOrder;//更改排序方式
+                        orderExpr = r => r.TOTAL_ITEM;
+                        showPage(1, entitiesDataSource, whereExpr, orderExpr);
+                        break;
+                    case "HAS_ERROR":
+                        descOrder = !descOrder;//更改排序方式
+                        orderExpr = r => r.HAS_ERROR;
+                        showPage(1, entitiesDataSource, whereExpr, orderExpr);
+                        break;
+                    case "ROLLED_BACK":
+                        descOrder = !descOrder;//更改排序方式
+                        orderExpr = r => r.ROLLED_BACK;
+                        break;
+                    case "NOTE":
+                        descOrder = !descOrder;//更改排序方式
+                        orderExpr = r => r.NOTE;
+                        showPage(1, entitiesDataSource, whereExpr, orderExpr);
+                        break;
+                }
+
+                showPage(1, entitiesDataSource, whereExpr, orderExpr);
+            }
+
+            //选中的列的 名称
+            
             if ("rollBackButton".Equals(targetColName))//回滚
             {
+                if (e.RowIndex < 0)
+                    return;
+                var session_Id = dataGridViewImportHistory.Rows[e.RowIndex].Cells["SESSION_ID"].Value.ToString();
+                var hasError = dataGridViewImportHistory.Rows[e.RowIndex].Cells["HAS_ERROR"].Value.ToString();
+                var selectedSession = entitiesDataSource.IMPORT_SESSION.Find(session_Id);
+                string tableName = selectedSession.TABLENAME;
                 var messageBoxResult = MessageBox.Show("确定回滚本次导入的全部记录么?", "是否回滚", MessageBoxButtons.YesNo);
 
                 if (messageBoxResult == System.Windows.Forms.DialogResult.Yes)
@@ -373,6 +461,12 @@ namespace TheDataResourceImporter
             }
             else if ("checkErrorButton".Equals(targetColName))//查看详情
             {
+                if (e.RowIndex < 0)
+                    return;
+                var session_Id = dataGridViewImportHistory.Rows[e.RowIndex].Cells["SESSION_ID"].Value.ToString();
+                var hasError = dataGridViewImportHistory.Rows[e.RowIndex].Cells["HAS_ERROR"].Value.ToString();
+                var selectedSession = entitiesDataSource.IMPORT_SESSION.Find(session_Id);
+                string tableName = selectedSession.TABLENAME;
                 //有错 弹出错误详情
                 if ("Y".Equals(hasError))
                 {
@@ -385,5 +479,62 @@ namespace TheDataResourceImporter
                 }
             }
         }
+
+
+
+        private void buttonPgSize50_Click(object sender, EventArgs e)
+        {
+            pageSize = 50;
+            showPage(1, entitiesDataSource, whereExpr, orderExpr);
+        }
+
+        private void buttonPgSize100_Click(object sender, EventArgs e)
+        {
+            pageSize = 100;
+            showPage(1, entitiesDataSource, whereExpr, orderExpr);
+        }
+
+        private void buttonPgSize200_Click(object sender, EventArgs e)
+        {
+            pageSize = 200;
+            showPage(1, entitiesDataSource, whereExpr, orderExpr);
+        }
+
+        private void buttonPgSize500_Click(object sender, EventArgs e)
+        {
+            pageSize = 500;
+            showPage(1, entitiesDataSource, whereExpr, orderExpr);
+        }
+
+        private void buttonPgSize1000_Click(object sender, EventArgs e)
+        {
+            pageSize = 1000;
+            showPage(1, entitiesDataSource, whereExpr, orderExpr);
+        }
+
+        private void buttonPgSize5000_Click(object sender, EventArgs e)
+        {
+            pageSize = 5000;
+            showPage(1, entitiesDataSource, whereExpr, orderExpr);
+        }
+
+
+        private void buttonFiliterResType_Click(object sender, EventArgs e)
+        {
+            var resType = textBoxResType.Text;
+
+            if (string.IsNullOrWhiteSpace(resType))
+            {
+                return;
+            }
+            else
+            {
+                resType = resType.Trim();
+                whereExpr = r => r.DATA_RES_TYPE.Contains(resType);
+                showPage(1, entitiesDataSource, whereExpr, orderExpr);
+            }
+        }
+
+
     }
 }
