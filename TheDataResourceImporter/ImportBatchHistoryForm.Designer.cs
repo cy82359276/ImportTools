@@ -126,7 +126,6 @@
             this.dataGridViewImportHistory.Size = new System.Drawing.Size(822, 650);
             this.dataGridViewImportHistory.TabIndex = 8;
             this.dataGridViewImportHistory.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewImportHistory_CellClick);
-            this.dataGridViewImportHistory.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewImportHistory_ColumnHeaderMouseClick);
             // 
             // buttonPgSize50
             // 

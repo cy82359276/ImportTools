@@ -476,14 +476,6 @@ namespace TheDataResourceImporter
             }
         }
 
-        private void dataGridViewImportHistory_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
-        {
-            if (e.ColumnIndex < 0)
-            {
-                return;
-            }
-        }
-
         private void buttonPgSize50_Click(object sender, EventArgs e)
         {
             pageSize = 50;
