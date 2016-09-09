@@ -46,7 +46,7 @@ namespace TheDataResourceImporter
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message + "  " + ex.StackTrace);
+                MessageBox.Show($"启动失败，请确保安装了必备包内软件！！！\n错误详情：“{ex.Message}”");
                 throw;
             }
 
