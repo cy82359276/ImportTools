@@ -5089,8 +5089,8 @@ namespace TheDataResourceImporter
                 entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated", "country", namespaceManager);
                 entityObject.STA_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated", "docNumber", namespaceManager);
                 //公告类型
-                entityObject.STA_PUB_KIND = string.IsNullOrEmpty(entityObject.STA_PUB_NUMBER) ? "" : entityObject.STA_PUB_NUMBER.Last().ToString();
-
+                //entityObject.STA_PUB_KIND = string.IsNullOrEmpty(entityObject.STA_PUB_NUMBER) ? "" : entityObject.STA_PUB_NUMBER.Last().ToString();
+                entityObject.STA_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated", "kind", namespaceManager);
                 var pubDateStr = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated", "datePublication", namespaceManager);
 
                 entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(pubDateStr);
@@ -5266,7 +5266,7 @@ namespace TheDataResourceImporter
                 //entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/business:PublicationReference", "appl-type");
                 entityObject.STA_PUB_COUNTRY = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:WIPOST3Code", "", namespaceManager);
                 entityObject.STA_PUB_NUMBER = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:DocNumber", "", namespaceManager);
-                entityObject.STA_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind", "", namespaceManager);
+                entityObject.STA_PUB_KIND = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Kind[@]", "", namespaceManager);
                 entityObject.STA_PUB_DATE = MiscUtil.pareseDateTimeExactUseCurrentCultureInfo(MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:PublicationReference[@dataFormat='standard']/base:DocumentID/base:Date", "", namespaceManager));
 
 

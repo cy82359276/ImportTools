@@ -168,11 +168,8 @@ namespace TheDataResourceImporter
             }
 
 
-
             SetEnabled(btn_Choose, false);
             SetEnabled(btnStart, false);
-
-
 
             Func<string[], string, bool> func = TheDataResourceImporter.ImportManger.BeginImport;
 
