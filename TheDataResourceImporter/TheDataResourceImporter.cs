@@ -5675,7 +5675,22 @@ namespace TheDataResourceImporter
 
                 sCNPatentTextCode.IMPORT_TIME = System.DateTime.Now;
 
-                entiesContext.SaveChanges();
+
+
+                try
+                {
+                    if (0 == handledCount % 500)//每500条写库一次
+                    {
+                        entiesContext.SaveChanges();
+                    }
+                    entiesContext.SaveChanges();
+
+                }
+                catch (Exception ex)
+                {
+                    var importError =  MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, ex.Message, ex.StackTrace);
+                }
+                
 
                 //输出插入记录
                 var currentValue = MiscUtil.jsonSerilizeObject(sCNPatentTextCode);
