@@ -244,7 +244,6 @@ namespace TheDataResourceImporter
                 }
 
                 MessageUtil.DoAppendTBDetail($"当前批次运行完毕，处理了{bath.FILECOUNT}个文件，入库了{bath.HANDLED_ITEM_COUNT}条目，总耗时{bath.LAST_TIME}秒");
-
             }
 
             return true;
