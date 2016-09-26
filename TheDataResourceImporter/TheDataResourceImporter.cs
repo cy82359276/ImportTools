@@ -244,7 +244,6 @@ namespace TheDataResourceImporter
                 }
 
                 MessageUtil.DoAppendTBDetail($"当前批次运行完毕，处理了{bath.FILECOUNT}个文件，入库了{bath.HANDLED_ITEM_COUNT}条目，总耗时{bath.LAST_TIME}秒");
-
             }
 
             return true;
@@ -292,7 +291,8 @@ namespace TheDataResourceImporter
             //有疑问: XML结构不同, 文件路径不确定
             else if (fileType == "中国专利标准化全文文本数据")
             {
-                parseZip03(filePath, dataSourceEntites, importSession);
+                //parseZip03(filePath, dataSourceEntites, importSession);
+                parseZipUniversalSTA(filePath, dataSourceEntites, importSession, dataSourceEntites.S_CHINA_PATENT_STANDARDFULLTXT, typeof(S_CHINA_PATENT_STANDARDFULLTXT));
             }
 
             #endregion
@@ -1124,9 +1124,9 @@ namespace TheDataResourceImporter
                     var keyTemp = entry.Key;
 
                     //解压当前的XML文件
-                    string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                    MemoryStream memStream = new MemoryStream(); entry.WriteTo(memStream);
 
-                    if ("" == entryFullPath.Trim())
+                    if (0 == memStream.Length)
                     {
                         MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                         LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -1144,7 +1144,8 @@ namespace TheDataResourceImporter
                     dataSourceEntites.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
                     ////entiesContext.SaveChanges();
 
-                    XDocument doc = XDocument.Load(entryFullPath);
+                    if (memStream.Position > 0) { memStream.Position = 0; }
+                    XDocument doc = XDocument.Load(memStream);
 
                     #region 具体的入库操作,EF
                     //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -2143,9 +2144,8 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
-
-                if ("" == entryFullPath.Trim())
+                MemoryStream memStream = new MemoryStream(); entry.WriteTo(memStream);
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -2169,7 +2169,8 @@ namespace TheDataResourceImporter
                 entiesContext.S_CHINA_PATENT_LAWSPROCESS.Add(entityObject);
                 ////entiesContext.SaveChanges();
 
-                XDocument doc = XDocument.Load(entryFullPath);
+                if (memStream.Position > 0) { memStream.Position = 0; }
+                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -2217,6 +2218,7 @@ namespace TheDataResourceImporter
                 //输出插入记录
                 #endregion
 
+                memStream.Dispose();
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
             }
@@ -2359,9 +2361,9 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                MemoryStream memStream = new MemoryStream(); entry.WriteTo(memStream);
 
-                if ("" == entryFullPath.Trim())
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -2381,7 +2383,11 @@ namespace TheDataResourceImporter
                 try
                 {
                     XmlReaderSettings xmlReaderSettings = new XmlReaderSettings { CheckCharacters = false };
-                    XmlReader xmlReader = XmlReader.Create(entryFullPath, xmlReaderSettings);
+                    if (memStream.Position > 0)
+                    {
+                        memStream.Position = 0;
+                    }
+                    XmlReader xmlReader = XmlReader.Create(memStream, xmlReaderSettings);
                     xmlReader.MoveToContent();
                     XDocument doc = XDocument.Load(xmlReader);
 
@@ -2506,6 +2512,7 @@ namespace TheDataResourceImporter
                     #endregion
 
                     xmlReader.Dispose();
+                    memStream.Dispose();
                 }
                 catch (Exception ex)
                 {
@@ -2615,9 +2622,9 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                MemoryStream memStream = new MemoryStream(); entry.WriteTo(memStream);
 
-                if ("" == entryFullPath.Trim())
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -2641,7 +2648,8 @@ namespace TheDataResourceImporter
                 entiesContext.S_JOURNAL_PROJECT_ABSTRACT.Add(entityObject);
                 ////entiesContext.SaveChanges();
 
-                XDocument doc = XDocument.Load(entryFullPath);
+                if (memStream.Position > 0) { memStream.Position = 0; }
+                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -2730,6 +2738,7 @@ namespace TheDataResourceImporter
                 //输出插入记录
                 #endregion
 
+                memStream.Dispose();
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
             }
@@ -2989,9 +2998,9 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                MemoryStream memStream = new MemoryStream(); entry.WriteTo(memStream);
 
-                if ("" == entryFullPath.Trim())
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -3015,7 +3024,8 @@ namespace TheDataResourceImporter
                 entiesContext.S_MADRID_BRAND_PURCHASE.Add(entityObject);
                 ////entiesContext.SaveChanges();
 
-                XDocument doc = XDocument.Load(entryFullPath);
+                if (memStream.Position > 0) { memStream.Position = 0; }
+                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -3208,9 +3218,9 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                MemoryStream memStream = new MemoryStream(); entry.WriteTo(memStream);
 
-                if ("" == entryFullPath.Trim())
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -3234,7 +3244,8 @@ namespace TheDataResourceImporter
                 entiesContext.S_AMERICA_TRANSFER_BRAND.Add(entityObject);
                 ////entiesContext.SaveChanges();
 
-                XDocument doc = XDocument.Load(entryFullPath);
+                if (memStream.Position > 0) { memStream.Position = 0; }
+                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -3378,9 +3389,9 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                MemoryStream memStream = new MemoryStream(); entry.WriteTo(memStream);
 
-                if ("" == entryFullPath.Trim())
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -3404,7 +3415,8 @@ namespace TheDataResourceImporter
                 entiesContext.S_AMERICA_APPLY_BRAND.Add(entityObject);
                 ////entiesContext.SaveChanges();
 
-                XDocument doc = XDocument.Load(entryFullPath);
+                if (memStream.Position > 0) { memStream.Position = 0; }
+                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -3557,9 +3569,9 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                MemoryStream memStream = new MemoryStream(); entry.WriteTo(memStream);
 
-                if ("" == entryFullPath.Trim())
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -3583,7 +3595,8 @@ namespace TheDataResourceImporter
                 entiesContext.S_CHINA_WELLKNOWN_BRAND.Add(entityObject);
                 ////entiesContext.SaveChanges();
 
-                XDocument doc = XDocument.Load(entryFullPath);
+                if (memStream.Position > 0) { memStream.Position = 0; }
+                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -3717,9 +3730,9 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                MemoryStream memStream = new MemoryStream(); entry.WriteTo(memStream);
 
-                if ("" == entryFullPath.Trim())
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -3743,7 +3756,8 @@ namespace TheDataResourceImporter
                 entiesContext.S_MADRID_BRAND_ENTER_CHINA.Add(entityObject);
                 ////entiesContext.SaveChanges();
 
-                XDocument doc = XDocument.Load(entryFullPath);
+                if (memStream.Position > 0) { memStream.Position = 0; }
+                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -3943,9 +3957,9 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                MemoryStream memStream = new MemoryStream(); entry.WriteTo(memStream);
 
-                if ("" == entryFullPath.Trim())
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -3969,7 +3983,8 @@ namespace TheDataResourceImporter
                 entiesContext.S_CHINA_BRAND_TRANSFER.Add(entityObject);
                 ////entiesContext.SaveChanges();
 
-                XDocument doc = XDocument.Load(entryFullPath);
+                if (memStream.Position > 0) { memStream.Position = 0; }
+                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -4128,9 +4143,9 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                MemoryStream memStream = new MemoryStream(); entry.WriteTo(memStream);
 
-                if ("" == entryFullPath.Trim())
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -4154,7 +4169,8 @@ namespace TheDataResourceImporter
                 entiesContext.S_CHINA_BRAND_LICENSE.Add(entityObject);
                 ////entiesContext.SaveChanges();
 
-                XDocument doc = XDocument.Load(entryFullPath);
+                if (memStream.Position > 0) { memStream.Position = 0; }
+                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -4317,9 +4333,9 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                MemoryStream memStream = new MemoryStream(); entry.WriteTo(memStream);
 
-                if ("" == entryFullPath.Trim())
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -4343,7 +4359,8 @@ namespace TheDataResourceImporter
                 entiesContext.S_CHINA_BRAND.Add(entityObject);
                 ////entiesContext.SaveChanges();
 
-                XDocument doc = XDocument.Load(entryFullPath);
+                if (memStream.Position > 0) { memStream.Position = 0; }
+                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -4562,9 +4579,10 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
-
-                if ("" == entryFullPath.Trim())
+                //string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                MemoryStream memStream = new MemoryStream();
+                entry.WriteTo(memStream);
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -4587,7 +4605,13 @@ namespace TheDataResourceImporter
                 dbSet.Add(entityObject);
                 ////entiesContext.SaveChanges();
 
-                XDocument doc = XDocument.Load(entryFullPath);
+
+                if (memStream.Position > 0)
+                {
+                    memStream.Position = 0;
+                }
+
+                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -4661,6 +4685,7 @@ namespace TheDataResourceImporter
                 entityObject.IMPORT_TIME = System.DateTime.Now;
 
                 var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+
                 try
                 {
                     //entiesContext.SaveChanges();
@@ -4671,15 +4696,9 @@ namespace TheDataResourceImporter
                     MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入失败!!!");
                     throw ex;
                 }
-
-
-
-
-
                 //输出插入记录
-
-
                 #endregion
+                memStream.Dispose();
 
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
@@ -4774,9 +4793,9 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                MemoryStream memStream = new MemoryStream(); entry.WriteTo(memStream);
 
-                if ("" == entryFullPath.Trim())
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -4794,7 +4813,8 @@ namespace TheDataResourceImporter
                 entiesContext.S_CHINA_PATENT_BIBLIOGRAPHIC.Add(entityObject);
                 ////entiesContext.SaveChanges();
 
-                XDocument doc = XDocument.Load(entryFullPath);
+                if (memStream.Position > 0) { memStream.Position = 0; }
+                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -4872,15 +4892,15 @@ namespace TheDataResourceImporter
 
                 //输出插入记录
                 var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
-
                 MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
-
                 #endregion
 
+                memStream.Dispose();
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
             }
             #endregion 循环入库
+
         }
 
         private static void parseTRS05(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession)
@@ -5048,9 +5068,9 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 #region 解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                MemoryStream memStream = new MemoryStream(); entry.WriteTo(memStream);
 
-                if ("" == entryFullPath.Trim())
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{zipFilePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -5075,7 +5095,8 @@ namespace TheDataResourceImporter
 
 
 
-                XDocument doc = XDocument.Load(entryFullPath);
+                if (memStream.Position > 0) { memStream.Position = 0; }
+                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -5140,7 +5161,7 @@ namespace TheDataResourceImporter
                 MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
 
                 #endregion
-
+                memStream.Dispose();
 
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, zipFilePath);
@@ -5148,6 +5169,7 @@ namespace TheDataResourceImporter
             #endregion 循环入库
         }
 
+        /*
         private static void parseZip03(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession)
         {
             handledCount = 0;
@@ -5235,9 +5257,9 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                MemoryStream memStream = new MemoryStream();entry.WriteTo(memStream);
 
-                if ("" == entryFullPath.Trim())
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -5255,7 +5277,7 @@ namespace TheDataResourceImporter
                 entiesContext.S_CHINA_PATENT_STANDARDFULLTXT.Add(entityObject);
                 ////entiesContext.SaveChanges();
 
-                XDocument doc = XDocument.Load(entryFullPath);
+                if (memStream.Position > 0){ memStream.Position = 0;}                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -5343,6 +5365,7 @@ namespace TheDataResourceImporter
             }
             #endregion 循环入库
         }
+        */
 
         private static void parseZip02(string filePath, DataSourceEntities entiesContext, IMPORT_SESSION importSession)
         {
@@ -5578,9 +5601,13 @@ namespace TheDataResourceImporter
                 var keyTemp = entry.Key;
 
                 //解压当前的XML文件
-                string entryFullPath = CompressUtil.writeEntryToTemp(entry);
+                //string entryFullPath = CompressUtil.writeEntryToTemp(entry);
 
-                if ("" == entryFullPath.Trim())
+                MemoryStream memStream = new MemoryStream();
+
+                entry.WriteTo(memStream);
+
+                if (0 == memStream.Length)
                 {
                     MessageUtil.DoAppendTBDetail("----------当前条目：" + entry.Key + "解压失败!!!,跳过本条目");
                     LogHelper.WriteErrorLog($"----------当前条目:{filePath}{Path.DirectorySeparatorChar}{entry.Key}解压失败!!!");
@@ -5598,7 +5625,17 @@ namespace TheDataResourceImporter
                 entiesContext.S_CHINA_PATENT_TEXTCODE.Add(sCNPatentTextCode);
                 ////entiesContext.SaveChanges();
 
-                XDocument doc = XDocument.Load(entryFullPath);
+
+                //XmlReader xmlReader = XmlReader.Create(bufStream);
+
+
+                if (memStream.Position > 0)
+                {
+                    memStream.Position = 0;
+                }
+
+
+                XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
                 //获取所有字段名， 获取字段的配置信息， 对字段值进行复制， 
@@ -5686,362 +5723,26 @@ namespace TheDataResourceImporter
                 {
                     if (0 == handledCount % 500)//每500条写库一次
                     {
-                        //entiesContext.SaveChanges();
+                        entiesContext.SaveChanges();
                     }
-                    //entiesContext.SaveChanges();
+                    entiesContext.SaveChanges();
 
                 }
                 catch (Exception ex)
                 {
-                    var importError =  MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, ex.Message, ex.StackTrace);
+                    var importError = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, ex.Message, ex.StackTrace);
                 }
-                
+
+                memStream.Dispose();
+
 
                 //输出插入记录
                 var currentValue = MiscUtil.jsonSerilizeObject(sCNPatentTextCode);
 
                 MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
 
-                /**
-                var pub_numberEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/doc-number");
-
-                if (pub_numberEles.Count() > 0)
-                {
-                    insertStr = insertStr + "PUB_NUMBER,";
-                    var valueTemp = pub_numberEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-                var pub_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/date");
-
-                if (pub_dateEles.Count() > 0)
-                {
-                    insertStr = insertStr + "PUB_DATE,";
-                    var valueTemp = pub_dateEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
-                }
-
-
-
-                var pub_kindEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/kind");
-
-                if (pub_kindEles.Count() > 0)
-                {
-                    insertStr = insertStr + "PUB_KIND,";
-                    var valueTemp = pub_kindEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-
-
-                var gazette_numEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/gazette-num");
-
-                if (gazette_numEles.Count() > 0)
-                {
-                    insertStr = insertStr + "GAZETTE_NUM,";
-                    var valueTemp = gazette_numEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-
-
-                var gazette_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/date");
-
-                if (gazette_dateEles.Count() > 0)
-                {
-                    insertStr = insertStr + "GAZETTE_DATE,";
-                    var valueTemp = gazette_dateEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
-                }
-
-
-
-                var app_countryEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/country");
-
-                if (app_countryEles.Count() > 0)
-                {
-                    insertStr = insertStr + "APP_COUNTRY,";
-                    var valueTemp = app_countryEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-
-
-
-                var app_numberEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/doc-number");
-
-                if (app_numberEles.Count() > 0)
-                {
-                    insertStr = insertStr + "APP_NUMBER,";
-                    var valueTemp = app_numberEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-
-
-
-                var app_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/date");
-
-                if (app_dateEles.Count() > 0)
-                {
-                    insertStr = insertStr + "APP_DATE,";
-                    var valueTemp = app_dateEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr = insertStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
-                }
-
-
-
-                var classification_ipcrEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/classifications-ipcr/classification-ipcr[0]/text");
-
-                if (classification_ipcrEles.Count() > 0)
-                {
-                    insertStr = insertStr + "CLASSIFICATION-IPCR,";
-                    var valueTemp = classification_ipcrEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-
-
-
-
-
-                var invention_titleEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/invention-title");
-
-                if (invention_titleEles.Count() > 0)
-                {
-                    insertStr = insertStr + "INVENTION_TITLE,";
-                    var valueTemp = invention_titleEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-
-
-
-                var abstractEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/abstract");
-
-                if (abstractEles.Count() > 0)
-                {
-                    insertStr = insertStr + "ABSTRACT,";
-                    var valueTemp = abstractEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-
-                    //处理文本出现单引号的情况
-                    valueTemp = valueTemp.Replace("'", "''");
-
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-
-
-
-
-
-                insertStr = insertStr + "PATH_XML,";
-                valuesStr = valuesStr + "'" + entry.Key + "',";
-
-
-                insertStr = insertStr + "EXIST_XML,";
-
-                valuesStr = valuesStr + "'1',";
-
-                var id = System.Guid.NewGuid().ToString();
-
-                insertStr = insertStr + "ID,";
-
-                valuesStr = valuesStr + String.Format("'{0}',", id);
-
-                if (',' == insertStr.Last())
-                {
-                    insertStr = insertStr.Substring(0, insertStr.Length - 1);
-                }
-
-                if (',' == valuesStr.Last())
-                {
-                    valuesStr = valuesStr.Substring(0, valuesStr.Length - 1);
-                }
-
-                string sql = "insert into S_CHINA_PATENT_TEXTCODE(" + insertStr + ") values (" + valuesStr + ")";
-
-                MessageUtil.DoAppendTBDetail("SQL 当前插入语句：" + sql);
-
-                int insertedCount = OracleDB.ExecuteSql(sql);
-
-                if (1 == insertedCount)
-                {
-                    MessageUtil.DoAppendTBDetail("记录：" + entry.Key + "插入成功!!!");
-                }
-                **/
                 #endregion
-
-                #region 解析XML,插入数据库 已使用EF重构
-                /**
-                string insertStr = "";
-                string valuesStr = "";
-
-                var appl_typeEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference");
-
-                if (appl_typeEles.Count() > 0)
-                {
-                    insertStr = insertStr + "APPL_TYPE,";
-                    var valueTemp = appl_typeEles.ElementAt(0).Attribute("appl-type").Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-                var pub_countryEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/country");
-
-                if (pub_countryEles.Count() > 0)
-                {
-                    insertStr = insertStr + "PUB_COUNTRY,";
-                    var valueTemp = pub_countryEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-                var pub_numberEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/doc-number");
-
-                if (pub_numberEles.Count() > 0)
-                {
-                    insertStr = insertStr + "PUB_NUMBER,";
-                    var valueTemp = pub_numberEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-                var pub_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/date");
-
-                if (pub_dateEles.Count() > 0)
-                {
-                    insertStr = insertStr + "PUB_DATE,";
-                    var valueTemp = pub_dateEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
-                }
-                var pub_kindEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/document-id/kind");
-
-                if (pub_kindEles.Count() > 0)
-                {
-                    insertStr = insertStr + "PUB_KIND,";
-                    var valueTemp = pub_kindEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-
-
-                var gazette_numEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/gazette-num");
-
-                if (gazette_numEles.Count() > 0)
-                {
-                    insertStr = insertStr + "GAZETTE_NUM,";
-                    var valueTemp = gazette_numEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-                var gazette_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/cn-publication-reference/gazette-reference/date");
-
-                if (gazette_dateEles.Count() > 0)
-                {
-                    insertStr = insertStr + "GAZETTE_DATE,";
-                    var valueTemp = gazette_dateEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
-                }
-                var app_countryEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/country");
-
-                if (app_countryEles.Count() > 0)
-                {
-                    insertStr = insertStr + "APP_COUNTRY,";
-                    var valueTemp = app_countryEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-                var app_numberEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/doc-number");
-
-                if (app_numberEles.Count() > 0)
-                {
-                    insertStr = insertStr + "APP_NUMBER,";
-                    var valueTemp = app_numberEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-                var app_dateEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/application-reference/date");
-
-                if (app_dateEles.Count() > 0)
-                {
-                    insertStr = insertStr + "APP_DATE,";
-                    var valueTemp = app_dateEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr = insertStr + String.Format("TO_DATE('{0}', 'yyyymmdd')", valueTemp) + ",";
-                }
-                var classification_ipcrEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/classifications-ipcr/classification-ipcr[0]/text");
-
-                if (classification_ipcrEles.Count() > 0)
-                {
-                    insertStr = insertStr + "CLASSIFICATION-IPCR,";
-                    var valueTemp = classification_ipcrEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-                var invention_titleEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/invention-title");
-
-                if (invention_titleEles.Count() > 0)
-                {
-                    insertStr = insertStr + "INVENTION_TITLE,";
-                    var valueTemp = invention_titleEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-                var abstractEles = doc.Root.XPathSelectElements("/cn-patent-document/cn-bibliographic-data/abstract");
-
-
-                if (abstractEles.Count() > 0)
-                {
-                    insertStr = insertStr + "ABSTRACT,";
-                    var valueTemp = abstractEles.ElementAt(0).Value;
-                    valueTemp = String.IsNullOrEmpty(valueTemp) ? "" : valueTemp;
-
-                    //处理文本出现单引号的情况
-                    valueTemp = valueTemp.Replace("'", "''");
-
-                    valuesStr = valuesStr + "'" + valueTemp + "',";
-                }
-
-                insertStr = insertStr + "PATH_XML,";
-                valuesStr = valuesStr + "'" + entry.Key + "',";
-
-
-                insertStr = insertStr + "EXIST_XML,";
-
-                valuesStr = valuesStr + "'1',";
-
-                var id = System.Guid.NewGuid().ToString();
-
-                insertStr = insertStr + "ID,";
-
-                valuesStr = valuesStr + String.Format("'{0}',", id);
-
-                if (',' == insertStr.Last())
-                {
-                    insertStr = insertStr.Substring(0, insertStr.Length - 1);
-                }
-
-                if (',' == valuesStr.Last())
-                {
-                    valuesStr = valuesStr.Substring(0, valuesStr.Length - 1);
-                }
-
-                string sql = "insert into S_CHINA_PATENT_TEXTCODE(" + insertStr + ") values (" + valuesStr + ")";
-
-                MessageUtil.DoAppendTBDetail("SQL 当前插入语句：" + sql);
-
-                int insertedCount = OracleDB.ExecuteSql(sql);
-
-                if (1 == insertedCount)
-                {
-                    MessageUtil.DoAppendTBDetail("记录：" + entry.Key + "插入成功!!!");
-                }
-                **/
-                #endregion
-
+                memStream.Dispose();
 
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);

@@ -191,7 +191,7 @@ namespace TheDataResourceImporter
                     }
                     catch (Exception ex)
                     {
-
+                        MessageBox.Show(ex.Message);
                     }
 
                     SetEnabled(btn_Choose, true);
