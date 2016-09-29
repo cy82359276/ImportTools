@@ -4696,11 +4696,11 @@ namespace TheDataResourceImporter
 
                 entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
 
-                entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+                entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno/business:MainClassification[1]", "", namespaceManager);
                 if (!string.IsNullOrEmpty(entityObject.CLASSIFICATIONLOCARNO))
                 {
-                    entityObject.EDITIONSTATEMENT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno/base:EditionStatement", "", namespaceManager);
-                    entityObject.MAINCLASSIFICATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno/business:MainClassification", "", namespaceManager);
+                    //entityObject.EDITIONSTATEMENT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno/base:EditionStatement", "", namespaceManager);
+                    //entityObject.MAINCLASSIFICATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno/business:MainClassification[1]", "", namespaceManager);
                 }
 
                 entityObject.INVENTIONTITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
@@ -5789,6 +5789,11 @@ namespace TheDataResourceImporter
                 sCNPatentTextCode.CLASSIFICATION_IPCR = classification_ipcr;
 
                 var invention_title = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/invention-title");
+                if(string.IsNullOrEmpty(invention_title))
+                {
+                    invention_title = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:DesignTitle");
+                }
+
                 sCNPatentTextCode.INVENTION_TITLE = invention_title;
 
                 var abstractEle = MiscUtil.getXElementSingleValueByXPath(rootElement, "/cn-patent-document/cn-bibliographic-data/abstract");
