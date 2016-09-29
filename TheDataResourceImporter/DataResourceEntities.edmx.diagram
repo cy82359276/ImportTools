@@ -10,7 +10,6 @@
         <EntityTypeShape EntityType="Model.S_AMERICAN_BRAND_GRAPHCLASSIFY" Width="1.5" PointX="6.75" PointY="6.75" />
         <EntityTypeShape EntityType="Model.S_AMERICAN_BRAND_USCLASSIFY" Width="1.5" PointX="8.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_AMERICAN_DESIGN_PATENT" Width="1.5" PointX="8.75" PointY="4.75" />
-        <EntityTypeShape EntityType="Model.S_AMERICAN_PATENT_FULLTEXT" Width="1.5" PointX="2.75" PointY="9.75" />
         <EntityTypeShape EntityType="Model.S_AUSTRALIAN_PATENT_FULLTEXT" Width="1.5" PointX="10.75" PointY="0.75" />
         <EntityTypeShape EntityType="Model.S_AUSTRIA_PATENT_FULLTEXT" Width="1.5" PointX="4.75" PointY="10.75" />
         <EntityTypeShape EntityType="Model.S_BELGIAN_PATENT_FULLTEXT" Width="1.5" PointX="10.75" PointY="9.75" />
@@ -91,6 +90,7 @@
         <EntityTypeShape EntityType="Model.S_CHINA_PATENT_LAWSPROCESS" Width="1.5" PointX="21.375" PointY="13.75" />
         <EntityTypeShape EntityType="Model.S_BIOLOGICAL_SEQ" Width="1.5" PointX="39.375" PointY="8.75" />
         <EntityTypeShape EntityType="Model.S_FOREIGN_PATENT_SEQUENCE" Width="1.5" PointX="37.375" PointY="32.75" />
+        <EntityTypeShape EntityType="Model.S_AMERICAN_PATENT_FULLTEXT" Width="1.5" PointX="0.75" PointY="6.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

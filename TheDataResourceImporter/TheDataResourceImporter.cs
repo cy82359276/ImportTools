@@ -166,8 +166,6 @@ namespace TheDataResourceImporter
                 #endregion
 
                 bath.FILECOUNT = AllFilePaths.Count();
-                dataSourceEntites.S_IMPORT_BATH.Add(bath);
-                dataSourceEntites.SaveChanges();
 
                 #region 对指定的或发现的路径进行处理
 
@@ -236,6 +234,7 @@ namespace TheDataResourceImporter
 
                 try
                 {
+                    dataSourceEntites.S_IMPORT_BATH.Add(bath);
                     dataSourceEntites.SaveChanges();
                 }
                 catch (Exception ex)
@@ -262,7 +261,8 @@ namespace TheDataResourceImporter
             //导入操作信息
             IMPORT_SESSION importSession = MiscUtil.getNewImportSession(fileType, filePath, bath);
             dataSourceEntites.IMPORT_SESSION.Add(importSession);
-            dataSourceEntites.SaveChanges();
+            importSession.START_TIME = DateTime.Now;
+            //dataSourceEntites.SaveChanges();
             #endregion
 
 
@@ -326,7 +326,6 @@ namespace TheDataResourceImporter
             else if (fileType == "中国专利法律状态数据")
             {
                 parseTRS10(filePath, dataSourceEntites, importSession);
-
             }
             #endregion
             #region  11 中国专利法律状态变更翻译数据 mdb文件
@@ -1346,6 +1345,10 @@ namespace TheDataResourceImporter
             bath.HANDLED_ITEM_COUNT = bath.HANDLED_ITEM_COUNT + totalCount;
             dataSourceEntites.SaveChanges();
             #endregion
+
+          
+            GC.Collect();
+
             return true;
         }
 
@@ -3476,6 +3479,12 @@ namespace TheDataResourceImporter
                 //输出插入记录
                 #endregion
 
+                if (0 == handledCount % 10000)//每500条写库一次
+                {
+                    entiesContext.SaveChanges();
+                    GC.Collect();
+                }
+
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
             }
@@ -3636,6 +3645,12 @@ namespace TheDataResourceImporter
 
                 //输出插入记录
                 #endregion
+
+                if (0 == handledCount % 10000)//每500条写库一次
+                {
+                    entiesContext.SaveChanges();
+                    GC.Collect();
+                }
 
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
@@ -3864,6 +3879,12 @@ namespace TheDataResourceImporter
 
                 #endregion
 
+                if (0 == handledCount % 10000)//每500条写库一次
+                {
+                    entiesContext.SaveChanges();
+                    GC.Collect();
+                }
+
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
             }
@@ -4049,6 +4070,12 @@ namespace TheDataResourceImporter
 
 
                 #endregion
+
+                if (0 == handledCount % 10000)//每500条写库一次
+                {
+                    entiesContext.SaveChanges();
+                    GC.Collect();
+                }
 
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
@@ -4239,6 +4266,12 @@ namespace TheDataResourceImporter
 
 
                 #endregion
+
+                if (0 == handledCount % 10000)//每500条写库一次
+                {
+                    entiesContext.SaveChanges();
+                    GC.Collect();
+                }
 
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
@@ -4477,6 +4510,12 @@ namespace TheDataResourceImporter
 
                 #endregion
 
+                if (0 == handledCount % 10000)//每500条写库一次
+                {
+                    entiesContext.SaveChanges();
+                    GC.Collect();
+                }
+
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
             }
@@ -4652,8 +4691,15 @@ namespace TheDataResourceImporter
                 entityObject.CLASSIFICATIONIPCR = MiscUtil.getXElementSingleValueByXPath(rootElement, "//business:ClassificationIPCRDetails/business:ClassificationIPCR[@sequence='1']/base:Text", "", namespaceManager);
 
                 entityObject.CLASSIFICATIONLOCARNO = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno", "", namespaceManager);
+                if (!string.IsNullOrEmpty(entityObject.CLASSIFICATIONLOCARNO))
+                {
+                    entityObject.EDITIONSTATEMENT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno/base:EditionStatement", "", namespaceManager);
+                    entityObject.MAINCLASSIFICATION = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:ClassificationLocarno/business:MainClassification", "", namespaceManager);
+                }
 
                 entityObject.INVENTIONTITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:BibliographicData/business:InventionTitle", "", namespaceManager);
+                if(string.IsNullOrEmpty(entityObject.INVENTIONTITLE))
+                    entityObject.INVENTIONTITLE = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:DesignBibliographicData/business:DesignTitle", "", namespaceManager);
 
                 entityObject.ABSTRACT = MiscUtil.getXElementSingleValueByXPath(rootElement, "/business:PatentDocumentAndRelated/business:Abstract/base:Paragraphs", "", namespaceManager);
 
@@ -4684,21 +4730,29 @@ namespace TheDataResourceImporter
 
                 entityObject.IMPORT_TIME = System.DateTime.Now;
 
-                var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+                
 
-                try
-                {
-                    //entiesContext.SaveChanges();
-                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
-                }
-                catch (Exception ex)
-                {
-                    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入失败!!!");
-                    throw ex;
-                }
+                //try
+                //{
+                //    //entiesContext.SaveChanges();
+                //    //var currentValue = MiscUtil.jsonSerilizeObject(entityObject);
+                //    //MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+                //}
+                //catch (Exception ex)
+                //{
+                //    MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入失败!!!");
+                //    throw ex;
+                //}
+
                 //输出插入记录
                 #endregion
                 memStream.Dispose();
+
+                if (0 == handledCount % 10000)//每500条写库一次
+                {
+                    entiesContext.SaveChanges();
+                    GC.Collect();
+                }
 
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
@@ -4896,6 +4950,14 @@ namespace TheDataResourceImporter
                 #endregion
 
                 memStream.Dispose();
+
+                if (0 == handledCount % 10000)//每500条写库一次
+                {
+                    entiesContext.SaveChanges();
+                    GC.Collect();
+                }
+
+
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, filePath);
             }
@@ -5160,8 +5222,18 @@ namespace TheDataResourceImporter
 
                 MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
 
+
+
+
                 #endregion
                 memStream.Dispose();
+
+
+                if (0 == handledCount % 10000)//每500条写库一次
+                {
+                    entiesContext.SaveChanges();
+                    GC.Collect();
+                }
 
                 //更新进度信息
                 MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, zipFilePath);
@@ -5629,12 +5701,7 @@ namespace TheDataResourceImporter
                 //XmlReader xmlReader = XmlReader.Create(bufStream);
 
 
-                if (memStream.Position > 0)
-                {
-                    memStream.Position = 0;
-                }
-
-
+                memStream.Seek(0, SeekOrigin.Begin);
                 XDocument doc = XDocument.Load(memStream);
 
                 #region 具体的入库操作,EF
@@ -5717,29 +5784,26 @@ namespace TheDataResourceImporter
 
                 sCNPatentTextCode.IMPORT_TIME = System.DateTime.Now;
 
-
+                memStream.Dispose();
 
                 try
                 {
-                    if (0 == handledCount % 500)//每500条写库一次
+                    if (0 == handledCount % 10000)//每500条写库一次
                     {
                         entiesContext.SaveChanges();
+                        GC.Collect();
                     }
-                    entiesContext.SaveChanges();
-
                 }
                 catch (Exception ex)
                 {
                     var importError = MiscUtil.getImpErrorInstance(importSession.SESSION_ID, "Y", filePath, entry.Key, ex.Message, ex.StackTrace);
                 }
 
-                memStream.Dispose();
-
 
                 //输出插入记录
-                var currentValue = MiscUtil.jsonSerilizeObject(sCNPatentTextCode);
+                //var currentValue = MiscUtil.jsonSerilizeObject(sCNPatentTextCode);
 
-                MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
+                //MessageUtil.DoAppendTBDetail("记录：" + currentValue + "插入成功!!!");
 
                 #endregion
                 memStream.Dispose();

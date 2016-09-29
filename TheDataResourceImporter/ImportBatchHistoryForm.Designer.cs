@@ -51,35 +51,39 @@
             // labelTotal
             // 
             this.labelTotal.AutoSize = true;
-            this.labelTotal.Location = new System.Drawing.Point(230, 719);
+            this.labelTotal.Location = new System.Drawing.Point(307, 899);
+            this.labelTotal.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelTotal.Name = "labelTotal";
-            this.labelTotal.Size = new System.Drawing.Size(29, 12);
+            this.labelTotal.Size = new System.Drawing.Size(39, 15);
             this.labelTotal.TabIndex = 15;
             this.labelTotal.Text = "    ";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(213, 719);
+            this.label2.Location = new System.Drawing.Point(284, 899);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(11, 12);
+            this.label2.Size = new System.Drawing.Size(15, 15);
             this.label2.TabIndex = 14;
             this.label2.Text = "/";
             // 
             // labelCurrentPage
             // 
             this.labelCurrentPage.AutoSize = true;
-            this.labelCurrentPage.Location = new System.Drawing.Point(178, 719);
+            this.labelCurrentPage.Location = new System.Drawing.Point(237, 899);
+            this.labelCurrentPage.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelCurrentPage.Name = "labelCurrentPage";
-            this.labelCurrentPage.Size = new System.Drawing.Size(29, 12);
+            this.labelCurrentPage.Size = new System.Drawing.Size(39, 15);
             this.labelCurrentPage.TabIndex = 13;
             this.labelCurrentPage.Text = "    ";
             // 
             // buttonLast
             // 
-            this.buttonLast.Location = new System.Drawing.Point(126, 714);
+            this.buttonLast.Location = new System.Drawing.Point(168, 892);
+            this.buttonLast.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonLast.Name = "buttonLast";
-            this.buttonLast.Size = new System.Drawing.Size(31, 23);
+            this.buttonLast.Size = new System.Drawing.Size(41, 29);
             this.buttonLast.TabIndex = 12;
             this.buttonLast.Text = ">>";
             this.buttonLast.UseVisualStyleBackColor = true;
@@ -87,9 +91,10 @@
             // 
             // buttonNext
             // 
-            this.buttonNext.Location = new System.Drawing.Point(88, 714);
+            this.buttonNext.Location = new System.Drawing.Point(117, 892);
+            this.buttonNext.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonNext.Name = "buttonNext";
-            this.buttonNext.Size = new System.Drawing.Size(32, 23);
+            this.buttonNext.Size = new System.Drawing.Size(43, 29);
             this.buttonNext.TabIndex = 11;
             this.buttonNext.Text = ">";
             this.buttonNext.UseVisualStyleBackColor = true;
@@ -97,9 +102,10 @@
             // 
             // buttonPrevious
             // 
-            this.buttonPrevious.Location = new System.Drawing.Point(50, 714);
+            this.buttonPrevious.Location = new System.Drawing.Point(67, 892);
+            this.buttonPrevious.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonPrevious.Name = "buttonPrevious";
-            this.buttonPrevious.Size = new System.Drawing.Size(32, 23);
+            this.buttonPrevious.Size = new System.Drawing.Size(43, 29);
             this.buttonPrevious.TabIndex = 10;
             this.buttonPrevious.Text = "<";
             this.buttonPrevious.UseVisualStyleBackColor = true;
@@ -107,9 +113,10 @@
             // 
             // buttonFirst
             // 
-            this.buttonFirst.Location = new System.Drawing.Point(13, 714);
+            this.buttonFirst.Location = new System.Drawing.Point(17, 892);
+            this.buttonFirst.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonFirst.Name = "buttonFirst";
-            this.buttonFirst.Size = new System.Drawing.Size(31, 23);
+            this.buttonFirst.Size = new System.Drawing.Size(41, 29);
             this.buttonFirst.TabIndex = 9;
             this.buttonFirst.Text = "<<";
             this.buttonFirst.UseVisualStyleBackColor = true;
@@ -120,18 +127,20 @@
             this.dataGridViewImportHistory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridViewImportHistory.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewImportHistory.Location = new System.Drawing.Point(7, 45);
+            this.dataGridViewImportHistory.Location = new System.Drawing.Point(9, 56);
+            this.dataGridViewImportHistory.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.dataGridViewImportHistory.Name = "dataGridViewImportHistory";
             this.dataGridViewImportHistory.RowTemplate.Height = 23;
-            this.dataGridViewImportHistory.Size = new System.Drawing.Size(822, 650);
+            this.dataGridViewImportHistory.Size = new System.Drawing.Size(1096, 812);
             this.dataGridViewImportHistory.TabIndex = 8;
             this.dataGridViewImportHistory.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewImportHistory_CellClick);
             // 
             // buttonPgSize50
             // 
-            this.buttonPgSize50.Location = new System.Drawing.Point(451, 713);
+            this.buttonPgSize50.Location = new System.Drawing.Point(601, 891);
+            this.buttonPgSize50.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonPgSize50.Name = "buttonPgSize50";
-            this.buttonPgSize50.Size = new System.Drawing.Size(42, 23);
+            this.buttonPgSize50.Size = new System.Drawing.Size(56, 29);
             this.buttonPgSize50.TabIndex = 16;
             this.buttonPgSize50.Text = "50";
             this.buttonPgSize50.UseVisualStyleBackColor = true;
@@ -139,9 +148,10 @@
             // 
             // buttonPgSize100
             // 
-            this.buttonPgSize100.Location = new System.Drawing.Point(512, 713);
+            this.buttonPgSize100.Location = new System.Drawing.Point(683, 891);
+            this.buttonPgSize100.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonPgSize100.Name = "buttonPgSize100";
-            this.buttonPgSize100.Size = new System.Drawing.Size(42, 23);
+            this.buttonPgSize100.Size = new System.Drawing.Size(56, 29);
             this.buttonPgSize100.TabIndex = 16;
             this.buttonPgSize100.Text = "100";
             this.buttonPgSize100.UseVisualStyleBackColor = true;
@@ -149,9 +159,10 @@
             // 
             // buttonPgSize200
             // 
-            this.buttonPgSize200.Location = new System.Drawing.Point(573, 714);
+            this.buttonPgSize200.Location = new System.Drawing.Point(764, 892);
+            this.buttonPgSize200.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonPgSize200.Name = "buttonPgSize200";
-            this.buttonPgSize200.Size = new System.Drawing.Size(42, 23);
+            this.buttonPgSize200.Size = new System.Drawing.Size(56, 29);
             this.buttonPgSize200.TabIndex = 16;
             this.buttonPgSize200.Text = "200";
             this.buttonPgSize200.UseVisualStyleBackColor = true;
@@ -159,9 +170,10 @@
             // 
             // buttonPgSize500
             // 
-            this.buttonPgSize500.Location = new System.Drawing.Point(636, 714);
+            this.buttonPgSize500.Location = new System.Drawing.Point(848, 892);
+            this.buttonPgSize500.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonPgSize500.Name = "buttonPgSize500";
-            this.buttonPgSize500.Size = new System.Drawing.Size(42, 23);
+            this.buttonPgSize500.Size = new System.Drawing.Size(56, 29);
             this.buttonPgSize500.TabIndex = 16;
             this.buttonPgSize500.Text = "500";
             this.buttonPgSize500.UseVisualStyleBackColor = true;
@@ -169,9 +181,10 @@
             // 
             // buttonPgSize1000
             // 
-            this.buttonPgSize1000.Location = new System.Drawing.Point(701, 714);
+            this.buttonPgSize1000.Location = new System.Drawing.Point(935, 892);
+            this.buttonPgSize1000.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonPgSize1000.Name = "buttonPgSize1000";
-            this.buttonPgSize1000.Size = new System.Drawing.Size(42, 23);
+            this.buttonPgSize1000.Size = new System.Drawing.Size(56, 29);
             this.buttonPgSize1000.TabIndex = 16;
             this.buttonPgSize1000.Text = "1000";
             this.buttonPgSize1000.UseVisualStyleBackColor = true;
@@ -180,33 +193,37 @@
             // LabelPageSize
             // 
             this.LabelPageSize.AutoSize = true;
-            this.LabelPageSize.Location = new System.Drawing.Point(336, 719);
+            this.LabelPageSize.Location = new System.Drawing.Point(448, 899);
+            this.LabelPageSize.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.LabelPageSize.Name = "LabelPageSize";
-            this.LabelPageSize.Size = new System.Drawing.Size(113, 12);
+            this.LabelPageSize.Size = new System.Drawing.Size(143, 15);
             this.LabelPageSize.TabIndex = 17;
             this.LabelPageSize.Text = "页大小（默认15）：";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 21);
+            this.label1.Location = new System.Drawing.Point(16, 26);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(53, 12);
+            this.label1.Size = new System.Drawing.Size(67, 15);
             this.label1.TabIndex = 18;
             this.label1.Text = "资源类型";
             // 
             // textBoxResType
             // 
-            this.textBoxResType.Location = new System.Drawing.Point(71, 18);
+            this.textBoxResType.Location = new System.Drawing.Point(95, 22);
+            this.textBoxResType.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBoxResType.Name = "textBoxResType";
-            this.textBoxResType.Size = new System.Drawing.Size(164, 21);
+            this.textBoxResType.Size = new System.Drawing.Size(217, 25);
             this.textBoxResType.TabIndex = 19;
             // 
             // buttonFiliterResType
             // 
-            this.buttonFiliterResType.Location = new System.Drawing.Point(241, 16);
+            this.buttonFiliterResType.Location = new System.Drawing.Point(321, 20);
+            this.buttonFiliterResType.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonFiliterResType.Name = "buttonFiliterResType";
-            this.buttonFiliterResType.Size = new System.Drawing.Size(75, 23);
+            this.buttonFiliterResType.Size = new System.Drawing.Size(100, 29);
             this.buttonFiliterResType.TabIndex = 20;
             this.buttonFiliterResType.Text = "过滤";
             this.buttonFiliterResType.UseVisualStyleBackColor = true;
@@ -214,9 +231,9 @@
             // 
             // ImportBatchHistoryForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(833, 760);
+            this.ClientSize = new System.Drawing.Size(1111, 950);
             this.Controls.Add(this.buttonFiliterResType);
             this.Controls.Add(this.textBoxResType);
             this.Controls.Add(this.label1);
@@ -234,8 +251,10 @@
             this.Controls.Add(this.buttonPrevious);
             this.Controls.Add(this.buttonFirst);
             this.Controls.Add(this.dataGridViewImportHistory);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "ImportBatchHistoryForm";
             this.Text = "批次历史";
+            this.Load += new System.EventHandler(this.ImportBatchHistoryForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewImportHistory)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

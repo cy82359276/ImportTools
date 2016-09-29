@@ -52,5 +52,7 @@ namespace TheDataResourceImporter
         public string SESSION_INDEX { get; set; }
         public string ABSTRACT { get; set; }
         public string DESIGNBRIEFEXPLANATION { get; set; }
+        public string EDITIONSTATEMENT { get; set; }
+        public string MAINCLASSIFICATION { get; set; }
     }
 }

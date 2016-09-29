@@ -521,5 +521,10 @@ namespace TheDataResourceImporter
                 showPage(1, entitiesDataSource, whereExpr, orderExpr);
             }
         }
+
+        private void ImportBatchHistoryForm_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

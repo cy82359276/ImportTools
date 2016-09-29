@@ -30,7 +30,6 @@ namespace TheDataResourceImporter
         public DbSet<S_AMERICAN_BRAND_GRAPHCLASSIFY> S_AMERICAN_BRAND_GRAPHCLASSIFY { get; set; }
         public DbSet<S_AMERICAN_BRAND_USCLASSIFY> S_AMERICAN_BRAND_USCLASSIFY { get; set; }
         public DbSet<S_AMERICAN_DESIGN_PATENT> S_AMERICAN_DESIGN_PATENT { get; set; }
-        public DbSet<S_AMERICAN_PATENT_FULLTEXT> S_AMERICAN_PATENT_FULLTEXT { get; set; }
         public DbSet<S_AUSTRALIAN_PATENT_FULLTEXT> S_AUSTRALIAN_PATENT_FULLTEXT { get; set; }
         public DbSet<S_AUSTRIA_PATENT_FULLTEXT> S_AUSTRIA_PATENT_FULLTEXT { get; set; }
         public DbSet<S_BELGIAN_PATENT_FULLTEXT> S_BELGIAN_PATENT_FULLTEXT { get; set; }
@@ -111,5 +110,6 @@ namespace TheDataResourceImporter
         public DbSet<S_CHINA_PATENT_LAWSPROCESS> S_CHINA_PATENT_LAWSPROCESS { get; set; }
         public DbSet<S_BIOLOGICAL_SEQ> S_BIOLOGICAL_SEQ { get; set; }
         public DbSet<S_FOREIGN_PATENT_SEQUENCE> S_FOREIGN_PATENT_SEQUENCE { get; set; }
+        public DbSet<S_AMERICAN_PATENT_FULLTEXT> S_AMERICAN_PATENT_FULLTEXT { get; set; }
     }
 }
